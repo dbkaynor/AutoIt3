@@ -1,0 +1,22 @@
+#This is a comment
+#delay "2000"
+
+High "C:\xampp\xampp-control.exe"
+High "C:\Program Files (x86)\FileHippo.com\UpdateChecker.exe"
+High "C:\Program Files (x86)\AutoIt3\Dougs\WallPaper.exe" run hide
+
+Medium "C:\Program Files (x86)\MagicDisc\MagicDisc.exe"
+
+Low "C:\Program Files (x86)\TrueCrypt\TrueCrypt.exe" /v "C:\Program Files (x86)\TrueCrypt\TC.tc" /ly /a /p casey1951 /q
+Low "C:\Program Files (x86)\TrueCrypt\TrueCrypt.exe" /v "C:\Program Files (x86)\TrueCrypt\DataNew.tc" /lZ /a /p Dorothy!1951 /q
+
+AlmostNever "C:\Program Files (x86)\Adobe\Reader 10.0\Reader\Reader_sl.exe"
+AlmostNever "C:\Program Files (x86)\Common Files\Adobe\ARM\1.0\AdobeARM.exe"
+AlmostNever "C:\Program files (x86)\common files\adobe\arm\1.0\armsvc.exe"
+AlmostNever "C:\Program Files (x86)\Common Files\Java\Java Update\jusched.exe"
+AlmostNever "C:\Program files (x86)\google\common\google updater\googleupdaterservice.exe"
+AlmostNever "C:\Program files (x86)\trusteer\rapport\bin\rapportmgmtservice.exe"
+AlmostNever "c:\Windows\system32\drivers\wtsrv.exe"
+AlmostNever "C:\Xampp\apache\bin\httpd.exe" -k runservice
+AlmostNever "C:\Xampp\filezillaftp\filezillaserver.exe"
+AlmostNever "C:\Xampp\mysql\bin\mysqld.exe"
