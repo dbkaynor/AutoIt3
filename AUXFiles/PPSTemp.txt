@@ -1,0 +1,13 @@
+[WallpaperTemp.jpg]
+File name = WallpaperTemp.jpg
+Directory = C:\PROGRA~2\AutoIt3\Dougs\AUXFiles\
+Compression = JPEG, quality: 80
+Resolution = 96 x 96 DPI
+Image dimensions = 1201 x 787  Pixels (1.53)
+Print size = 31.8 x 20.8 cm; 12.5 x 8.2 inches
+Color depth = 16,7 Millions   (24 BitsPerPixel)
+Number of unique colors = 58394
+Disk size = 50.82 KB (52,040 Bytes)
+Current memory size = 2.70  MB (2,836,388 Bytes)
+File date/time = 8/30/2012 / 16:01:08
+

@@ -1,0 +1,50 @@
+Valid for WallPaper options
+Options file for C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallPaper-BALROG.opt  9/17/2011 12:09:11 PM
+Help 1 is enabled, 4 is disabled for checkboxes
+Irfanview:C:\Program Files (x86)\IrfanView\i_view32.exe
+WorkingFolder:C:\Users\Doug\Pictures\
+CheckBoxSelectFolderRecursive:1
+CheckSkipSmallFiles:1
+CheckAppendFiles:4
+SliderMinPictFileSize:10
+LabelMinPictFileSizeValue:10
+SliderMaxLogFileSize:50
+LabelMaxLogFileSizeValue:50
+CheckboxDisplayName:1
+CheckboxTransparent:1
+CheckboxCheckForUsed:1
+RadioTop:4
+RadioBottom:1
+RadioEveryMinutes:4
+SliderEveryMinutes:15
+LabelEveryMinutes:15
+RadioEveryFixed:4
+ComboEveryFixed:10 minutes
+RadioRandom:1
+SliderMin:5
+SliderMax:31
+LabelMinV:5
+LabelMaxV:31
+LabelValue:17
+CheckboxAspect:1
+CheckboxShrinkToFit:1
+CheckboxEnlargeToFit:1
+SliderFitPercent:75
+LabelFitPercent:75
+RadioCentered:1
+RadioTiled:4
+RadioStretched:4
+RadioStretchedProportional:4
+FontName:Segoe Script
+FontColorFG:0x00FF00
+FontColorFG_REF:65280
+FontColorBG:0
+FontPointSize:14
+FontWeight:700
+FontItalic:0
+FontUnderline:0
+FontStrikethru:0
+WallPaperWinpos:562 324 526 188
+SelectFilesWinpos:351 142 956 638
+SelectFoldersWinpos:10 10 711 628
+SelectOptionsWinpos:633 505 606 428

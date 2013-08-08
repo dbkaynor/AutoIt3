@@ -1,0 +1,12 @@
+Valid for DuplicateFinder Project
+Project file for DuplicateFinder  10/19/2010 9:17:42 PM
+Help 1 is enabled, 4 is disabled for checkboxes
+RadioInclude:1
+RadioExclude:4
+RadioAll:4
+CheckFolders:4
+RadioDupNameExtension:1
+RadioDupSize:4
+InputFilter:jpg;txt
+InputSearch:
+ListFolders:C:\Program Files\AutoIt3

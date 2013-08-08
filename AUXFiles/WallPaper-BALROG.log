@@ -1,0 +1,160 @@
+2012-08-19 20:02:40 :  GetAFileToDisplay
+2012-08-19 20:02:40 :  CheckForUsed FALSE C:\Users\Doug\Pictures\Scenery Oregon\Beach009.jpg has not been displayed
+2012-08-19 20:02:40 :  ProcessWallpaper: C:\Users\Doug\Pictures\Scenery Oregon\Beach009.jpg
+2012-08-19 20:02:40 :  ConvertFile: C:\Users\Doug\Pictures\Scenery Oregon\Beach009.jpg
+2012-08-19 20:02:41 :  ConvertFile. ShellExecuteWait results: 0 C:\Users\Doug\Pictures\SCENER~1\Beach009.jpg /resize=(1260,787)  /aspectratio   /advancedbatch /ini="C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\" /resample /convert=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-19 20:02:41 :  C:\Users\Doug\Pictures\SCENER~1\Beach009.jpg /resize=(1260,787)  /aspectratio   /advancedbatch /ini="C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\" /resample /convert=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-19 20:02:41 :  ConvertFile. ShellExecuteWait results: 0
+2012-08-19 20:02:41 :  CheckPictureInfo C:\Users\Doug\Pictures\Scenery Oregon\Beach009.jpg C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperM.inf
+2012-08-19 20:02:41 :  ProcessPictureSize C:\Users\Doug\Pictures\Scenery Oregon\Beach009.jpg
+2012-08-19 20:02:41 :  ProcessPictureSize. ShellExecuteWait results: 0 C:\Users\Doug\Pictures\SCENER~1\Beach009.jpg /info=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\PPSTemp.txt
+2012-08-19 20:02:41 :  ProcessPictureSize C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-19 20:02:41 :  ProcessPictureSize. ShellExecuteWait results: 0 C:\PROGRA~2\AutoIt3\Dougs\AUXFiles\WALLPA~1.JPG /info=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\PPSTemp.txt
+2012-08-19 20:02:44 :  ProcessWallpaper complete
+2012-08-19 20:02:44 :  ChangeWallpaper C:\Users\Doug\Pictures\Scenery Oregon\Beach009.jpg
+2012-08-19 20:27:09 :  ChangeWallpaper
+2012-08-19 20:27:09 :  LogFileLimit
+2012-08-19 20:27:09 :  Current size:17294 Max size:30000
+2012-08-19 20:27:09 :  LogFileLimit completed. Current size:17352
+2012-08-19 20:27:09 :  VerifyFilesCounts
+2012-08-19 20:27:09 :  GetAFileToDisplay
+2012-08-19 20:27:09 :  CheckForUsed FALSE C:\Users\Doug\Pictures\Medical\semmelweis-medical-museum.jpg has not been displayed
+2012-08-19 20:27:09 :  ProcessWallpaper: C:\Users\Doug\Pictures\Medical\semmelweis-medical-museum.jpg
+2012-08-19 20:27:09 :  ConvertFile: C:\Users\Doug\Pictures\Medical\semmelweis-medical-museum.jpg
+2012-08-19 20:27:09 :  ConvertFile. ShellExecuteWait results: 0 C:\Users\Doug\Pictures\Medical\SEMMEL~1.JPG /resize=(1260,787)  /aspectratio   /advancedbatch /ini="C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\" /resample /convert=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-19 20:27:09 :  C:\Users\Doug\Pictures\Medical\SEMMEL~1.JPG /resize=(1260,787)  /aspectratio   /advancedbatch /ini="C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\" /resample /convert=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-19 20:27:09 :  ConvertFile. ShellExecuteWait results: 0
+2012-08-19 20:27:09 :  CheckPictureInfo C:\Users\Doug\Pictures\Medical\semmelweis-medical-museum.jpg C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperM.inf
+2012-08-19 20:27:09 :  ProcessPictureSize C:\Users\Doug\Pictures\Medical\semmelweis-medical-museum.jpg
+2012-08-19 20:27:09 :  ProcessPictureSize. ShellExecuteWait results: 0 C:\Users\Doug\Pictures\Medical\SEMMEL~1.JPG /info=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\PPSTemp.txt
+2012-08-19 20:27:09 :  ProcessPictureSize C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-19 20:27:09 :  ProcessPictureSize. ShellExecuteWait results: 0 C:\PROGRA~2\AutoIt3\Dougs\AUXFiles\WALLPA~1.JPG /info=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\PPSTemp.txt
+2012-08-19 20:27:10 :  ProcessWallpaper complete
+2012-08-19 20:27:10 :  ChangeWallpaper C:\Users\Doug\Pictures\Medical\semmelweis-medical-museum.jpg
+2012-08-19 20:42:32 :  ChangeWallpaper
+2012-08-19 20:42:32 :  LogFileLimit
+2012-08-19 20:42:32 :  Current size:19477 Max size:30000
+2012-08-19 20:42:32 :  LogFileLimit completed. Current size:19535
+2012-08-19 20:42:32 :  VerifyFilesCounts
+2012-08-19 20:42:32 :  GetAFileToDisplay
+2012-08-19 20:42:32 :  CheckForUsed FALSE C:\Users\Doug\Pictures\Family\MomPicts\mom16a.jpg has not been displayed
+2012-08-19 20:42:32 :  ProcessWallpaper: C:\Users\Doug\Pictures\Family\MomPicts\mom16a.jpg
+2012-08-19 20:42:32 :  ConvertFile: C:\Users\Doug\Pictures\Family\MomPicts\mom16a.jpg
+2012-08-19 20:42:32 :  ConvertFile. ShellExecuteWait results: 0 C:\Users\Doug\Pictures\Family\MomPicts\mom16a.jpg /resize=(1260,787)  /aspectratio   /advancedbatch /ini="C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\" /resample /convert=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-19 20:42:32 :  C:\Users\Doug\Pictures\Family\MomPicts\mom16a.jpg /resize=(1260,787)  /aspectratio   /advancedbatch /ini="C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\" /resample /convert=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-19 20:42:32 :  ConvertFile. ShellExecuteWait results: 0
+2012-08-19 20:42:32 :  CheckPictureInfo C:\Users\Doug\Pictures\Family\MomPicts\mom16a.jpg C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperM.inf
+2012-08-19 20:42:32 :  ProcessPictureSize C:\Users\Doug\Pictures\Family\MomPicts\mom16a.jpg
+2012-08-19 20:42:33 :  ProcessPictureSize. ShellExecuteWait results: 0 C:\Users\Doug\Pictures\Family\MomPicts\mom16a.jpg /info=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\PPSTemp.txt
+2012-08-19 20:42:33 :  ProcessPictureSize C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-19 20:42:33 :  ProcessPictureSize. ShellExecuteWait results: 0 C:\PROGRA~2\AutoIt3\Dougs\AUXFiles\WALLPA~1.JPG /info=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\PPSTemp.txt
+2012-08-19 20:42:33 :  ProcessWallpaper complete
+2012-08-19 20:42:33 :  ChangeWallpaper C:\Users\Doug\Pictures\Family\MomPicts\mom16a.jpg
+2012-08-19 20:42:37 :  ChangeWallpaper
+2012-08-19 20:42:37 :  LogFileLimit
+2012-08-19 20:42:37 :  Current size:21612 Max size:30000
+2012-08-19 20:42:37 :  LogFileLimit completed. Current size:21670
+2012-08-19 20:42:37 :  VerifyFilesCounts
+2012-08-19 20:42:37 :  GetAFileToDisplay
+2012-08-19 20:42:37 :  CheckForUsed TRUE C:\Users\Doug\Pictures\2011-04-24 Procession of Species\Procession2011-098.jpg has already been displayed
+2012-08-19 20:42:37 :  CheckForUsed FALSE C:\Users\Doug\Pictures\Memelo\Mayhem\assalto_11.jpg has not been displayed
+2012-08-19 20:42:37 :  ProcessWallpaper: C:\Users\Doug\Pictures\Memelo\Mayhem\assalto_11.jpg
+2012-08-19 20:42:37 :  ConvertFile: C:\Users\Doug\Pictures\Memelo\Mayhem\assalto_11.jpg
+2012-08-19 20:42:37 :  ConvertFile. ShellExecuteWait results: 0 C:\Users\Doug\Pictures\Memelo\Mayhem\AS51DE~1.JPG /resize=(1260,787)  /aspectratio   /advancedbatch /ini="C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\" /resample /convert=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-19 20:42:37 :  C:\Users\Doug\Pictures\Memelo\Mayhem\AS51DE~1.JPG /resize=(1260,787)  /aspectratio   /advancedbatch /ini="C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\" /resample /convert=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-19 20:42:37 :  ConvertFile. ShellExecuteWait results: 0
+2012-08-19 20:42:37 :  CheckPictureInfo C:\Users\Doug\Pictures\Memelo\Mayhem\assalto_11.jpg C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperM.inf
+2012-08-19 20:42:37 :  ProcessPictureSize C:\Users\Doug\Pictures\Memelo\Mayhem\assalto_11.jpg
+2012-08-19 20:42:37 :  ProcessPictureSize. ShellExecuteWait results: 0 C:\Users\Doug\Pictures\Memelo\Mayhem\AS51DE~1.JPG /info=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\PPSTemp.txt
+2012-08-19 20:42:37 :  ProcessPictureSize C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-19 20:42:37 :  ProcessPictureSize. ShellExecuteWait results: 0 C:\PROGRA~2\AutoIt3\Dougs\AUXFiles\WALLPA~1.JPG /info=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\PPSTemp.txt
+2012-08-19 20:42:38 :  ProcessWallpaper complete
+2012-08-19 20:42:38 :  ChangeWallpaper C:\Users\Doug\Pictures\Memelo\Mayhem\assalto_11.jpg
+2012-08-19 20:58:57 :  ChangeWallpaper
+2012-08-19 20:58:57 :  LogFileLimit
+2012-08-19 20:58:57 :  Current size:23907 Max size:30000
+2012-08-19 20:58:57 :  LogFileLimit completed. Current size:23965
+2012-08-19 20:58:57 :  VerifyFilesCounts
+2012-08-19 20:58:57 :  GetAFileToDisplay
+2012-08-19 20:58:57 :  CheckForUsed FALSE C:\Users\Doug\Pictures\Scenery Other\Hawaii 013.jpg has not been displayed
+2012-08-19 20:58:57 :  ProcessWallpaper: C:\Users\Doug\Pictures\Scenery Other\Hawaii 013.jpg
+2012-08-19 20:58:57 :  ConvertFile: C:\Users\Doug\Pictures\Scenery Other\Hawaii 013.jpg
+2012-08-19 20:58:58 :  ConvertFile. ShellExecuteWait results: 0 C:\Users\Doug\Pictures\SCENER~2\HAWAII~1.JPG /resize=(1260,787)  /aspectratio   /advancedbatch /ini="C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\" /resample /convert=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-19 20:58:58 :  C:\Users\Doug\Pictures\SCENER~2\HAWAII~1.JPG /resize=(1260,787)  /aspectratio   /advancedbatch /ini="C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\" /resample /convert=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-19 20:58:58 :  ConvertFile. ShellExecuteWait results: 0
+2012-08-19 20:58:58 :  CheckPictureInfo C:\Users\Doug\Pictures\Scenery Other\Hawaii 013.jpg C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperM.inf
+2012-08-19 20:58:58 :  ProcessPictureSize C:\Users\Doug\Pictures\Scenery Other\Hawaii 013.jpg
+2012-08-19 20:58:58 :  ProcessPictureSize. ShellExecuteWait results: 0 C:\Users\Doug\Pictures\SCENER~2\HAWAII~1.JPG /info=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\PPSTemp.txt
+2012-08-19 20:58:58 :  ProcessPictureSize C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-19 20:58:58 :  ProcessPictureSize. ShellExecuteWait results: 0 C:\PROGRA~2\AutoIt3\Dougs\AUXFiles\WALLPA~1.JPG /info=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\PPSTemp.txt
+2012-08-19 20:58:59 :  ProcessWallpaper complete
+2012-08-19 20:58:59 :  ChangeWallpaper C:\Users\Doug\Pictures\Scenery Other\Hawaii 013.jpg
+2012-08-30 15:31:58 :  Command line arguments: 2  run hide
+2012-08-30 15:31:58 :  -----------------WallPaper Started -----------------
+2012-08-30 15:31:58 :  SetDefaults
+2012-08-30 15:31:58 :  LoadOptions  Start
+2012-08-30 15:31:58 :  LoadOptions C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallPaper-BALROG.opt
+2012-08-30 15:31:58 :  TestForIrfanView found: C:\Program Files (x86)\IrfanView\i_view32.exe
+2012-08-30 15:31:59 :  LoadList Start  C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallPaper-BALROG.lst
+2012-08-30 15:31:59 :  Done reading file C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallPaper-BALROG.lst
+2012-08-30 15:32:00 :  Done with arraysort
+2012-08-30 15:32:00 :  Done with unique
+2012-08-30 15:34:03 :  LoadList done. Files in list: 13314  C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallPaper-BALROG.lst
+2012-08-30 15:34:03 :  VerifyFilesCounts
+2012-08-30 15:34:03 :  Text editor: c:\program files (x86)\notepad++\notepad++.exe
+2012-08-30 15:34:03 :  ChangeWallpaper
+2012-08-30 15:34:03 :  LogFileLimit
+2012-08-30 15:34:03 :  Current size:27007 Max size:30000
+2012-08-30 15:34:03 :  LogFileLimit completed. Current size:27065
+2012-08-30 15:34:03 :  VerifyFilesCounts
+2012-08-30 15:34:03 :  GetAFileToDisplay
+2012-08-30 15:34:03 :  CheckForUsed FALSE C:\Users\Doug\Pictures\Humor\The Flasher.jpg has not been displayed
+2012-08-30 15:34:03 :  ProcessWallpaper: C:\Users\Doug\Pictures\Humor\The Flasher.jpg
+2012-08-30 15:34:03 :  ConvertFile: C:\Users\Doug\Pictures\Humor\The Flasher.jpg
+2012-08-30 15:34:03 :  ConvertFile. ShellExecuteWait results: 0 C:\Users\Doug\Pictures\Humor\THEFLA~1.JPG /resize=(1260,787)  /aspectratio   /advancedbatch /ini="C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\" /resample /convert=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-30 15:34:03 :  C:\Users\Doug\Pictures\Humor\THEFLA~1.JPG /resize=(1260,787)  /aspectratio   /advancedbatch /ini="C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\" /resample /convert=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-30 15:34:03 :  ConvertFile. ShellExecuteWait results: 0
+2012-08-30 15:34:03 :  CheckPictureInfo C:\Users\Doug\Pictures\Humor\The Flasher.jpg C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperM.inf
+2012-08-30 15:34:03 :  ProcessPictureSize C:\Users\Doug\Pictures\Humor\The Flasher.jpg
+2012-08-30 15:34:04 :  ProcessPictureSize. ShellExecuteWait results: 0 C:\Users\Doug\Pictures\Humor\THEFLA~1.JPG /info=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\PPSTemp.txt
+2012-08-30 15:34:04 :  ProcessPictureSize C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-30 15:34:04 :  ProcessPictureSize. ShellExecuteWait results: 0 C:\PROGRA~2\AutoIt3\Dougs\AUXFiles\WALLPA~1.JPG /info=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\PPSTemp.txt
+2012-08-30 15:34:04 :  ProcessWallpaper complete
+2012-08-30 15:34:04 :  ChangeWallpaper C:\Users\Doug\Pictures\Humor\The Flasher.jpg
+2012-08-30 15:40:04 :  ChangeWallpaper
+2012-08-30 15:40:04 :  LogFileLimit
+2012-08-30 15:40:04 :  Current size:29088 Max size:30000
+2012-08-30 15:40:04 :  LogFileLimit completed. Current size:29146
+2012-08-30 15:40:04 :  VerifyFilesCounts
+2012-08-30 15:40:04 :  GetAFileToDisplay
+2012-08-30 15:40:04 :  CheckForUsed FALSE C:\Users\Doug\Pictures\Fractals\Fractal264.jpg has not been displayed
+2012-08-30 15:40:04 :  ProcessWallpaper: C:\Users\Doug\Pictures\Fractals\Fractal264.jpg
+2012-08-30 15:40:04 :  ConvertFile: C:\Users\Doug\Pictures\Fractals\Fractal264.jpg
+2012-08-30 15:40:05 :  ConvertFile. ShellExecuteWait results: 0 C:\Users\Doug\Pictures\Fractals\FR563A~1.JPG /resize=(1260,787)  /aspectratio   /advancedbatch /ini="C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\" /resample /convert=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-30 15:40:05 :  C:\Users\Doug\Pictures\Fractals\FR563A~1.JPG /resize=(1260,787)  /aspectratio   /advancedbatch /ini="C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\" /resample /convert=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-30 15:40:05 :  ConvertFile. ShellExecuteWait results: 0
+2012-08-30 15:40:05 :  CheckPictureInfo C:\Users\Doug\Pictures\Fractals\Fractal264.jpg C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperM.inf
+2012-08-30 15:40:05 :  ProcessPictureSize C:\Users\Doug\Pictures\Fractals\Fractal264.jpg
+2012-08-30 15:40:05 :  ProcessPictureSize. ShellExecuteWait results: 0 C:\Users\Doug\Pictures\Fractals\FR563A~1.JPG /info=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\PPSTemp.txt
+2012-08-30 15:40:05 :  ProcessPictureSize C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-30 15:40:05 :  ProcessPictureSize. ShellExecuteWait results: 0 C:\PROGRA~2\AutoIt3\Dougs\AUXFiles\WALLPA~1.JPG /info=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\PPSTemp.txt
+2012-08-30 15:40:06 :  ProcessWallpaper complete
+2012-08-30 15:40:06 :  ChangeWallpaper C:\Users\Doug\Pictures\Fractals\Fractal264.jpg
+2012-08-30 16:01:07 :  ChangeWallpaper
+2012-08-30 16:01:07 :  LogFileLimit
+2012-08-30 16:01:07 :  LogFileLimit completed. Current size:15855
+2012-08-30 16:01:07 :  VerifyFilesCounts
+2012-08-30 16:01:07 :  GetAFileToDisplay
+2012-08-30 16:01:08 :  CheckForUsed FALSE C:\Users\Doug\Pictures\Scenery Other\Maine.jpg has not been displayed
+2012-08-30 16:01:08 :  ProcessWallpaper: C:\Users\Doug\Pictures\Scenery Other\Maine.jpg
+2012-08-30 16:01:08 :  ConvertFile: C:\Users\Doug\Pictures\Scenery Other\Maine.jpg
+2012-08-30 16:01:08 :  ConvertFile. ShellExecuteWait results: 0 C:\Users\Doug\Pictures\SCENER~2\Maine.jpg /resize=(1260,787)  /aspectratio   /advancedbatch /ini="C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\" /resample /convert=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-30 16:01:08 :  C:\Users\Doug\Pictures\SCENER~2\Maine.jpg /resize=(1260,787)  /aspectratio   /advancedbatch /ini="C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\" /resample /convert=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-30 16:01:08 :  ConvertFile. ShellExecuteWait results: 0
+2012-08-30 16:01:08 :  CheckPictureInfo C:\Users\Doug\Pictures\Scenery Other\Maine.jpg C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperM.inf
+2012-08-30 16:01:08 :  ProcessPictureSize C:\Users\Doug\Pictures\Scenery Other\Maine.jpg
+2012-08-30 16:01:08 :  ProcessPictureSize. ShellExecuteWait results: 0 C:\Users\Doug\Pictures\SCENER~2\Maine.jpg /info=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\PPSTemp.txt
+2012-08-30 16:01:08 :  ProcessPictureSize C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\WallpaperTemp.jpg
+2012-08-30 16:01:08 :  ProcessPictureSize. ShellExecuteWait results: 0 C:\PROGRA~2\AutoIt3\Dougs\AUXFiles\WALLPA~1.JPG /info=C:\Program Files (x86)\AutoIt3\Dougs\AUXFiles\PPSTemp.txt
+2012-08-30 16:01:08 :  ProcessWallpaper complete
+2012-08-30 16:01:08 :  ChangeWallpaper C:\Users\Doug\Pictures\Scenery Other\Maine.jpg

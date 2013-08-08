@@ -1,0 +1,7 @@
+[autorun]
+icon=USBLost.exe
+open=USBLost.exe
+action=Lost USB Key
+label=Lost USB Key
+shell\open\command=USBLost.exe
+shell\open=Help! Lost USB Key.

@@ -1,0 +1,24 @@
+&DEV_105E& ~ Redwater 82571EB (Ophir) 2 port copper
+&DEV_105F& ~ Bretona 82571EB (Bretona) fiber
+&DEV_107D& ~ Glyndon (Rimon) 1 port copper
+&DEV_1096& ~ Goshen/EBS2 Intel(R) PRO/1000 EB1 Network Connection with I/O Acceleration
+&DEV_10C9& ~ Kawela 82576 (Portville) Intel(R) Gigabit ET Dual Port Server Adapter
+&DEV_10D3& ~ Shelter Island (82574L)
+&DEV_10D6& ~ Springport (82575 Zoar) Dell Intel(R) Gigabit VT Quad Port Server Adapter
+&DEV_10E2& ~ Springport (82575 Zoar) Retail Intel(R) Gigabit VT Quad Port Server Adapter
+&DEV_10E8& ~ Quad Port Kawella (82576EB) E1Q
+&DEV_1502& ~ Lewisville 82579LM
+&DEV_1507& ~ Intel(R) 82599EB 10 Gigabit Network Connection
+&DEV_1508& ~ Intel(R) 82598EB Gigabit BX Network Connection
+&DEV_150A& ~ Intel(R) 82578NS Gigabit Ethernet Controller
+&DEV_150E& ~ I340T Intel(R) 82580 Gigabit Network Connection (Barton Hills)
+&DEV_1516& ~ Bartonville DT 82580 Intel(R) Ethernet Server Adapter I340-T2
+&DEV_1521& ~ Powerville Copper\Stoney Lake
+&DEV_1522& ~ I350 Fiber Powerville\Stoney Lake
+&DEV_1526& ~ Porterville ACS (82576) Kawela Intel (R) Gigabit ET2 Quad Port Server Adapter
+&DEV_1533& ~ Springville Gigabit Copper E1R  Intel(R) I210 Gigabit Network Connection
+&DEV_1536& ~ Springville Gigabit Fiber E1R  Intel(R) I210 Gigabit Network Connection
+&DEV_1537& ~ Springville I210 Gigabit KX E1R  Intel(R) I210 Gigabit Network Connection
+&DEV_1538& ~ Springville I210 Gigabit SGMII E1R  Intel(R) I210 Gigabit Network Connection
+&DEV_1539& ~ Pearsonville NRB Copper E1R
+&DEV_XXXX& ~ Beaver Lake

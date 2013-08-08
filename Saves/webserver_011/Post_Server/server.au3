@@ -1,0 +1,210 @@
+#cs 
+Resources:
+    Internet Assigned Number Authority - all Content-Types: http://www.iana.org/assignments/media-types/
+    World Wide Web Consortium - An overview of the HTTP protocol: http://www.w3.org/Protocols/
+    
+Credits:
+    Manadar for starting on the webserver.
+    Alek for adding POST and some fixes
+    Creator for providing the "application/octet-stream" MIME type.
+#ce
+
+#include <Misc.au3> ; Only used for _Iif
+#include <Array.au3>
+
+; // OPTIONS HERE //
+Local $sRootDir = @ScriptDir & "\www" ; The absolute path to the root directory of the server.
+Local $sIP = @IPAddress1 ; ip address as defined by AutoIt
+Local $iPort = 80 ; the listening port
+Local $sServerAddress = "http://" & $sIP & ":" & $iPort & "/"
+Local $iMaxUsers = 15 ; Maximum number of users who can simultaneously get/post
+Local $sServerName = "ManadarX/1.1 (" & @OSVersion & ") AutoIt " & @AutoItVersion
+; // END OF OPTIONS //
+
+Local $aSocket[$iMaxUsers] ; Creates an array to store all the possible users
+Local $sBuffer[$iMaxUsers] ; All these users have buffers when sending/receiving, so we need a place to store those
+
+For $x = 0 to UBound($aSocket)-1 ; Fills the entire socket array with -1 integers, so that the server knows they are empty.
+    $aSocket[$x] = -1
+Next
+
+TCPStartup() ; AutoIt needs to initialize the TCP functions
+
+$iMainSocket = TCPListen($sIP,$iPort) ;create main listening socket
+If @error Then ; if you fail creating a socket, exit the application
+    MsgBox(0x20, "AutoIt Webserver", "Unable to create a socket on port " & $iPort & ".") ; notifies the user that the HTTP server will not run
+    Exit ; if your server is part of a GUI that has nothing to do with the server, you'll need to remove the Exit keyword and notify the user that the HTTP server will not work.
+EndIf
+
+
+ConsoleWrite( "Server created on " & $sServerAddress & @CRLF) ; If you're in SciTE,
+
+While 1
+    $iNewSocket = TCPAccept($iMainSocket) ; Tries to accept incoming connections
+    
+    If $iNewSocket >= 0 Then ; Verifies that there actually is an incoming connection
+        For $x = 0 to UBound($aSocket)-1 ; Attempts to store the incoming connection
+            If $aSocket[$x] = -1 Then
+                $aSocket[$x] = $iNewSocket ;store the new socket
+                ExitLoop
+            EndIf
+        Next
+    EndIf
+
+    For $x = 0 to UBound($aSocket)-1 ; A big loop to receive data from everyone connected
+        If $aSocket[$x] = -1 Then ContinueLoop ; if the socket is empty, it will continue to the next iteration, doing nothing
+        $sNewData = TCPRecv($aSocket[$x],1024) ; Receives a whole lot of data if possible
+        If @error Then ; Client has disconnected
+            $aSocket[$x] = -1 ; Socket is freed so that a new user may join
+            ContinueLoop ; Go to the next iteration of the loop, not really needed but looks oh so good
+        ElseIf $sNewData Then ; data received
+            $sBuffer[$x] &= $sNewData ;store it in the buffer
+            If StringInStr(StringStripCR($sBuffer[$x]),@LF&@LF) Then ; if the request has ended .. 
+                $sFirstLine = StringLeft($sBuffer[$x],StringInStr($sBuffer[$x],@LF)) ; helps to get the type of the request
+                $sRequestType = StringLeft($sFirstLine,StringInStr($sFirstLine," ")-1) ; gets the type of the request
+                If $sRequestType = "GET" Then ; user wants to download a file or whatever .. 
+                    $sRequest = StringTrimRight(StringTrimLeft($sFirstLine,4),11) ; let's see what file he actually wants
+					If StringInStr(StringReplace($sRequest,"\","/"), "/.") Then ; Disallow any attempts to go back a folder
+						_HTTP_SendError($aSocket[$x]) ; sends back an error 
+					Else
+						If $sRequest = "/" Then ; user has requested the root
+							$sRequest = "/index.html" ; instead of root we'll give him the index page 
+						EndIf
+						$sRequest = StringReplace($sRequest,"/","\") ; convert HTTP slashes to windows slashes, not really required because windows accepts both
+						If FileExists($sRootDir & "\" & $sRequest) Then ; makes sure the file that the user wants exists 
+							$sFileType = StringRight($sRequest,4) ; determines the file type, so that we may choose what mine type to use
+							Switch $sFileType
+								Case "html", ".htm" ; in case of normal HTML files
+									_HTTP_SendFile($aSocket[$x], $sRootDir & $sRequest, "text/html")
+								Case ".css" ; in case of style sheets
+									_HTTP_SendFile($aSocket[$x], $sRootDir & $sRequest, "text/css")
+								Case ".jpg", "jpeg" ; for common images
+									_HTTP_SendFile($aSocket[$x], $sRootDir & $sRequest, "image/jpeg")
+								Case ".png" ; another common image format
+									_HTTP_SendFile($aSocket[$x], $sRootDir & $sRequest, "image/png")
+								Case Else ; this is for .exe, .zip, or anything else that is not supported is downloaded to the client using a application/octet-stream
+									_HTTP_SendFile($aSocket[$x], $sRootDir & $sRequest, "application/octet-stream")
+							EndSwitch
+						Else
+							_HTTP_SendFileNotFoundError($aSocket[$x]) ; File does not exist, so we'll send back an error..
+						EndIf
+					EndIf
+                ElseIf $sRequestType = "POST" Then ; user has come to us with data, we need to parse that data and based on that do something special
+                    
+                    $aPOST = _HTTP_GetPost($sBuffer[$x]) ; parses the post data
+                    
+                    $sComment = _HTTP_POST("wintext",$aPOST) ; Like PHPs _POST, but it requires the second parameter to be the return value from _Get_Post
+                    
+                    _HTTP_ConvertString($sComment) ; Needs to convert the POST HTTP string into a normal string
+					
+                    ConsoleWrite($sComment)
+					
+					$data = FileRead($sRootDir & "\template.html")
+					$data = StringReplace($data, "<?au3 Replace me ?>", $sComment)
+					
+					$h = FileOpen($sRootDir & "\index.html", 2)
+                    FileWrite($h, $data)
+					FileClose($h)
+					
+					$h = FileOpen($sRootDir & "\clean.html", 2)
+					FileWrite($h, $sComment)
+					FileClose($h)
+                   
+                    _HTTP_SendFile($aSocket[$x], $sRootDir & "\index.html", "text/html") ; Sends back the new file we just created
+                EndIf
+                
+                $sBuffer[$x] = "" ; clears the buffer because we just used to buffer and did some actions based on them
+                $aSocket[$x] = -1 ; the socket is automatically closed so we reset the socket so that we may accept new clients
+                
+            EndIf
+        EndIf
+    Next
+    
+    Sleep(10)
+WEnd
+
+Func _HTTP_ConvertString(ByRef $sInput) ; converts any characters like %20 into space 8)
+    $sInput = StringReplace($sInput, '+', ' ')
+    StringReplace($sInput, '%', '')
+    For $t = 0 To @extended
+        $Find_Char = StringLeft( StringTrimLeft($sInput, StringInStr($sInput, '%')) ,2)
+        $sInput = StringReplace($sInput, '%' & $Find_Char, Chr(Dec($Find_Char)))
+    Next
+EndFunc
+
+Func _HTTP_SendHTML($hSocket, $sHTML, $sReply = "200 OK") ; sends HTML data on X socket
+    _HTTP_SendData($hSocket, Binary($sHTML), "text/html", $sReply)
+EndFunc
+
+Func _HTTP_SendFile($hSocket, $sFileLoc, $sMimeType, $sReply = "200 OK") ; Sends a file back to the client on X socket, with X mime-type
+    Local $hFile, $sImgBuffer, $sPacket, $a
+    
+	ConsoleWrite("Sending " & $sFileLoc & @CRLF)
+	
+    $hFile = FileOpen($sFileLoc,16)
+    $bFileData = FileRead($hFile)
+    FileClose($hFile)
+   
+    _HTTP_SendData($hSocket, $bFileData, $sMimeType, $sReply)
+EndFunc
+
+Func _HTTP_SendData($hSocket, $bData, $sMimeType, $sReply = "200 OK")
+	$sPacket = Binary("HTTP/1.1 " & $sReply & @CRLF & _
+    "Server: " & $sServerName & @CRLF & _
+	"Connection: close" & @CRLF & _
+	"Content-Lenght: " & BinaryLen($bData) & @CRLF & _
+    "Content-Type: " & $sMimeType & @CRLF & _
+    @CRLF)
+    TCPSend($hSocket,$sPacket) ; Send start of packet
+   
+    While BinaryLen($bData) ; Send data in chunks (most code by Larry)
+        $a = TCPSend($hSocket, $bData) ; TCPSend returns the number of bytes sent
+        $bData = BinaryMid($bData, $a+1, BinaryLen($bData)-$a)
+    WEnd
+   
+    $sPacket = Binary(@CRLF & @CRLF) ; Finish the packet
+    TCPSend($hSocket,$sPacket)
+	
+	TCPCloseSocket($hSocket)
+EndFunc
+
+Func _HTTP_SendFileNotFoundError($hSocket) ; Sends back a basic 404 error
+	Local $s404Loc = $sRootDir & "\404.html"
+	If (FileExists($s404Loc)) Then
+		_HTTP_SendFile($hSocket, $s404Loc, "text/html")
+	Else
+		_HTTP_SendHTML($hSocket, "404 Error: " & @CRLF & @CRLF & "The file you requested could not be found.")
+	EndIf
+EndFunc
+
+Func _HTTP_GetPost($s_Buffer) ; parses incoming POST data
+    Local $sTempPost, $sLen, $sPostData, $sTemp
+    
+    ; Get the lenght of the data in the POST
+    $sTempPost = StringTrimLeft($s_Buffer,StringInStr($s_Buffer,"Content-Length:"))
+    $sLen = StringTrimLeft($sTempPost,StringInStr($sTempPost,": "))
+   
+    ; Create the base struck
+    $sPostData = StringSplit(StringRight($s_Buffer,$sLen),"&")
+    
+    Local $sReturn[$sPostData[0]+1][2]
+    
+    For $t = 1 To $sPostData[0]
+        $sTemp = StringSplit($sPostData[$t],"=")
+        If $sTemp[0] >= 2 Then
+            $sReturn[$t][0] = $sTemp[1]
+            $sReturn[$t][1] = $sTemp[2]
+        EndIf
+    Next
+   
+    Return $sReturn
+EndFunc
+
+Func _HTTP_Post($sName,$sArray) ; Returns a POST variable like a associative array.
+    For $i = 1 to UBound($sArray)-1
+        If $sArray[$i][0] = $sName Then
+            Return $sArray[$i][1]
+        EndIf
+    Next
+    Return ""
+EndFunc

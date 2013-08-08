@@ -1,0 +1,29 @@
+Valid for CLaunch project
+;----------------------------
+; Comments begin with ;
+; blank lines are ignored
+
+perl_script_exe = "c:\perl\bin\perl.exe"
+au3_script_exe = "C:\Program Files\AutoIt3\AutoIt3.exe"
+web_page_exe =   "C:\Program Files\Mozilla Firefox\firefox.exe"
+run_exe = "cmd.exe"
+;----------------------------
+perl_script = "C:\Perl\Projects\_CurrentProjects\SavedScripts\TkPath.pl"
+perl_script = "C:\Perl\Projects\music\TkPlaylist.pl"
+au3_script = "C:\Program Files\AutoIt3\Dougs\DeviceLister.au3" 
+junk_script = "c:\perl"
+Web_page  =  "en.wikipedia.org/wiki/Main_Page"
+Web_page  =  "www.katu.com"
+Web_page  =  "www.koin.com"
+Web_page  =  "www.kgw.com"
+Web_page  =  "www.kptv.com"
+Web_page  =  "www.kaynor.net"
+Web_page  =  "www.intel.com"
+web_page = "https://axiaecampus.phoenix.edu/afm103/login!default.jspa"
+web_page = "www.mail2web.com"
+web_page = "http://www.wccls.org/index.html"
+web_page = "http://alexandria.wiki.sourceforge.net/CVS+-+Version+Control+for+Source+Code"
+run = /c "C:\Program Files (x86)\Systems Internals\Dbgview.exe" 
+
+
+

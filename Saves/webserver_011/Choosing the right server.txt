@@ -1,0 +1,10 @@
+Each folder contains a different kind of server. Since you are going to be using this webserver as a base server to create other servers off, it is nice to pick the server that has the functionality that you want and doesn't have the functionality that you don't want! This ultimately saves you time and some trouble.
+
+ == Basic server. == 
+This is the most basic of servers. It can only display HTML pages and has the ability to show a custom 404 error handler.
+
+ == Post server. == 
+This is a server that can handle incoming POST messages and process them. It has the same features as the basic server, with a little extras.
+
+ == Session server. ==
+This is a more mature server. It has a lot more features, most notably session handling. This server was written by BrettF. I've decided to include it as an example on how to do a bit more with the servers.

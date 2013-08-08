@@ -1,0 +1,61 @@
+html, body 
+{
+	margin: 0;
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+	color: white;
+	background: #001C3F;
+}
+
+a {
+	color: #EEE;
+	text-decoration: none;
+}
+
+a:hover {
+	color: white;
+}
+
+#wrapper {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 0 auto -1.5em;
+	font-family: Georgia, "Times New Roman", Times, serif;
+}
+
+#mostawesomethingever, #submitform
+{
+	text-align: center;
+	margin-top: 10%;
+}
+
+#links, #footer {
+	padding: 5px;
+}
+
+#footer {
+	height: 1.5em;
+	text-align: right;
+}
+#footer a {
+	color: white;
+}
+
+#content {
+	font-size: 3.5em;
+}	
+
+#history {
+	font-size: 0.8em;
+	padding: 25px 25px 25px 25px;
+}
+
+#moreawesome, #links, #footer {
+	font-size: 0.6em;
+}
+
+#submitform {
+	display: block;
+}

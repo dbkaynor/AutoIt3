@@ -1,0 +1,2275 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+
+****************************************************************************
+** Intel Corporation, MPG MPCS
+** Title   :   Install.xml
+** Description :
+**     Install XML file.
+**
+** Revision:   Rev 2.0.91
+**
+**
+** 														***** ATTENTION (2-11-10) *****
+**
+**		<User>[value]</User> 	
+**		
+**		- this is the new XML element for each script that is going to be added to this XML file.
+**		This new element is required for VMLite purposes. It refers to User Required Input feature.
+**		Element's [value] value can have one of two values:
+**
+**							NONE	- when user input during script execution is NOT REQUIRED
+**							YES		- when at any point of script execution user input is REQUIRED
+**
+**		This feature will allow VMLite to display a particular script.
+**		
+**
+*****************************************************************************
+** Revision History:                           
+**          
+;** Update for Rev 2.0.48		- Jarek Szymanski 2/3/2009
+;** - added .NET 3.0 install script for XP SP2 x32 and IBEXPEAK platform family in Application Section
+;**
+;** Update for Rev 2.0.49		- Jarek Szymanski 2/12/2009
+;** - Added Vista SP2 32/64 support
+;**
+;** Update for Rev 2.0.50		- Jarek Szymanski 2/12/2009
+;** - Removed Win 7 as default OS from both regular and Cantiga Intel graphic driver install scripts - no support yet
+;**
+;** Update for Rev 2.0.51		- Jarek Szymanski 2/24/2009
+;** - Removed Sandra from Licensed Apps tab (code still exists)
+;**
+;** Update for Rev 2.0.52		- Jarek Szymanski 2/25/2009
+;** - added .NET 3.0 install script for XP SP2 x64 and IBEXPEAK platform family in Application Section
+;**
+;** Update for Rev 2.0.53		- Jarek Szymanski 2/27/2009
+;**	- added WIN 7 support for scripts
+;** 		- removed GVCycle support for Win 7 due to manual install problem
+;**			- removed video driver support for Montevina and older platforms in Windows 7: drivers not available yet
+;**			- removed IMSM driver support for IbexPeak and Win 7
+;**
+;** Update for Rev 2.0.54		- Jarek Szymanski 3/3/2009
+;**	- updated WIN 7 version number
+;**	- removed UT3 demo install script from Win7 - benchmark not suported in that OS
+;**
+;** Update for Rev 2.0.55		- Jarek Szymanski 3/4/2009
+;**	- enabled GVCycle install script
+;**
+;** Update for Rev 2.0.56		- Jarek Szymanski 3/19/2009
+;**	- changed Intel Graphics Media Accelerator Driver for Auburndale script to DEFAULT
+;**
+;** Update for Rev 2.0.57		- Jarek Szymanski 3/20/2009
+;**	- added WinFlash install script
+;**
+;** Update for Rev 2.0.58		- Jarek Szymanski 3/24/2009
+;**	- changed name: Intel Graphics Media Accelerator Driver for Auburndale to Intel Graphics Media Accelerator Driver for Calpella
+;**
+;** Update for Rev 2.0.59		- Jarek Szymanski 3/26/2009
+;** - added Windows Vista Starter Edition SP1/ SP2 VM support
+;**	- enabled Win 7 support for Intel Graphics Media Accelerator Driver for Cantiga
+;**	- changed .NET 3.0 platform support from IbexPeak to ALL
+;**
+;** Update for Rev 2.0.60		- Jarek Szymanski 3/27/2009
+;** - removed PCMark Vantage support for Vista Starter Edition SP1/SP2
+;**	- removed UT3 support for Vista Starter Edition SP1/SP2
+;** - removed support MobileMark 2007 for Vista Starter Edition SP1/SP2
+;**	- enabled default graphic driver for Win 7 for Crestline and Calistoga
+;**
+;** Update for Rev 2.0.61		- Jarek Szymanski 3/31/2009
+;** - enabled IMSM driver install script for Windows 7
+;**	- updated WIN 7 version number to 2.6.1.7068
+;**
+;** Update for Rev 2.0.62		- Jarek Szymanski 4/1/2009
+;**	- changed OS entries for 3DMark Vantage. If <OS>Windows Vista Family</OS> not supported Vista SP1/SP2 has to be break down for sub-selections
+;**
+;** Update for Rev 2.0.63		- Jarek Szymanski 4/2/2009
+;**	- removed ProcLoad ver 1.1.0.1002 support for Windows 2000 - tool not supported
+;**
+;** Update for Rev 2.0.64		- Jarek Szymanski 4/13/2009
+;**	- changed OS support for PMTE to XP 32/64 family only
+;**
+;** Update for Rev 2.0.65		- Jarek Szymanski 4/15/2009
+;**	- update for Win 7 for versions 7077 and 7068
+;**
+;** Update for Rev 2.0.66		- Jarek Szymanski 5/1/2009
+;**	- greyed out 2 scripts from VIDEO SECTION
+;**
+;** Update for Rev 2.0.66		- Jarek Szymanski 5/1/2009
+;**	- removed 2 scripts from VIDEO SECTION
+;**
+;** Update for Rev 2.0.67		- Jarek Szymanski 5/5/2009
+;**	- removed UT3 support for Win2K
+;**
+;** Update for Rev 2.0.68		- Jarek Szymanski 5/6/2009
+;**	- added Pineview (Pike View/ Tiger Point) Graphic Driver
+;**
+;** Update for Rev 2.0.69		- Jarek Szymanski 5/7/2009
+;**	- added "MEI SOL Driver"
+;**
+;** Update for Rev 2.0.70		- Jarek Szymanski 5/12/2009
+;**	- removed support for Win 7 64 bit for Intel Graphics Media Accelerator Driver for Calpella / PineView due to lack of driver
+;**
+;** Update for Rev 2.0.71		- Jarek Szymanski 5/13/2009
+;**	- added 64 bit OS support for SysMark 2007
+;**
+;** Update for Rev 2.0.72		- Jarek Szymanski 5/27/2009
+;**	- enabled SINIT ACM and MPGTXT driver for Calpella (IbexPeak)
+;**
+;** Update for Rev 2.0.73		- Jarek Szymanski 7/6/2009
+;**	- added Grace Period Extension for Vista and Win 7 script
+;**
+;** Update for Rev 2.0.74		- Jarek Szymanski 7/7/2009
+;**	- added WinACPI install script in utility section
+;**
+;** Update for Rev 2.0.75		- Jarek Szymanski 7/9/2009
+;**	- removed SINIT ACM and MPGTXT driver for Calpella (IbexPeak)
+;**
+;** Update for Rev 2.0.76		- Jarek Szymanski 7/17/2009
+;**	- added Intel Rapid Storage Technology (RST) driver install script
+;**
+;** Update for Rev 2.0.77		- Jarek Szymanski 08/04/2009
+;**	- changed name of the script: Vista Power Plan Setting to Power Plan Settings
+;** - added Win 7 Wake Timers Enabler config script
+;** - added Real-Time HDR Image-Based Lighting Benchmark install script
+;**
+;** Update for Rev 2.0.78		- Jarek Szymanski 08/06/2009
+;**	- updated Windows Firewall Configurator - added Win 7 support
+;**
+;** Update for Rev 2.0.79		- Jarek Szymanski 08/13/2009
+;**	- SandyBridge support 
+;**
+;** Update for Rev 2.0.80		- Jarek Szymanski 09/29/2009
+;**	- added <User> ... </User> node 
+;** - removed Intel SpeedStep 3 Applet for Win2K 
+;** - removed DMA Configuration Script for Win2K 
+;**
+;** Update for Rev 2.0.81		- Jarek Szymanski 10/15/2009
+;** - added XP SP2/SP3 USB HotPlug Hotfix (KB969238)
+;**
+;** Update for Rev 2.0.82		- Jarek Szymanski 10/19/2009
+;** - added Windows XP 64Bit SP2 C-State Hotfix (KB941838)
+;**
+;** Update for Rev 2.0.83		- Jarek Szymanski 11/13/2009
+;** - removed GENERIC entry for TXT and MEI SOL driver install scripts 
+;**
+;** Update for Rev 2.0.84		- Jarek Szymanski 12/1/2009
+;** - moved User node before OS and Platform check 
+;**
+;** Update for Rev 2.0.85		- Michelle Tran 12/21/2009
+;** - added Puma Peak Wireless install script
+;**
+;** Update for Rev 2.0.86		- Michelle Tran 12/23/2009
+;** - added Kilmer Peak Wireless install script
+;** - added Intel Dynamic Power Performance Mangement install script
+;**
+;** Update for Rev 2.0.87		- Jarek Szymanski 1/13/2010
+;** - added info about <User> ... </User> XL element in this XML's header
+;**
+;** Update for Rev 2.0.88		- Jarek Szymanski 1/28/2010
+;** - added support for HuronRiver (SandyBridge-CPT / Cougar Point) - <Platform>SandyBridge-CPT Family</Platform>
+;**	- added video script for SandyBridge-CPT / Cougar Point
+;**
+;** Update for Rev 2.0.89		- Tim Zogas 2/11/2010
+;** - REM'd out  QuickTime Media Player entry
+;** -Set Portable Preload = Yes for the following scripts: Unreal Tournament 3 Demo,  X3 Terran Conflict Demo, AquaMark3 Benchmark, Windows Media Video 9 VCM Codec, K-Lite Codec, MPGTXT Driver, SINIT ACM, & MEI SOL Driver
+;**
+;** Update for Rev 2.0.90		- Jarek Szymanski 3/16/2010
+;** - deleted .Net 3.0 32/64 bit install scripts entries
+;** - added .Net 3.5 install script for Win XP and Vista Family
+;**
+;** Update for Rev 2.0.91		- Chris Shorey 3/18/2010
+;** - added Vista to .Net 3.5 install script (Jarek did this)
+;** - Modified MEI_SOL to supported SB/CPT and added Win7 64
+;** - Modified Puma Peak to support SB/CPT
+;** - Modified Kilmer Peak to support SB/CPT
+;**
+;** Update for Rev 2.0.92		- Chris Shorey 3/19/2010
+;** - added Win7 Standard Infrared Driver
+;**
+;** Update for Rev 2.0.93		- Jarek Szymanski 3/30/2010
+;** - replaced existing script executable for Cantiga video script with ImGraphicsAB.exe due to newer driver's backwards compatibility
+;** - removed entries for different video drivers
+;**	- added intel graphics silent install script for all supported platforms
+;**
+****************************************************************************
+                                                                       
+SupportedOS -                                                           
+<OS>ALL</OS>                                                        
+<OS>NONE</OS> 
+
+<OS>Windows 7 Family</OS>	            2.6.1.7137
+	<OS>Windows 7 x64 Family</OS>	2.6.1.7137.0.0.256.1/2.6.1.7137.0.0.768.1
+		<OS>Windows 7 x64 </OS>		2.6.1.7137.0.0.256.1/2.6.1.7137.0.0.768.1
+	<OS>Windows 7 x32 Family</OS>	2.6.1.7137.0.0.256.1/2.6.1.7137.0.0.768.1
+		<OS>Windows 7 x32</OS> 	            2.6.1.7137.0.0.256.1/2.6.1.7137.0.0.768.1
+ 
+<OS>Windows Vista Family</OS>	            2.6.0.6000
+	<OS>Windows Vista x64 Family</OS>	2.6.0.6000.0.0.256.1/2.6.0.6000.0.0.768.1
+		<OS>Windows Vista x64 </OS>		2.6.0.6000.0.0.256.1/2.6.0.6000.0.0.768.1
+	<OS>Windows Vista x32 Family</OS>	2.6.0.6000.0.0.256.1/2.6.0.6000.0.0.768.1
+		<OS>Windows Vista x32</OS> 		2.6.0.6000.0.0.256.1/2.6.0.6000.0.0.768.1
+		        	
+<OS>Windows Vista SP1 Family</OS>		2.6.0.6001		
+	<OS>Windows Vista x64 SP1 Family</OS>	2.6.0.6001.1.0.256.1/2.6.0.6001.1.0.768.1
+		<OS>Windows Vista x64 SP1</OS>		2.6.0.6001.1.0.256.1/2.6.0.6001.1.0.768.1
+	<OS>Windows Vista x32 SP1 Family</OS>	2.6.0.6001.1.0.256.1/2.6.0.6001.1.0.768.1
+		<OS>Windows Vista x32 SP1</OS>		2.6.0.6001.1.0.256.1/2.6.0.6001.1.0.768.1
+			
+<OS>Windows Vista Starter Edition SP1 Family</OS>	2.6.0.6001.1.0.768.1
+	<OS>Windows Vista Starter Edition 32 bit SP2</OS>	2.6.0.6001.1.0.768.1
+
+<OS>Windows Vista SP2 Family</OS>		2.6.0.6002		
+	<OS>Windows Vista x64 SP2 Family</OS>	2.6.0.6002.2.0.256.1/2.6.0.6002.2.0.768.1
+		<OS>Windows Vista x64 SP2</OS>	    2.6.0.6002.2.0.256.1/2.6.0.6002.2.0.768.1
+	<OS>Windows Vista x32 SP2 Family</OS>	2.6.0.6002.2.0.256.1/2.6.0.6002.2.0.768.1
+		<OS>Windows Vista x32 SP2</OS>		2.6.0.6002.2.0.256.1/2.6.0.6002.2.0.768.1
+			
+<OS>Windows Vista Starter Edition SP2 Family</OS>	2.6.0.6002.2.0.768.1
+	<OS>Windows Vista Starter Edition 32 bit SP2</OS>	2.6.0.6002.2.0.768.1
+
+<OS>Windows XP Family</OS>                     	2.5.1.2600     
+    <OS>Windows XP SP3 Family</OS>		            2.5.1.2600.3          
+		<OS>Windows XP Professional SP3 Family</OS>	        2.5.1.2600.3.0.256.1 
+			<OS>Windows XP Professional SP3</OS>        	2.5.1.2600.3.0.256.1 
+			<OS>Windows XP Media Center 2005 SP3</OS>     	2.5.1.2600.3.0.256.1 
+			<OS>Windows XP Tablet PC 2005 SP3</OS>        	2.5.1.2600.3.0.256.1    
+		<OS>Windows XP Home Edition SP3</OS>          	    2.5.1.2600.3.0.768.1
+
+    <OS>Windows XP SP2 Family</OS>	2.5.1.2600.2
+		<OS>Windows XP Professional SP2 Family</OS>		2.5.1.2600.2.0.256.1
+			<OS>Windows XP Professional SP2</OS>		2.5.1.2600.2.0.256.1 
+			<OS>Windows XP Media Center 2005</OS>         	2.5.1.2600.2.0.256.1 
+			<OS>Windows XP Tablet PC 2005</OS>            	2.5.1.2600.2.0.256.1
+		<OS>Windows XP Home Edition SP2</OS>         	2.5.1.2600.2.0.768.1
+    <OS>Windows XP Professional SP1</OS>     			2.5.1.2600.1.0.256.1
+
+<OS>Windows XP x64 Family</OS>  			2.5.2.3790
+    <OS>Windows XP x64 SP1</OS> 			2.5.2.3790.1.0.256.1
+    <OS>Windows XP x64 SP2</OS>                   	2.5.2.3790.2.0.256.1      
+
+<OS>Windows 2000 Family</OS>                  	2.5.0.2195                       
+    <OS>Windows 2000 Professional SP4</OS>     		2.5.0.2195.4.0.0.1                                         
+                                                                                                                                                  
+SupportedPlatform -                                                      
+	<Platform>ALL</Platform>                                            
+	<Platform>GENERIC</Platform>                                        
+	<Platform>Alviso Family</Platform>                                    
+		<Platform>Sonoma (Alviso / ICH6-M)</Platform>                                      
+	<Platform>Calistoga Family</Platform>                               
+		<Platform>Napa (Calistoga / ICH7-M)</Platform>                                   
+	<Platform>Crestline Family</Platform>                            
+		<Platform>Santa Rosa (Crestline / ICH8-M)</Platform>                                                    
+	<Platform>Cantiga Family</Platform>
+		<Platform>Montevina (Cantiga / ICH9-M)</Platform>    
+		<Platform>Calpella (Montello / GreenPeak)</Platform>
+	<Platform>IbexPeak Family</Platform>
+		<Platform>Calpella (IbexPeak)</Platform>
+	<Platform>SandyBridge Family</Platform>
+		<Platform>Huron River (Sandy Bridge / IbexPeak)</Platform>
+		<Platform>HuronRiver (SandyBridge-CPT / Cougar Point)</Platform>
+		
+****************************************************************************		
+-->
+
+<CRB>
+	<!-- ************************* -->
+	<!-- ** APPLICATION SECTION ** -->
+	<!-- ************************* -->
+	<Application>
+		<App Name="Foobar2000 Audio Player" RunCmd="ImFoobar2K.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>ALL</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+
+	</Application>
+
+	<Application>
+		<App Name="Windows Media Encoder 9" RunCmd="ImMEncoder.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>ALL</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Application>
+<!--
+	<Application>
+		<App Name="QuickTime Media Player" RunCmd="ImQTime.exe" Reboot="No" Order="999" DVD="No" Portable="No" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP x64 Family</OS>  
+			<OS>Windows XP Family</OS>                             
+			<OS>Windows 2000 Professional SP4</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Application>
+-->	
+	<Application>
+		<App Name="HCT 12.1" RunCmd="ImHCT121.exe" Reboot="Yes" Order="1000" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP x64 Family</OS>                               
+			<OS>Windows XP Family</OS>                                        
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Application>
+	
+	<Application>
+		<App Name="Windows MediaPlayer 10" RunCmd="ImMPlayer.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP x64 Family</OS>                               
+			<OS>Windows XP Family</OS>                                        
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Application>
+	
+	<Application>
+		<App Name="NX Hammer" RunCmd="ImNXHammer.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS>                
+			<OS>Windows XP Professional SP3 Family</OS>   			
+			<OS>Windows XP Professional SP2 Family</OS>                      
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>                      
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>                               
+		</PlatformDefault>
+	</Application>				
+	
+	<Application>
+		<App Name="PMTE" RunCmd="ImPMTE.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP x64 Family</OS> 
+			<OS>Windows XP Family</OS>                          
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>                               
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>                      
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>                               
+		</PlatformDefault>
+	</Application>			
+					
+	<Application>
+		<App Name="Power Management Test Tool" RunCmd="ImPwrTest.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS>     
+			<OS>Windows Vista SP1 Family</OS>	
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>			
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS>               
+			<OS>Windows Vista SP1 Family</OS>	
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>			
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>ALL</Platform>                               
+		</PlatformDefault>
+	</Application>			
+
+	<Application>
+		<App Name="Microsoft WHQL DTM(Driver Test Manager) Log Viewer" RunCmd="ImDTMLogViewer.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS>               
+			<OS>Windows Vista SP1 Family</OS>	
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>			
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>                      
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>                               
+		</PlatformDefault>
+	</Application>	
+	
+	<Application>
+		<App Name=".NET 3.5" RunCmd="ImdotNET35.exe" Reboot="Optional" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP SP2 Family</OS>
+			<OS>Windows XP SP3 Family</OS>	
+			<OS>Windows XP x64 Family</OS>
+			<OS>Windows Vista SP1 Family</OS>	
+			<OS>Windows Vista SP2 Family</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>                              
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE/</OS>              
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>                              
+		</PlatformDefault>
+	</Application>
+			
+	<!-- ******************************* -->
+	<!-- ** BENCHMARKSOFTWARE SECTION ** -->
+	<!-- ******************************* -->
+	<BenchmarkSoftware>
+		<App Name="3DMark 2001" RunCmd="Im3DMk01.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS>               
+			<OS>Windows Vista SP1 Family</OS>	
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS> 
+			<OS>Windows XP Family</OS>                                        
+			<OS>Windows 2000 Professional SP4</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>
+	
+	<BenchmarkSoftware>
+		<App Name="3DMark 2003 Professional Version" RunCmd="Im3DMk03P.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS>               
+			<OS>Windows Vista SP1 Family</OS>	
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS> 
+			<OS>Windows XP Family</OS>                                        
+			<OS>Windows 2000 Professional SP4</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>
+	
+	<BenchmarkSoftware>
+		<App Name="3DMark 2005 Business Edition" RunCmd="Im3DMk05.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS>               
+			<OS>Windows Vista SP1 Family</OS>	
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS> 
+			<OS>Windows XP Family</OS>                                        
+			<OS>Windows 2000 Professional SP4</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>
+			
+	<BenchmarkSoftware>
+		<App Name="Final Reality Benchmark 1.01" RunCmd="ImFinalR.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP Family</OS>                                        
+			<OS>Windows 2000 Professional SP4</OS>                           
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>
+	
+	<BenchmarkSoftware>
+		<App Name="Glaze V3.1 Setup" RunCmd="ImGlaze.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>			
+			<OS>ALL</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>
+	
+	<BenchmarkSoftware>
+		<App Name="IBASES 2.0" RunCmd="ImIBASES.exe" Reboot="Optional" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>ALL</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>
+		
+	<BenchmarkSoftware>
+		<App Name="Intel KNI Kitchen Sink" RunCmd="ImKSink.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>ALL</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>
+	
+	<BenchmarkSoftware>
+		<App Name="Serious Sam SE Demo" RunCmd="ImSerSam.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP x64 Family</OS>  
+			<OS>Windows XP Family</OS>                             
+			<OS>Windows 2000 Professional SP4</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>
+	
+	<BenchmarkSoftware>
+		<App Name="Unreal Tournament 2004 Demo" RunCmd="ImUT2004.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS>               
+			<OS>Windows Vista SP1 Family</OS>	
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS>  
+			<OS>Windows XP Family</OS>                             
+			<OS>Windows 2000 Professional SP4</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>
+		
+	<BenchmarkSoftware>
+		<App Name="Unreal Tournament 3 Demo" RunCmd="ImUT3Demo.exe" Reboot="No" Order="999" DVD="No" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows Vista Family</OS>               
+			<OS>Windows Vista SP1 Family</OS>	
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS>  
+			<OS>Windows XP Family</OS>                             
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>
+
+		<BenchmarkSoftware>
+		<App Name="X3 Terran Conflict Demo" RunCmd="ImX3TC.exe" Reboot="No" Order="999" DVD="No" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS>               
+			<OS>Windows Vista SP1 Family</OS>	
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS>  
+			<OS>Windows XP Family</OS>                             
+			<OS>Windows 2000 Professional SP4</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>
+		
+	<BenchmarkSoftware>
+		<App Name="AquaMark3 Benchmark" RunCmd="ImAquaMk3.exe" Reboot="No" Order="999" DVD="No" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP Family</OS>                                        
+			<OS>Windows 2000 Professional SP4</OS>                           
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>
+		
+	<BenchmarkSoftware>
+		<App Name="CineBench R10" RunCmd="ImCineBench.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>ALL</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>
+			
+	<BenchmarkSoftware>
+		<App Name="MobileMark 2005" RunCmd="ImMMk05.exe" Reboot="Yes" Order="999" DVD="No" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP SP3 Family</OS>
+			<OS>Windows XP SP2 Family</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>	
+
+	<BenchmarkSoftware>
+		<App Name="MobileMark 2007" RunCmd="ImMMk07.exe" Reboot="Yes" Order="999" DVD="No" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS>           
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows XP SP3 Family</OS>
+			<OS>Windows XP SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS> 
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>		
+	
+	<BenchmarkSoftware>
+		<App Name="PCMark2005" RunCmd="ImPCMk05.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP x64 Family</OS>                    
+			<OS>Windows XP Family</OS>  
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>		
+	
+	<BenchmarkSoftware>
+		<App Name="PCMark2005 for Vista" RunCmd="ImPCMk05Vista.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS>           
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>			
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>		
+	
+	<BenchmarkSoftware>
+		<App Name="PCMark Vantage" RunCmd="ImPCMkVN.exe" Reboot="No" Order="999" DVD="No" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS>           
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>	
+
+	<BenchmarkSoftware>
+		<App Name="SYSmark 2004" RunCmd="ImSMk04.exe" Reboot="Yes" Order="999" DVD="No" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP Family</OS>                                        
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>	
+		
+	<BenchmarkSoftware>
+		<App Name="Serious Sam 2 Demo" RunCmd="ImSerSam2.exe" Reboot="No" Order="999" DVD="No" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS>           
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS>  
+			<OS>Windows XP Family</OS>                             
+			<OS>Windows 2000 Professional SP4</OS> 
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>
+	
+	<BenchmarkSoftware>
+		<App Name="3DMark 2006" RunCmd="Im3DMk06.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS>           
+			<OS>Windows Vista x32 SP1 Family</OS>
+			<OS>Windows Vista x64 SP1 Family</OS>
+			<OS>Windows Vista x32 SP2 Family</OS>
+			<OS>Windows Vista x64 SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS>  
+			<OS>Windows XP Family</OS>                
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>
+
+	<BenchmarkSoftware>
+		<App Name="3DMark Vantage" RunCmd="Im3DMkVN.exe" Reboot="No" Order="999" DVD="NO" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS> 
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista x32 SP1 Family</OS>
+			<OS>Windows Vista x64 SP1 Family</OS>
+			<OS>Windows Vista x32 SP2 Family</OS>
+			<OS>Windows Vista x64 SP2 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>			
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>
+
+	<BenchmarkSoftware>
+		<App Name="SYSmark 2007" RunCmd="ImSMk07.exe" Reboot="Yes" Order="999" DVD="No" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS>		
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>	
+			<OS>Windows XP SP3 Family</OS>
+			<OS>Windows XP SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS>  
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>		
+	
+	<BenchmarkSoftware>
+		<App Name="HeavyLoad" RunCmd="ImHvyLd.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>All</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>	
+	
+	<BenchmarkSoftware>
+		<App Name="Real-Time HDR Image-Based Lighting" RunCmd="Imrthdribl.exe" Reboot="No" Order="999" DVD="No" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>All</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</BenchmarkSoftware>
+
+	<!-- *********************** -->
+	<!-- ** CONFIGURE SECTION ** -->
+	<!-- *********************** -->
+	
+	<Configure>
+		<App Name="Screen Resolution Setting" RunCmd="CmVideo.exe" Reboot="Yes" Order="10" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>ALL</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>ALL</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>ALL</Platform>
+		</PlatformDefault>
+	</Configure>	
+	
+	<Configure>
+		<App Name="Preload Server Time Sync" RunCmd="CmTimeSync.exe" Reboot="No" Order="5" DVD="No" Portable="No" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>ALL</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>ALL</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>ALL</Platform>
+		</PlatformDefault>
+	</Configure>
+	
+	<Configure>
+		<App Name="Power Scheme Configuration" RunCmd="CmPowerM.exe" Reboot="No" Order="901" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP x64 Family</OS> 
+			<OS>Windows XP Family</OS>                                        
+			<OS>Windows 2000 Professional SP4</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>Windows XP x64 Family</OS> 
+			<OS>Windows XP Family</OS>                                        
+			<OS>Windows 2000 Professional SP4</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>ALL</Platform>
+		</PlatformDefault>
+	</Configure>
+	
+	<Configure>
+		<App Name="Power Scheme Configuration Tool" RunCmd="CmPowerCFG.exe" Reboot="No" Order="900" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP x64 Family</OS> 
+			<OS>Windows XP Family</OS>                                        
+			<OS>Windows 2000 Professional SP4</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Configure>	
+	
+	<Configure>
+		<App Name="EHCI USB Async Idle Configurator" RunCmd="CmUSBAsyncIdle.exe" Reboot="Optional" Order="1005" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>YES</User>
+		<SupportedOS>
+			<OS>Windows XP x64 Family</OS>                                     			                       
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Configure>
+			
+	<Configure>
+		<App Name="Wake On USB" RunCmd="CmWakeOnUSB.exe" Reboot="Optional" Order="1005" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>YES</User>
+		<SupportedOS>
+			<OS>Windows XP x64 Family</OS>                                      
+			<OS>Windows XP Family</OS>                                        
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Configure>
+	
+	<Configure>
+		<App Name="Windows Firewall Configurator" RunCmd="CmFirewall.exe" Reboot="Optional" Order="1005" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>YES</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows XP x64 Family</OS>            
+			<OS>Windows XP SP3 Family</OS>                      
+			<OS>Windows XP SP2 Family</OS>                                        
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Configure>	
+		
+	<Configure>
+		<App Name="NX Configurator" RunCmd="CmNx.exe" Reboot="Optional" Order="1005" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>YES</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>	
+			<OS>Windows XP x64 Family</OS>  
+			<OS>Windows XP SP3 Family</OS>                      	
+			<OS>Windows XP SP2 Family</OS>                                      
+	</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Configure>		
+
+	<Configure>
+		<App Name="Power Plan Settings" RunCmd="CmVistaPower.exe" Reboot="No" Order="901" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>	
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>	
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>ALL</Platform>
+		</PlatformDefault>
+	</Configure>
+	
+	<Configure>
+		<App Name="Win 7 Wake Timers Enabler" RunCmd="Cm7WakeTmrs.exe" Reboot="No" Order="901" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Configure>
+
+	<Configure>
+		<App Name="Vista Screen Saver Setting" RunCmd="CmScrSaver.exe" Reboot="No" Order="902" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>	
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>	
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>ALL</Platform>
+		</PlatformDefault>
+	</Configure>
+
+	<Configure>
+		<App Name="EHCI USB ASync Idle Config" RunCmd="CmUSBAsyncIdleXP32.exe" Reboot="Optional" Order="1005" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>YES</User>
+		<SupportedOS>
+			<OS>Windows XP SP3 Family</OS>                                     			                       
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Configure>
+	
+	<Configure>
+		<App Name="Grace Period Extension for Vista and Win 7" RunCmd="CmWinTimeExt.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>ALL</Platform>
+		</PlatformDefault>
+	</Configure>
+
+	<!-- ********************** -->
+	<!-- ** OSUPDATE SECTION ** -->
+	<!-- ********************** -->
+	<OSUpdate>
+		<App Name="Windows XP SP2 GV3 QFE (KB896256)" RunCmd="ImSP2QFE.exe" Reboot="Yes" Order="50" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP SP2 Family</OS>                                              
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform> 
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>Windows XP SP2 Family</OS>                                              
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>Alviso Family</Platform>
+			<Platform>Calistoga Family</Platform> 
+			<Platform>Crestline Family</Platform>
+			<Platform>Cantiga Family</Platform>
+			<Platform>IbexPeak Family</Platform>
+			<Platform>SandyBridge Family</Platform>
+			<Platform>SandyBridge-CPT Family</Platform>
+		</PlatformDefault>
+	</OSUpdate>			
+		
+	<OSUpdate>
+		<App Name="Windows XP SP2 XD-bit S3 Hotfix (KB889673)" RunCmd="ImSP2XDHotfix.exe" Reboot="Yes" Order="50" Portable="Yes" DVD="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP SP2 Family</OS>                                            			
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>Windows XP SP2 Family</OS>                                                
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>ALL</Platform>
+		</PlatformDefault>
+	</OSUpdate>			
+				
+	<OSUpdate>
+		<App Name="MCE Emerald Update" RunCmd="ImEmerald.exe" Reboot="Yes" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP Media Center 2005</OS>                      
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>Windows XP Media Center 2005</OS>                      
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>ALL</Platform>
+		</PlatformDefault>
+	</OSUpdate>						
+		
+	<OSUpdate>
+		<App Name="Windows XP SP2 USB2 Hotfix (KB918005)" RunCmd="ImUSB2Hotfix.exe" Reboot="Yes" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP SP2 Family</OS>                    
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>Windows XP SP2 Family</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>ALL</Platform>
+		</PlatformDefault>
+	</OSUpdate>	
+
+      <OSUpdate>
+		<App Name="Windows XP USB2 Hotfix (KB918005)" RunCmd="ImUSB2HotfixRegKey.exe" Reboot="Yes" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP SP3 Family</OS>
+			<OS>Windows XP x64 Family</OS>  			
+ 			<OS>Windows XP x64 SP2</OS>                   	
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>ALL</Platform>
+		</PlatformDefault>
+	</OSUpdate>
+			
+	<OSUpdate>
+		<App Name="Windows XP SP2 USB Yellow Bang Hotfix (KB921411)" RunCmd="ImXPSP2USBYBHotfix.exe" Reboot="Yes" Order="15" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP SP2 Family</OS>                      			                                 			          
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</OSUpdate>				
+	
+	<OSUpdate>
+		<App Name="High Definition Audio Class Driver Hotfix (KB901105/KB888111)" RunCmd="ImHDAudioHotFix.exe" Reboot="Yes" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP SP2 Family</OS>      
+			<OS>Windows 2000 Professional SP4</OS>           
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>         
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</OSUpdate>		
+
+	<OSUpdate>
+		<App Name="Daylight Saving Time(DST) Patch" RunCmd="ImDSTPatch.exe" Reboot="No" Order="3" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP x64 Family</OS>
+			<OS>Windows XP SP2 Family</OS>                      			                         	          
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>Windows XP x64 Family</OS>
+			<OS>Windows XP SP2 Family</OS>                     			                                
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>ALL</Platform>
+		</PlatformDefault>
+	</OSUpdate>				
+	
+	<OSUpdate>
+		<App Name="Windows Vista Update (KB938194)" RunCmd="ImVistaKB938194.exe" Reboot="Optional" Order="35" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows Vista x64 Family</OS>
+			<OS>Windows Vista x32 Family</OS>                 
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>Windows Vista x64 Family</OS>
+			<OS>Windows Vista x32 Family</OS> 
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>ALL</Platform>
+		</PlatformDefault>
+	</OSUpdate>					
+	
+	<OSUpdate>
+		<App Name="Windows Vista Update (KB938979)" RunCmd="ImVistaKB938979.exe" Reboot="Optional" Order="35" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows Vista x64 Family</OS>
+			<OS>Windows Vista x32 Family</OS>           
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>Windows Vista x64 Family</OS>
+			<OS>Windows Vista x32 Family</OS> 
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>ALL</Platform>
+		</PlatformDefault>
+	</OSUpdate>						
+
+	<OSUpdate>
+		<App Name="Windows Vista ReadyBoot QFE (KB939008)" RunCmd="ImVistaReadyBootQFE.exe" Reboot="Yes" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows Vista x64 Family</OS>
+			<OS>Windows Vista x32 Family</OS>               
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS> 
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</OSUpdate>				
+	
+	<OSUpdate>
+		<App Name="Windows XP SP2 Penryn C6 QFE (KB940566)" RunCmd="ImPenrynC6QFE.exe" Reboot="Optional" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP SP2 Family</OS>                      
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>Crestline Family</Platform>                              
+			<Platform>Cantiga Family</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>Windows XP SP2 Family</OS>              
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>Crestline Family</Platform>                              
+			<Platform>Cantiga Family</Platform>
+		</PlatformDefault>
+	</OSUpdate>	
+
+	<OSUpdate>
+		<App Name="Windows XP SP2/SP3 USB HotPlug Hotfix (KB969238)" RunCmd="ImXPUSBHotPlugHf.exe" Reboot="Yes" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP SP2 Family</OS> 
+			<OS>Windows XP SP3 Family</OS>			
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</OSUpdate>	
+	
+	<OSUpdate>
+		<App Name="Windows XP 64Bit SP2 C-State Hotfix (KB941838)" RunCmd="ImXP64SP2CstHf.exe" Reboot="Yes" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP x64 SP2</OS>   
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</OSUpdate>	
+
+	
+	<!-- ******************** -->
+	<!-- ** DRIVER SECTION ** -->
+	<!-- ******************** -->
+	<Driver>
+		<App Name="Intel Chipset Software Installation Utility" RunCmd="ImInf.exe" Reboot="Yes"	Order="20" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>ALL</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>ALL</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>ALL</Platform>
+		</PlatformDefault>
+	</Driver>
+	
+	<Driver>
+		<App Name="Direct X 9.0 Drivers" RunCmd="ImDX90.exe" Reboot="Yes" Order="30" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 2000 Professional SP4</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>Windows 2000 Professional SP4</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>ALL</Platform>
+		</PlatformDefault>
+	</Driver>	
+	
+	<Driver>
+		<App Name="Windows Media Video 9 VCM Codec" RunCmd="ImMCodec.exe" Reboot="No" Order="999" DVD="No" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>ALL</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Driver>
+	
+	<Driver>
+		<App Name="K-Lite Codec" RunCmd="ImKLCodec.exe" Reboot="No" Order="999" DVD="No" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>ALL</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Driver>
+	
+	<Driver>
+		<App Name="Intel Matrix Storage Manager" RunCmd="ImIMSM.exe" Reboot="Yes" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+	        <OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 		
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>	
+			<OS>Windows XP x64 Family</OS> 
+			<OS>Windows XP Family</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>SandyBridge-CPT Family</Platform>
+			<Platform>SandyBridge Family</Platform>
+			<Platform>IbexPeak Family</Platform>
+			<Platform>Cantiga Family</Platform>
+			<Platform>Calistoga Family</Platform>
+			<Platform>Crestline Family</Platform>                            
+			<Platform>GENERIC</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Driver>
+	
+	<Driver>
+		<App Name="Intel Rapid Storage Technology" RunCmd="ImRST.exe" Reboot="Yes" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+	        <OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 		
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>	
+			<OS>Windows XP Professional SP3</OS>	 
+			<OS>Windows XP Home Edition SP3</OS>
+			<OS>Windows XP Media Center 2005 SP3</OS>  			
+			<OS>Windows XP Professional SP2</OS>
+			<OS>Windows XP Media Center 2005</OS>  
+			<OS>Windows XP Professional SP1</OS>
+			<OS>Windows XP x64 Family</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>SandyBridge-CPT Family</Platform>
+			<Platform>SandyBridge Family</Platform>
+			<Platform>IbexPeak Family</Platform>
+			<Platform>Cantiga Family</Platform>
+			<Platform>Crestline Family</Platform>                            
+			<Platform>GENERIC</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Driver>
+
+	<Driver>
+		<App Name="MPGTXT Driver" RunCmd="ImMPGTXT.exe" Reboot="Yes" Order="999" DVD="No" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 x32 Family</OS>
+			<OS>Windows Vista x32 Family</OS> 
+			<OS>Windows Vista x32 SP1 Family</OS>	
+			<OS>Windows Vista x32 SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>			
+			<OS>Windows XP Family</OS>
+		</SupportedOS>
+		<SupportedPlatform>                         
+			<Platform>Cantiga Family</Platform> 	                                                                    
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Driver>
+
+	<Driver>
+		<App Name="SINIT ACM" RunCmd="ImACM.exe" Reboot="Yes" Order="999" DVD="No" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 x32 Family</OS>
+			<OS>Windows Vista x32 Family</OS> 
+			<OS>Windows Vista x32 SP1 Family</OS>	
+			<OS>Windows Vista x32 SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>			
+			<OS>Windows XP Family</OS>
+		</SupportedOS>
+		<SupportedPlatform>                                                                                       
+			<Platform>Montevina (Cantiga / ICH9-M)</Platform>     
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>Montevina (Cantiga / ICH9-M)</Platform>
+		</PlatformDefault>
+	</Driver>
+	
+	<Driver>
+		<App Name="MEI SOL Driver" RunCmd="ImMEI_SOL.exe" Reboot="No" Order="999" DVD="No" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+	        <OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 		
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS> 
+			<OS>Windows XP Family</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>SandyBridge-CPT Family</Platform> 		
+			<Platform>Calpella (IbexPeak)</Platform>                                                                
+			<Platform>Montevina (Cantiga / ICH9-M)</Platform>                                                                       
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Driver>
+
+	<Driver>
+		<App Name="Puma Peak - Intel PROSet/Wireless Wifi Software" RunCmd="ImPumaPeak.exe" Reboot="No" Order="999" DVD="No" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP x64 Family</OS>                     
+			<OS>Windows XP Family</OS>                  
+			<OS>Windows Vista Family</OS>
+			<OS>Windows 7 x32 Family</OS>
+		</SupportedOS>
+		<SupportedPlatform>  
+			<Platform>SandyBridge-CPT Family</Platform> 		
+			<Platform>Calpella (IbexPeak)</Platform>                                                                    
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Driver>
+
+	<Driver>
+		<App Name="Kilmer Peak - Intel PROSet/Wireless WiMAX Software" RunCmd="ImKilmerPeak.exe" Reboot="No" Order="999" DVD="No" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP x64 Family</OS>                     
+			<OS>Windows XP Family</OS>                  
+			<OS>Windows Vista Family</OS>
+			<OS>Windows 7 x32 Family</OS>
+			<OS>Windows 7 x64 Family</OS>
+		</SupportedOS>
+		<SupportedPlatform>  
+			<Platform>SandyBridge-CPT Family</Platform> 		
+			<Platform>Calpella (IbexPeak)</Platform>                                                                    
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Driver>
+
+	<Driver>
+		<App Name="Intel Dynamic Power Performance Management" RunCmd="ImDPPM.exe" Reboot="Yes" Order="999" DVD="No" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>                  
+			<OS>Windows XP Family</OS>                  
+			<OS>Windows Vista Family</OS>
+			<OS>Windows 7 x32 Family</OS>
+			<OS>Windows 7 x64 Family</OS>
+		</SupportedOS>
+		<SupportedPlatform>                                                                                       
+			<Platform>Calpella (IbexPeak)</Platform>                                                                    
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Driver>
+	
+	<Driver>
+		<App Name="Win7 Standard Infrared Driver" RunCmd="ImStdIR.exe" Reboot="Yes" Order="999" DVD="No" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>                  
+			<OS>Windows 7 Family</OS>
+		</SupportedOS>
+		<SupportedPlatform>                                                                                       
+			<Platform>ALL</Platform>                                                                   
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Driver>
+	
+	<!-- ********************* -->
+	<!-- ** UTILITY SECTION ** -->
+	<!-- ********************* -->
+	
+	<Utility>
+		<App Name="Intel CSwitch Utility" RunCmd="ImCSwt.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>ALL</OS>         
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Utility>
+	
+	<Utility>
+		<App Name="Intel ProcLoad Utility" RunCmd="ImProcLo.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS>                               
+			<OS>Windows XP Family</OS>  
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Utility>
+	
+	<Utility>
+		<App Name="Intel WinPM" RunCmd="ImWinPM.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>ALL</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Utility>
+	
+	<Utility>
+		<App Name="Intel CPU Frequency Display" RunCmd="ImCPUFrq.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>ALL</OS>    
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>ALL</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>ALL</Platform>
+		</PlatformDefault>
+	</Utility>
+	
+	<Utility>
+		<App Name="Intel Thermal Analysis Tool" RunCmd="ImTAT.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS>                               
+			<OS>Windows XP Family</OS>                                        
+			<OS>Windows 2000 Professional SP4</OS>    
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Utility>
+
+	<Utility>
+		<App Name="Intel GVCycle Utility" RunCmd="ImGVCyl.exe" Reboot="No" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS> 
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS>
+			<OS>Windows XP Family</OS>                                        
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>Windows 7 Family</OS> 
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS>
+			<OS>Windows XP Family</OS>                                        
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>ALL</Platform>
+		</PlatformDefault>
+	</Utility>
+	
+	<Utility>
+		<App Name="Intel C State Residency Monitor Utility" RunCmd="ImCSTResMon.exe" Reboot="Yes" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS>
+			<OS>Windows XP Family</OS>                                        
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Utility>
+	
+	<Utility>
+		<App Name="Intel WinFlash Utility" RunCmd="ImWinFlash.exe" Reboot="Yes" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>ALL</OS>                                 
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Utility>
+	
+	<Utility>
+		<App Name="Intel WinACPI Utility" RunCmd="ImWinACPI.exe" Reboot="Yes" Order="999" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>ALL</OS>                                 
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Utility>
+	
+	<!-- ******************* -->
+	<!-- ** VIDEO SECTION ** -->
+	<!-- ******************* -->
+
+	<Video>
+		<App Name="Intel Graphics Media Accelerator Driver" RunCmd="ImSGraphics.exe" Reboot="Yes" Order="40" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>			
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP x64 SP2</OS>
+			<OS>Windows XP Family</OS>
+			<OS>Windows 2000 Professional SP4</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>Crestline Family</Platform> 					
+			<Platform>Calistoga Family</Platform>  		
+			<Platform>IbexPeak Family</Platform>
+			<Platform>Pineview Family</Platform>
+			<Platform>Cantiga Family</Platform>	
+			<Platform>SandyBridge-CPT Family</Platform>			
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>			
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP x64 SP2</OS>
+			<OS>Windows XP Family</OS>
+			<OS>Windows 2000 Professional SP4</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>Crestline Family</Platform> 					
+			<Platform>Calistoga Family</Platform>  		
+			<Platform>IbexPeak Family</Platform>
+			<Platform>Pineview Family</Platform>
+			<Platform>Cantiga Family</Platform>	
+			<Platform>SandyBridge-CPT Family</Platform>	 		
+		</PlatformDefault>
+	</Video>	
+
+	<!-- ****************************** -->
+	<!-- ** LICENSED-General SECTION ** -->
+	<!-- ****************************** -->
+	<General>
+		<App Name="CyberLink PowerDVD 8" RunCmd="ImPwrDVD.exe" Reboot="No" Order="999" DVD="No" Portable="No" Production="Yes" Tab="Licensed" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP SP2 Family</OS>
+			<OS>Windows XP SP3 Family</OS>  
+			<OS>Windows XP x64 SP2</OS>  	
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</General>
+	
+	<General>
+		<App Name="Corel WinDVD 9" RunCmd="ImWinDVD.exe" Reboot="No" Order="999" DVD="No" Portable="No" Production="Yes" Tab="Licensed" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP SP2 Family</OS>
+			<OS>Windows XP SP3 Family</OS>  
+			<OS>Windows XP x64 SP2</OS> 			
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</General>
+	
+	<General>
+		<App Name="Microsoft Office 2003" RunCmd="ImOffice.exe" Reboot="No" Order="999" DVD="No" Portable="No" Production="Yes" Tab="Licensed" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS>                               
+			<OS>Windows XP Family</OS>                                        
+			<OS>Windows 2000 Professional SP4</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>Crestline Family</Platform>
+			<Platform>Calistoga Family</Platform>                               
+			<Platform>Cantiga Family</Platform>	
+			<Platform>IbexPeak Family</Platform>
+			<Platform>SandyBridge Family</Platform>
+			<Platform>SandyBridge-CPT Family</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</General>
+	
+	<General>
+		<App Name="WorldBench 5" RunCmd="ImWDBench5.exe" Reboot="Optional" Order="999" DVD="No" Portable="No" Production="Yes" Tab="Licensed" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows XP Family</OS>                                        
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>ALL</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</General>
+		
+	<!-- ************************* -->
+	<!-- ** LICENSED-CV SECTION ** -->
+	<!-- ************************* -->
+	
+	<!-- **************************** -->
+	<!-- ** DEVELOPMENT SECTION ** -->
+	<!-- **************************** -->
+	<Development>
+		<App Name="AutoIt3" RunCmd="ImAutoIt3.exe" Reboot="No" Order="2000" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS> 
+			<OS>Windows XP Family</OS>   
+			<OS>Windows 2000 Professional SP4</OS>  
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>All</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Development>
+	
+	<Development>
+		<App Name="AutoIt3 Debugger" RunCmd="ImAutoIt3Debugger.exe" Reboot="No" Order="2100" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS>     
+			<OS>Windows XP Family</OS>  
+			<OS>Windows 2000 Professional SP4</OS>  
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>All</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Development>
+	
+	<Development>
+		<App Name="SciTE for AutoIt3" RunCmd="ImSciTE.exe" Reboot="No" Order="2200" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>Windows 7 Family</OS>
+			<OS>Windows Vista Family</OS> 
+			<OS>Windows Vista SP1 Family</OS>
+			<OS>Windows Vista SP2 Family</OS>
+			<OS>Windows Vista Starter Edition SP1 Family</OS>
+			<OS>Windows Vista Starter Edition SP2 Family</OS>
+			<OS>Windows XP x64 Family</OS>         
+			<OS>Windows XP Family</OS>  
+			<OS>Windows 2000 Professional SP4</OS>  
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>All</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Development>
+	
+	<Development>
+		<App Name="WMI Code Creator" RunCmd="ImWMICodeCreator.exe" Reboot="No" Order="2200" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>ALL</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>All</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Development>
+
+	<Development>
+		<App Name="DebugView" RunCmd="ImDbgView.exe" Reboot="No" Order="2200" DVD="Yes" Portable="Yes" Production="Yes" Tab="Install" />
+		<User>NONE</User>
+		<SupportedOS>
+			<OS>ALL</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>All</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</Development>	
+
+</CRB>
+
+

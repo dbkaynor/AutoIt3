@@ -1,0 +1,22 @@
+	<AMT>
+		<App Name="DriverInstall" RunCmd="ImAMT.exe" Reboot="No" Order="999" DVD="No" Portable="No" Production="Yes" Tab="Install" />
+		<SupportedOS>
+			<OS>Windows Vista Family</OS>
+			<OS>Windows Vista x64</OS>
+			<OS>Windows XP Professional SP2</OS>
+			<OS>Windows XP Professional SP3</OS>
+			<OS>Windows 7 x32 Family</OS>
+			<OS>Windows 7 x64 Family</OS>
+		</SupportedOS>
+		<SupportedPlatform>
+			<Platform>GENERIC</Platform>
+			<Platform>Calpella (IbexPeak)</Platform>
+			<Platform>Montevina (Cantiga / ICH9-M)</Platform>
+		</SupportedPlatform>
+		<OSDefault>
+			<OS>NONE</OS>
+		</OSDefault>
+		<PlatformDefault>
+			<Platform>NONE</Platform>
+		</PlatformDefault>
+	</AMT>

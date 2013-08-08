@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Notepad++">
+<Title>Notes for PowerCycle</Title>
+</HEAD>
+<BODY>
+<h1>Notes for PowerCycle</h1><br>
+--------------------
+<h2>All OSes</h2><br>
+BIOS set to reboot after power loss<br>
+Disable any firewall<br>
+Setup a static IP address (example: 172.31.107.200)<br>
+The connection and IP must be available after boot completes and before login<br>
+--------------------<br>
+<br>
+<h2>Windows OSes</h2><br>
+Disable Windows Startup Repair<br>
+bcdedit /set {default} recoveryenabled No<br>
+bcdedit /set {current} bootstatuspolicy ignoreallfailures<br>
+Change Windows Startup Settings (F8?)<br>
+  Change the default OS and the OS choice delay timer<br>
+
+--------------------<br><br>
+<h2>
+The Raritan client window should not be adjusted after the program is trained.<br>
+The window location will be reset durning the test but the buttons MUST be in the same location.<br>
+</h2>
+</BODY>
+</HTML>

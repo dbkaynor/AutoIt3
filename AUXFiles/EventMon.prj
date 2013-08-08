@@ -1,0 +1,27 @@
+Valid for EventMon project
+Project file for EventMon.au3  7/7/2012 2:14:18 PM
+Help 1 is enabled, 4 is disabled for checkboxes
+CheckSave:4
+CheckSplash:4
+CheckSystem:1
+CheckSecurity:1
+CheckApplication:1
+CheckInformation:4
+CheckWarnings:1
+CheckErrors:1
+CheckSuccessAudits:4
+CheckFailAudits:1
+CheckOther:1
+CheckJunkFilter:1
+CheckLoop:4
+LabelSliderDelay:2
+SliderDelay:2
+InputFilter:
+CheckFilterExclude4
+RadioFilterAll:1
+RadioFilterNumber4
+RadioFilterType4
+$RadioFilterDate4
+$RadioFilterSource4
+$RadioFilterDescription4
+EventMon_pos:474 216 731 618

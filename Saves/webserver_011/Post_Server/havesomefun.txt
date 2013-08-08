@@ -1,0 +1,1 @@
+Open the browser two times on the page this loads, then edit the text in one page. It will change within 5 seconds on the other browser window!! :)

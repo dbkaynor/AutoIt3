@@ -1,0 +1,14 @@
+Valid for PingTool project
+Project file for PingTool.au3  12/4/2011 6:09:00 PM
+Help 1 is enabled, 4 is disabled for checkboxes
+CheckDNS:1
+CheckClass:1
+CheckPublicIP:1
+CheckMAC:1
+InputTimeout:1000
+InputLoops:1
+InputDelay:500
+InputIPAddressEdit:
+MainWinpos:-77 -21 1000 419
+InputIPAddress:192.168.001.001
+InputIPAddress:192.168.001.001
