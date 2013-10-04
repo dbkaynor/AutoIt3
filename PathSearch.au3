@@ -4,7 +4,7 @@
 #AutoIt3Wrapper_UseX64=n
 #AutoIt3Wrapper_Res_Comment=Searchs the system path
 #AutoIt3Wrapper_Res_Description=PathSearch
-#AutoIt3Wrapper_Res_Fileversion=0.0.0.33
+#AutoIt3Wrapper_Res_Fileversion=0.0.0.25
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=Y
 #AutoIt3Wrapper_Res_LegalCopyright=Copyright 2011 Douglas B Kaynor
 #AutoIt3Wrapper_Res_Language=1033
@@ -22,15 +22,13 @@
 	Fixed:
 	Skip file button
 	Search crashes with no data
+	Added debug
 	Tool tips
 	
 	Todo:
 	Add a path refresh button
-	
-	Open the system properties/Enviroment Varibles window
-	
-	Path is saved back wards
-	
+	Implement an edit path button
+	Verify before save of editted path
 	Duplicate not found if / on end
 	Show full unprocessed path (scroll) ???
 #CE
@@ -55,36 +53,51 @@
 #include <StaticConstants.au3>
 #include <TreeViewConstants.au3>
 #include <WindowsConstants.au3>
-#include <_DougFunctions.au3>
 
 Opt("MustDeclareVars", 1)
+DirCreate("AUXFiles")
+Global $AuxPath = @ScriptDir & "\AUXFiles\"
 Global $FileVersion = "  Ver: " & FileGetVersion(@AutoItExe, "Fileversion")
-Global $SystemS = @ComputerName & @CRLF & @ScriptName & @CRLF & $FileVersion & @CRLF & @OSVersion & @CRLF & @OSServicePack & @CRLF & @OSType & @CRLF & @OSArch
+Global $SystemS = @ScriptName & @CRLF & $FileVersion & @CRLF & @OSVersion & @CRLF & @OSServicePack & @CRLF & @OSType & @CRLF & @OSArch & @IPAddress1
 Global $FileListArray[1]
 Global $EXETypes
+Global $Debug = False
 
 If _Singleton(@ScriptName, 1) = 0 Then
 	MsgBox(48, @ScriptName, @ScriptName & " is already running!")
 	Exit
 EndIf
 
-#region ### START Koda GUI section ### Form
+For $x = 1 To $CmdLine[0]
+	ConsoleWrite($x & " >> " & $CmdLine[$x] & @CRLF)
+	Select
+		Case StringInStr($CmdLine[$x], "help") > 0 Or StringInStr($CmdLine[$x], "?") > 0
+			Help()
+			Exit
+		Case StringInStr($CmdLine[$x], "debug") > 0
+			$Debug = True
+		Case Else
+			MsgBox(32, @ScriptLineNumber & " Unknown cmdline option found", _
+					"Unknown cmdline option found" & @CRLF & $CmdLine[$x])
+			Exit
+	EndSelect
+Next
+#region ### START Koda GUI section ### Form=
 Global $MainFormOptions = BitOR($WS_MINIMIZEBOX, $WS_SIZEBOX, $WS_THICKFRAME, $WS_SYSMENU, $WS_CAPTION, $WS_POPUP, $WS_POPUPWINDOW, $WS_GROUP, $WS_BORDER, $WS_CLIPSIBLINGS)
-Global $MainForm = GUICreate(@ScriptName & " " & $FileVersion, 625, 625, 10, 10, $MainFormOptions)
+Global $MainForm = GUICreate(@ScriptName & " " & $FileVersion, 625, 625, 10, 10);, $MainFormOptions)
 GUISetFont(10, 400, 0, "Courier New")
 GUISetHelp("notepad .\PathSearch.au3", $MainForm) ; Need a help file to call here
 
-Global $ButtonSearch = GUICtrlCreateButton("Search", 10, 10, 85, 20, $WS_GROUP)
+Global $ButtonGetFiles = GUICtrlCreateButton("Get files", 10, 10, 85, 20, $WS_GROUP)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Get the data using current options (paths and files)")
+Global $ButtonSearch = GUICtrlCreateButton("Search", 10, 30, 85, 20, $WS_GROUP)
 GUICtrlSetResizing(-1, 802)
 GUICtrlSetTip(-1, "Start the regular expression search")
 
-Global $ButtonFileInfo = GUICtrlCreateButton("File info", 10, 30, 85, 20, $WS_GROUP)
+Global $ButtonShowFiles = GUICtrlCreateButton("Show files", 10, 50, 85, 20, $WS_GROUP)
 GUICtrlSetResizing(-1, 802)
-GUICtrlSetTip(-1, "Display detailed information about selected file")
-
-Global $ButtonEditPath = GUICtrlCreateButton("Edit path", 10, 50, 85, 20, $WS_GROUP)
-GUICtrlSetResizing(-1, 802)
-GUICtrlSetTip(-1, "Edit the current path (not implemented yet)")
+GUICtrlSetTip(-1, "Show file list")
 
 Global $InputSearch = GUICtrlCreateInput("", 100, 10, 190, 24, BitOR($ES_CENTER, $ES_AUTOHSCROLL))
 GUICtrlSetResizing(-1, 802)
@@ -97,25 +110,28 @@ Global $CheckExecutableOnly = GUICtrlCreateCheckbox("Executable only", 300, 30, 
 GUICtrlSetResizing(-1, 802)
 GUICtrlSetTip(-1, "Show executable files only")
 GUICtrlSetState(-1, $GUI_CHECKED)
-
-
-Global $ButtonGetFiles = GUICtrlCreateButton("Get files", 460, 10, 85, 20, $WS_GROUP)
+Global $CheckSkipFiles = GUICtrlCreateCheckbox("Skip files", 300, 50, 148, 20)
 GUICtrlSetResizing(-1, 802)
-GUICtrlSetTip(-1, "Get the data using current options (paths and files)")
-Global $ButtonGetPath = GUICtrlCreateButton("Get path", 460, 30, 85, 20, $WS_GROUP)
-GUICtrlSetResizing(-1, 802)
-GUICtrlSetTip(-1, "Refresh paths")
-Global $ButtonShowFiles = GUICtrlCreateButton("Show files", 460, 50, 85, 20, $WS_GROUP)
-GUICtrlSetResizing(-1, 802)
-GUICtrlSetTip(-1, "Show file list")
+GUICtrlSetTip(-1, "Do not get the files in the folders")
+If $Debug Then
+	GUICtrlSetState(-1, $GUI_CHECKED)
+Else
+	GUICtrlSetState(-1, $GUI_UNCHECKED)
+EndIf
 
-Global $ButtonHelp = GUICtrlCreateButton("Help", 550, 10, 65, 20, $WS_GROUP)
+Global $ButtonFileInfo = GUICtrlCreateButton("File info", 460, 5, 85, 20, $WS_GROUP)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Display detailed information about selected file")
+Global $ButtonEditPath = GUICtrlCreateButton("Edit path", 460, 25, 85, 20, $WS_GROUP)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Edit the current path (not implemented yet)")
+Global $ButtonHelp = GUICtrlCreateButton("Help", 550, 5, 65, 20, $WS_GROUP)
 GUICtrlSetResizing(-1, 802)
 GUICtrlSetTip(-1, "Display help about this program  (not implemented yet)")
-Global $ButtonAbout = GUICtrlCreateButton("About", 550, 30, 65, 20, $WS_GROUP)
+Global $ButtonAbout = GUICtrlCreateButton("About", 550, 25, 65, 20, $WS_GROUP)
 GUICtrlSetResizing(-1, 802)
 GUICtrlSetTip(-1, "Display information about this program")
-Global $ButtonExit = GUICtrlCreateButton("Exit", 550, 50, 65, 20, $WS_GROUP)
+Global $ButtonExit = GUICtrlCreateButton("Exit", 550, 45, 65, 20, $WS_GROUP)
 GUICtrlSetResizing(-1, 802)
 GUICtrlSetTip(-1, "Exit this program")
 Global $InputFolderCount = GUICtrlCreateInput("0", 100, 45, 60, 20, BitOR($ES_CENTER, $ES_AUTOHSCROLL, $ES_READONLY))
@@ -140,18 +156,16 @@ Global $InputStatus = GUICtrlCreateInput("", 10, 125, 600, 20, BitOR($ES_AUTOHSC
 GUICtrlSetResizing(-1, 546)
 GUICtrlSetTip(-1, "Status bar")
 
-Global $ListOptions = BitOR($TVS_HASBUTTONS, $TVS_HASLINES, $TVS_LINESATROOT, $TVS_DISABLEDRAGDROP, $TVS_SHOWSELALWAYS, $TVS_INFOTIP, $WS_GROUP, $WS_TABSTOP)
-Global $TreeViewFolders = GUICtrlCreateTreeView(10, 150, 600, 150, $ListOptions, $WS_EX_CLIENTEDGE)
-GUICtrlSetResizing(-1, $GUI_DOCKTOP)
-GUICtrlSetTip(-1, "List of all folders in the path")
-Global $TreeViewMatches = GUICtrlCreateTreeView(10, 305, 600, 150, $ListOptions, $WS_EX_CLIENTEDGE)
-;GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP)
-GUICtrlSetTip(-1, "Results of search results.")
-Global $TreeViewProblems = GUICtrlCreateTreeView(10, 460, 600, 150, $ListOptions, $WS_EX_CLIENTEDGE)
-;GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM)
-GUICtrlSetTip(-1, "List of all problems.")
 
-ConsoleWrite(@ScriptLineNumber & " " & $TreeViewProblems & @CRLF)
+Global $TreeViewFolders = GUICtrlCreateTreeView(10, 150, 600, 150, BitOR($TVS_HASBUTTONS, $TVS_HASLINES, $TVS_LINESATROOT, $TVS_DISABLEDRAGDROP, $TVS_SHOWSELALWAYS, $TVS_INFOTIP, $WS_GROUP, $WS_TABSTOP), $WS_EX_CLIENTEDGE)
+GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP)
+GUICtrlSetTip(-1, "List of all folders in the path")
+Global $TreeViewMatches = GUICtrlCreateTreeView(10, 305, 600, 150, BitOR($TVS_HASBUTTONS, $TVS_HASLINES, $TVS_LINESATROOT, $TVS_DISABLEDRAGDROP, $TVS_SHOWSELALWAYS, $TVS_INFOTIP, $WS_GROUP, $WS_TABSTOP), $WS_EX_CLIENTEDGE)
+GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM)
+GUICtrlSetTip(-1, "Results of search results.")
+Global $TreeViewProblems = GUICtrlCreateTreeView(10, 460, 600, 150, BitOR($TVS_HASBUTTONS, $TVS_HASLINES, $TVS_LINESATROOT, $TVS_DISABLEDRAGDROP, $TVS_SHOWSELALWAYS, $TVS_INFOTIP, $WS_GROUP, $WS_TABSTOP), $WS_EX_CLIENTEDGE)
+GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM)
+GUICtrlSetTip(-1, "List of all problems.")
 
 GUISetState(@SW_SHOW)
 #endregion ### END Koda GUI section ###
@@ -169,23 +183,22 @@ While 1
 			GetPath()
 			GetPathFiles()
 		Case $ButtonShowFiles
-			_GuiDisable("disable")
+			GuiDisable("disable")
 			_ArrayDisplay($FileListArray, @ScriptLineNumber & ' FIles in path directories')
-			_GuiDisable("enable")
-		Case $ButtonGetPath
-			GetPath()
+			GuiDisable("enable")
 		Case $ButtonFileInfo
-			ShowFileInfo()
+			FileInfo()
 		Case $ButtonSearch
 			DoTheSearch()
 		Case $InputSearch
 			DoTheSearch()
 		Case $ButtonAbout
-			_About(@ScriptName, $SystemS)
+			About()
 		Case $ButtonHelp
-			_Help('Help not ready yet')
+			Help()
 		Case $CheckNoStartFolder
 		Case $CheckExecutableOnly
+		Case $CheckSkipFiles
 		Case $ButtonEditPath
 			EditPath()
 		Case Else
@@ -194,59 +207,62 @@ While 1
 WEnd
 ;-----------------------------------------------  Test for valid and duplicate folders in the path _arr
 Func EditPath()
-	;Local $var = RegRead("HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\", "Path")
+
+	Local $var = RegRead("HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\", "Path")
+	MsgBox(4096, "Program files are in:", $var)
+
 	Local $TmpFile = $AuxPath & "PathSearch.txt"
 
 	Local $hItem = _GUICtrlTreeView_GetFirstItem($TreeViewFolders)
 	Local $CurrentPath = _GUICtrlTreeView_GetText($TreeViewFolders, $hItem)
 	FileWriteLine($TmpFile, $CurrentPath)
+	;ConsoleWrite(@ScriptLineNumber & " " & $CurrentPath & @CRLF)
 
 	While $hItem <> 0
 		$hItem = _GUICtrlTreeView_GetNext($TreeViewFolders, $hItem)
 		If $hItem <> 0 Then
 			$CurrentPath = _GUICtrlTreeView_GetText($TreeViewFolders, $hItem)
 			FileWriteLine($TmpFile, $CurrentPath)
+			;ConsoleWrite(@ScriptLineNumber & " " & $CurrentPath & @CRLF)
 		EndIf
 	WEnd
 
-	Local $editor = _ChoseTextEditor()
+	Const $edit1 = "c:\program files\notepad++\notepad++.exe"
+	Const $edit2 = "c:\program files (x86)\notepad++\notepad++.exe"
+	Const $edit3 = "notepad.exe"
+	Local $editor = ""
+
+	If FileExists($edit1) = True Then
+		$editor = $edit1
+	ElseIf FileExists($edit2) = True Then
+		$editor = $edit2
+	Else
+		$editor = $edit3
+	EndIf
+	FileGetShortName($editor)
 	ShellExecuteWait($editor, $TmpFile, "", "open")
 
-	If MsgBox(36, "Edit path", "Do you want to save the changes?") = 6 Then
+	If MsgBox(4 + 32, "Edit path", "Do you want to save the changes?") = 6 Then
 		Local $TmpArray
 		Local $TS = ''
 		_FileReadToArray($TmpFile, $TmpArray)
 		_ArrayDelete($TmpArray, 0)
 
 		For $x In $TmpArray
-			$TS = $TS & ';' & $x
+			$TS = $x & ';' & $TS
+
 		Next
 		ConsoleWrite(@ScriptLineNumber & " " & $TS & " " & @CRLF)
-		ClipPut($TS)
-
-		;If RegWrite("HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\", "path", "REG_EXPAND_SZ", $TS) = 0 Then
-		;	MsgBox(16, "Registry update error", '@error: ' & @error)
-		;EndIf
-		;EnvUpdate()
-		;If @error = 1 Then
-		;	MsgBox(16, "EnvUpdate error", '@error: ' & @error)
-		;EndIf
-		ShellExecute('systempropertiesadvanced.exe')
-		Sleep(100)
-		WinActivate('System Properties')
-		Send("{TAB 3}{SPACE}{TAB 4}{DOWN 7}{TAB 2}{SPACE}{DELETE}{^V}")
-
-		;ControlClick("[CLASS:Button]", 'Enviro&nment Variables...', '', 106)
-
-		ConsoleWrite(@ScriptLineNumber & " " & RegRead("HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\", "path") & @CRLF)
-
+		MsgBox(48, "cool", $TS)
+		; RegWrite("HKEY_CURRENT_USER\Software\Test", "TestKey2", "REG_MULTI_SZ", "line1")
+		RegWrite("HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\", "path""REG_EXPAND_SZ", $TS)
 	EndIf
 	If FileExists($TmpFile) Then FileDelete($TmpFile)
 
 EndFunc   ;==>EditPath
 ;-----------------------------------------------
 Func GetPath()
-	_GuiDisable("disable")
+	GuiDisable("disable")
 	SplashImageOn("PathSearch is getting data. Please wait.", $AuxPath & "Working.jpg", -1, -1, -1, -1, 18)
 	GUICtrlSetData($InputStatus, 'GetThePath starting')
 	_GUICtrlTreeView_DeleteAll($TreeViewFolders)
@@ -261,17 +277,24 @@ Func GetPath()
 
 	GUICtrlSetData($InputEXETypes, EnvGet("PathEXT"))
 	$EXETypes = StringSplit(GUICtrlRead($InputEXETypes), ';', 2)
+	;_ArrayDisplay($EXETypes, @ScriptLineNumber & " Exe types")
 
 	If GUICtrlRead($CheckNoStartFolder) = $GUI_UNCHECKED Then
 		_GUICtrlTreeView_Add($TreeViewFolders, 0, @WorkingDir)
 	EndIf
 
-	Local $B = StringStripWS(EnvGet("Path"), 3)
+	Local $B
+	If $Debug Then
+		$B = StringStripWS(";c:\xyz;C:\Program Files\Java\jdk1.6.0_23\bin;;C:\cygwin\bin;C:\cygwin\bin\;C:\windows", 3)
+	Else
+		$B = StringStripWS(EnvGet("Path"), 3)
+	EndIf
+	;MsgBox(16, @ScriptLineNumber & " Path " & $Debug, $B)
 	GUICtrlSetData($InputPath, $B)
 
 	If StringInStr($B, ";;") > 0 Then _GUICtrlTreeView_Add($TreeViewProblems, 0, "Double semi-colons found.")
 
-	;This removes leading and trailing ;
+	;This fixes leading and trailing ;
 	$B = StringRegExpReplace($B, "^;", "")
 	$B = StringRegExpReplace($B, ";$", "")
 
@@ -296,7 +319,8 @@ Func GetPath()
 	For $B In $A
 		If StringLen($B) < 3 Then ContinueLoop
 		If FileExists($B) = 0 Then
-			_GUICtrlTreeView_Add($TreeViewProblems, 0, "Path folder does not exist: " & $B)
+			$B = "Path does not exist: " & $B
+			_GUICtrlTreeView_Add($TreeViewProblems, 0, $B)
 		Else
 			_GUICtrlTreeView_Add($TreeViewFolders, 0, $B)
 		EndIf
@@ -304,24 +328,24 @@ Func GetPath()
 
 	GUICtrlSetData($InputStatus, 'GetThePath complete')
 	SplashOff()
-	_GuiDisable("enable")
+	GuiDisable("enable")
 EndFunc   ;==>GetPath
 ;-----------------------------------------------
 Func GetPathFiles()
-	_GuiDisable("disable")
+	GuiDisable("disable")
 	GUICtrlSetData($InputStatus, 'GetPathFiles starting')
 	SplashImageOn("PathSearch is getting data. Please wait.", $AuxPath & "Working.jpg", -1, -1, -1, -1, 18)
 	GetTheFileList()
 	SplashOff()
 	GUICtrlSetData($InputStatus, 'GetPathFiles complete')
-	_GuiDisable("enable")
+	GuiDisable("enable")
 
 EndFunc   ;==>GetPathFiles
 ;-----------------------------------------------
 Func CheckForDuplicates(ByRef $A)
 	;This builds a hash of the items. The name is the key and the count is the data.
 	;The hash is a one dimensional array
-	Global $TmpArray[2] ;Create 2 slots so that a crash with no data is avoided
+	Local $TmpArray[2] ;Create 2 slots so that a crash with no data is avoided
 	For $x = 0 To UBound($A) - 1
 		Local $t = StringStripWS($A[$x], 3)
 		ConsoleWrite(@ScriptLineNumber & " " & $t & @CRLF)
@@ -336,7 +360,7 @@ Func CheckForDuplicates(ByRef $A)
 	;_ArrayDisplay($TmpArray, @ScriptLineNumber & " CheckForDups")
 	;Convert the hash to a two dimensional array
 	Local $Count = 0
-	Global $ZArray[1][2]
+	Local $ZArray[1][2]
 	While UBound($TmpArray) > 0
 		$ZArray[$Count][0] = _ArrayPop($TmpArray)
 		$ZArray[$Count][1] = _ArrayPop($TmpArray)
@@ -352,6 +376,7 @@ Func CheckForDuplicates(ByRef $A)
 EndFunc   ;==>CheckForDuplicates
 ;-----------------------------------------------
 Func GetTheFileList()
+	If GUICtrlRead($CheckSkipFiles) == $GUI_CHECKED Then Return
 	GUICtrlSetData($InputStatus, 'GetTheFileList')
 	GUICtrlSetData($InputFileCount, 0)
 	GUICtrlSetData($InputMatchCount, 0)
@@ -402,7 +427,7 @@ Func DoTheSearch()
 		Return
 	EndIf
 
-	_GuiDisable("disable")
+	GuiDisable("disable")
 	GUICtrlSetData($InputMatchCount, 0)
 	_GUICtrlTreeView_DeleteAll($TreeViewMatches)
 
@@ -410,12 +435,16 @@ Func DoTheSearch()
 		Local $B = StringSplit($A, "\", 2)
 		Local $C = $B[UBound($B) - 1]
 
-		If GUICtrlRead($CheckExecutableOnly) = $GUI_UNCHECKED Then
-			If StringRegExp($C, GUICtrlRead($InputSearch), 0) = 1 Then _GUICtrlTreeView_Add($TreeViewMatches, 0, $A) ; extension does not matter
+		If GUICtrlRead($CheckExecutableOnly) == $GUI_UNCHECKED Then ; Check the extension if needed
+			;If StringInStr($C, GUICtrlRead($InputSearch)) > 0 Then _GUICtrlTreeView_Add($TreeViewMatches, 0, $A)
+			If StringRegExp($C, GUICtrlRead($InputSearch), 0) = 1 Then _GUICtrlTreeView_Add($TreeViewMatches, 0, $A)
 		Else
 			For $D In $EXETypes
-				If StringInStr($A, $D, 0, -1) = StringLen($A) - 3 Then ; Verify that it is an executable file
-					If StringRegExp($C, GUICtrlRead($InputSearch), 0) = 1 Then _GUICtrlTreeView_Add($TreeViewMatches, 0, $A); Do the strings match?
+				;If StringInStr($A, $D) Then
+				;	If StringInStr($C, GUICtrlRead($InputSearch)) > 0 Then _GUICtrlTreeView_Add($TreeViewMatches, 0, $A)
+				If StringRegExp($A, $D, 0) = 1 Then
+					If StringRegExp($C, GUICtrlRead($InputSearch), 0) = 1 Then _GUICtrlTreeView_Add($TreeViewMatches, 0, $A)
+
 				EndIf
 			Next
 		EndIf
@@ -423,10 +452,26 @@ Func DoTheSearch()
 	Next
 	GUICtrlSetData($InputMatchCount, _GUICtrlTreeView_GetCount($TreeViewMatches))
 
-	_GuiDisable("enable")
+	GuiDisable("enable")
 EndFunc   ;==>DoTheSearch
 ;-----------------------------------------------
-Func ShowFileInfo()
+Func Help()
+	MsgBox(64 + 8192, "Help " & @ScriptName, "Help is not available yet", 5)
+EndFunc   ;==>Help
+;-----------------------------------------------
+Func About()
+	Local $D = WinGetPos(@ScriptName)
+	Local $WinPos
+	If IsArray($D) = 1 Then
+		$WinPos = StringFormat("%s" & @CRLF & "WinPOS: %d  %d " & @CRLF & "WinSize: %d %d " & @CRLF & "Desktop: %d %d ", _
+				$MainForm, $D[0], $D[1], $D[2], $D[3], @DesktopWidth, @DesktopHeight)
+	Else
+		$WinPos = ">>>About ERROR. Check the window name<<<"
+	EndIf
+	_Debug(@CRLF & $SystemS & @CRLF & $WinPos & @CRLF & "Written by Doug Kaynor because I wanted to!", 0x40, 5)
+EndFunc   ;==>About
+;-----------------------------------------------;
+Func FileInfo()
 	Local $Data[1]
 	Local $hItem = _GUICtrlTreeView_GetFirstItem($TreeViewMatches)
 	_ArrayAdd($Data, $hItem)
@@ -439,8 +484,68 @@ Func ShowFileInfo()
 	For $x = 0 To UBound($Data) - 1
 		If _GUICtrlTreeView_GetSelected($TreeViewMatches, $Data[$x]) == True Then
 			Local $file = _GUICtrlTreeView_GetText($TreeViewMatches, $Data[$x])
-			_FileInfo($file)
+
+			MsgBox(64, 'File info', _
+					StringFormat("%s %s %s %s %s %s %s %s %s", _
+					FileGetLongName($file), _
+					@CRLF & FileGetShortName($file), _
+					@CRLF & "Attributes:    " & FileGetAttrib($file), _
+					@CRLF & "Size:          " & FileGetSize($file), _
+					@CRLF & "Version:       " & FileGetVersion($file), _
+					@CRLF & "Modified Time: " & FormatedFileGetTime($file, 0), _
+					@CRLF & "Create time:   " & FormatedFileGetTime($file, 1), _
+					@CRLF & "Access Time:   " & FormatedFileGetTime($file, 2)))
 		EndIf
 	Next
-EndFunc   ;==>ShowFileInfo
+EndFunc   ;==>FileInfo
 ;-----------------------------------------------
+Func FormatedFileGetTime($file, $Type)
+	Local $FT = FileGetTime($file, $Type)
+	Return StringFormat("%s-%s-%s %s:%s:%s", $FT[0], $FT[1], $FT[2], $FT[3], $FT[4], $FT[5])
+EndFunc   ;==>FormatedFileGetTime
+;-----------------------------------------------
+Func GuiDisable($choice)
+	_Debug(@ScriptLineNumber & " GuiDisable  " & $choice)
+	Static $LastState
+	Local $setting
+
+	If $choice = "Enable" Then
+		$setting = $GUI_ENABLE
+	ElseIf $choice = "Disable" Then
+		$setting = $GUI_DISABLE
+	ElseIf $choice = "Toggle" Then
+		If $LastState = $GUI_DISABLE Then
+			$setting = $GUI_ENABLE
+		Else
+			$setting = $GUI_DISABLE
+		EndIf
+	Else
+		_Debug(@ScriptLineNumber & " Invalid choice at GuiDisable" & $choice, 0x40)
+	EndIf
+
+	GUICtrlSetState($ButtonSearch, $setting)
+	GUICtrlSetState($ButtonGetFiles, $setting)
+	GUICtrlSetState($ButtonShowFiles, $setting)
+	GUICtrlSetState($ButtonFileInfo, $setting)
+	GUICtrlSetState($ButtonEditPath, $setting)
+	GUICtrlSetState($ButtonHelp, $setting)
+	GUICtrlSetState($ButtonAbout, $setting)
+	GUICtrlSetState($ButtonExit, $setting)
+	GUICtrlSetState($InputSearch, $setting)
+	GUICtrlSetState($CheckNoStartFolder, $setting)
+	GUICtrlSetState($CheckExecutableOnly, $setting)
+	GUICtrlSetState($CheckSkipFiles, $setting)
+
+EndFunc   ;==>GuiDisable
+;-----------------------------------------------
+Func _Debug($msg, $ShowMsgBox = False, $Timeout = 0, $Verbose = True)
+	Local $DebugMSG = ''
+	If $Verbose = True Then
+		$DebugMSG = "DEBUG " & @ScriptName & "  " & $msg & @CRLF
+	Else
+		$DebugMSG = $msg & @CRLF
+	EndIf
+	DllCall("kernel32.dll", "none", "OutputDebugString", "str", $DebugMSG)
+	ConsoleWrite($DebugMSG)
+	If $ShowMsgBox = True Then MsgBox(48, @ScriptName & " Debug", $DebugMSG, $Timeout)
+EndFunc   ;==>_Debug

@@ -8,6 +8,7 @@
 #cs  This is a list of functions in this UDF
     Func _Help($msg)
     Func _GuiDisable($choice)
+    Func _AutoSplit($InString, $delimiters, $flag, $index)
     Func _About($WindowName, $SystemS='', $MessageS='')
     Func _FileInfo($file
     Func _FormatedFileGetTime($file, $Type)
@@ -36,12 +37,12 @@
     Func _FileListToArrayRecFiles1($sPathF, ByRef $sFileStringF, $sFilterF, $sExcludeF = "")
     Func _FileListToArrayBrief2a($sPathF, ByRef $sFileStringF, $sFilterF, $sExcludeF = "")
     Func _FileListToArrayBrief1a($sPathF, ByRef $sFileStringF, $sFilterF, $sExcludeF = "")
-    Func _Debug($DebugMSG, $LogFilename = '', $ListBoxName = '', $ShowMsgBox = False, $Timeout = 0)
+    Func _Debug($DebugMSG, $Log_filename = '', $ShowMsgBox = False, $Timeout = 0, $Verbose = False)
     Func _StartDebugViewer($DebugMSG)
     Func _CheckWindowLocation($WindowName, $Center = False)
     Func _SetWindowPosition($KeyName, $WindowName, $ReadLine)
-    Func _SaveWindowPosition($KeyName, $WindowName, $FileName)
-    Func _PingError($code)
+    Func _SaveWindowPosition($KeyName,debug	$WindowName, $FileName)
+    Func _ComputeStats($InDataArray, $ResultsDataArray)
 #ce
 
 #include-once
@@ -55,18 +56,20 @@ Opt("GUICoordMode", 1) ; 0=relative, 1=absolute, 2=cell
 #include <Date.au3>
 #include <File.au3>
 #include <GUIConstants.au3>
-#include <GUIListBox.au3>
-#include <ListBoxConstants.au3>
-#include <Misc.au3>
+#include <misc.au3>
 #include <String.au3>
 
 Global $AuxPath = @ScriptDir & "\AUXFiles\"
 Global $UtilPath = @ScriptDir & "\AUXFiles\Utils\"
-Global $Editor = ""
+
+Global $RFSarray[1]
+
 ;-----------------------------------------------
 Func _Help($msg)
     MsgBox(64, "Help", $msg)
 EndFunc   ;==>_Help
+;-----------------------------------------------
+
 ;-----------------------------------------------
 ; Will either disable, enable, or toggle all gui items
 ; The gui item in $DoNotDisable will be enabled
@@ -87,7 +90,8 @@ Func _GuiDisable($choice, $DoNotDisable = '', $MaxGUIItems = 100)
                 $Setting = $GUI_DISABLE
             EndIf
         Case Else
-            _Debug(@ScriptLineNumber & " Invalid choice at GuiDisable " & $choice, '', '', True)
+            ;Func _Debug($DebugMSG, $Log_filename = '', $ShowMsgBox = False, $Timeout = 0, $Verbose = False)
+            _Debug(@ScriptLineNumber & " Invalid choice at GuiDisable " & $choice, '', True)
     EndSwitch
 
     For $x = 0 To $MaxGUIItems
@@ -101,15 +105,19 @@ Func _GuiDisable($choice, $DoNotDisable = '', $MaxGUIItems = 100)
 
 EndFunc   ;==>_GuiDisable
 ;-----------------------------------------------
+Func _AutoSplit($InString, $delimiters, $flag, $index)
+    Local $ta = StringSplit($InString, $delimiters, $flag)
+    Return $ta[$index]
+EndFunc   ;==>_AutoSplit
+;-----------------------------------------------
 Func _About($WindowName, $SystemS = '', $MessageS = '')
     Local $D = WinGetPos($WindowName)
-    Local $MsgString = 'About ERROR. Window name not found ' & $WindowName
-    Local $MeString = ' Written by Douglas Kaynor '
+    Local $MsgString = "About ERROR. Window name not found " & $WindowName
     If IsArray($D) = True Then
-        $MsgString = StringFormat("%s" & @LF & @LF & "%s" & @LF & "WinPOS: %d  %d " & @LF & "WinSize: %d %d " & @LF & "Desktop: %d %d" & @LF & "%s" & @LF & "%s", _
-                $SystemS, $WindowName, $D[0], $D[1], $D[2], $D[3], @DesktopWidth, @DesktopHeight, $MessageS, $MeString)
+        $MsgString = StringFormat("%s" & @LF & @LF & "%s" & @LF & "WinPOS: %d  %d " & @LF & "WinSize: %d %d " & @LF & "Desktop: %d %d" & @LF & "%s", _
+                $SystemS, $WindowName, $D[0], $D[1], $D[2], $D[3], @DesktopWidth, @DesktopHeight, $MessageS)
     EndIf
-    _Debug($MsgString, '', '', True)
+    _Debug($MsgString, '', True)
 EndFunc   ;==>_About
 ;-----------------------------------------------
 ;Returns a message box abd/or a string with formated file information
@@ -194,7 +202,7 @@ Func _IPAddress($IPAddress)
     Local $T
 
     If $array[0] <> 2 Then
-        _Debug(@ScriptLineNumber & ' No count value found. Testing and returning the value. ', '', '', True)
+        _Debug(@ScriptLineNumber & " No count value found. Testing and returning the value. ", '', True)
         $T = _TestIP($array[1])
         If StringInStr($T, "ERROR0") = 0 Then
             _ArrayAdd($Results, "TestIP failed " & $array[1] & " Return " & $T)
@@ -272,9 +280,9 @@ EndFunc   ;==>_IPUnPad
 ;-----------------------------------------------
 ;Returns the class of an ip address
 Func _CheckIPClass($AddressToTest)
-    _Debug(@ScriptLineNumber & ' CheckIPClass')
+    _Debug(@ScriptLineNumber & " CheckIPClass")
     Local $octets = StringSplit($AddressToTest, ".")
-    _Debug(@ScriptLineNumber & ' ' & $octets[1])
+    _Debug(@ScriptLineNumber & " " & $octets[1])
     If $octets[1] = 127 Then
         Return 'Loopback'
     ElseIf $octets[1] >= 1 And $octets[1] <= 126 Then
@@ -309,6 +317,7 @@ EndFunc   ;==>_RemoveBlankLines
 ;It will handle integer, decimal and floating point numbers
 ;Commas are removed from the input string before processing
 Func _CheckNumericString($NumerToCheck)
+    _Debug(@ScriptLineNumber & " CheckNumber  >>" & $NumerToCheck & "<<")
     $NumerToCheck = StringRegExpReplace($NumerToCheck, "[,]", "", 0)
     If StringIsDigit($NumerToCheck) = 1 Then Return $NumerToCheck
     If StringIsFloat($NumerToCheck) = 1 Then Return $NumerToCheck
@@ -857,16 +866,20 @@ Func _FileListToArrayBrief1a($sPathF, ByRef $sFileStringF, $sFilterF, $sExcludeF
     FileClose($hSearch)
 EndFunc   ;==>_FileListToArrayBrief1a
 ;-----------------------------------------------
-Func _Debug($DebugMSG, $LogFilename = '', $ListBoxName = '', $ShowMsgBox = False, $Timeout = 0)
-    If StringInStr($DebugMSG, "-1") = 1 Then $DebugMSG = StringReplace($DebugMSG, "-1", "", 1) & @LF
-    DllCall("kernel32.dll", "none", "OutputDebugString", "str", $DebugMSG)
+Func _Debug($DebugMSG, $Log_filename = '', $ShowMsgBox = False, $Timeout = 0, $Verbose = False)
+    ConsoleWrite(@ScriptLineNumber & " " & StringInStr($DebugMSG, "-1") & @LF)
+    ConsoleWrite($DebugMSG)
 
-    If $ListBoxName Then
-        _GUICtrlListBox_AddString($ListBoxName, $DebugMSG)
-        _GUICtrlListBox_SetTopIndex($ListBoxName, _GUICtrlListBox_GetCount($ListBoxName) - 1)
+    If $Verbose Then
+        $DebugMSG = "DEBUG >> " & @ScriptName & "  " & $DebugMSG & @LF
+    Else
+        If StringInStr($DebugMSG, "-1") = 1 Then $DebugMSG = StringReplace($DebugMSG, "-1", "", 1)
+        $DebugMSG = $DebugMSG & @LF
     EndIf
 
-    If StringLen($LogFilename) > 3 Then _FileWriteLog($LogFilename, $DebugMSG & @CRLF)
+    DllCall("kernel32.dll", "none", "OutputDebugString", "str", $DebugMSG)
+
+    If $Log_filename Then _FileWriteLog($Log_filename, $DebugMSG)
     If $ShowMsgBox = True Then MsgBox(48, @ScriptName & " Debug", $DebugMSG, $Timeout)
 EndFunc   ;==>_Debug
 ;-----------------------------------------------
@@ -875,13 +888,14 @@ Func _StartDebugViewer($Clear = True)
     Opt("WinTitleMatchMode", 2)
     Local $result = WinGetProcess('DebugView')
     Local $DebugPath = $UtilPath & 'Dbgview.exe'
+    ConsoleWrite(@ScriptLineNumber & " " & $DebugPath & "  " & $result & @CRLF)
     If $result = -1 Then ShellExecute($DebugPath)
-    If $Clear Then _Debug('DBGVIEWCLEAR')
+    If $Clear Then _Debug("DBGVIEWCLEAR")
 EndFunc   ;==>_StartDebugViewer
 ;-----------------------------------------------
-;This will check the position of a window and if any portion of it is off of the desktop
-;the window will will be put it in the centered in the main screen
-;If position is specified then the window will be moved to that position on the main screen
+;This will check the position of a window and if it is off of the desktop will put it in the center of the main screen
+;If center is true the window will be moved to the center of the main screen
+;WinMove ( "title", "text", x, y [, width [, height[, speed]]] )
 Func _CheckWindowLocation($WindowName, $Position = 'null')
     Local $array = WinGetPos($WindowName, "")
 
@@ -913,7 +927,7 @@ Func _CheckWindowLocation($WindowName, $Position = 'null')
             WinMove($WindowName, "", 0, @DesktopHeight - $Height)
         Case 'N'
             WinMove($WindowName, "", @DesktopWidth / 2 - ($Width / 2), 0)
-        Case 'center', 'c'
+        Case 'center'
             WinMove($WindowName, "", (@DesktopWidth / 2) - ($Width / 2), @DesktopHeight / 2 - $Height / 2)
         Case 'S'
             WinMove($WindowName, "", @DesktopWidth / 2 - ($Width / 2), @DesktopHeight - $Height)
@@ -948,21 +962,84 @@ Func _SaveWindowPosition($KeyName, $WindowName, $FileName)
     FileWriteLine($FileName, $KeyName & $F[0] & " " & $F[1] & " " & $F[2] & " " & $F[3])
 EndFunc   ;==>_SaveWindowPosition
 ;-----------------------------------------------
-;return a message string for a ping error code
-Func _PingError($code)
-    Switch $code
-        Case 0
-            Return 'Success ' & $code
-        Case 1
-            Return 'Host is offline ' & $code
-        Case 2
-            Return 'Host is unreachable ' & $code
-        Case 3
-            Return 'Bad destination ' & $code
-        Case 4
-            Return 'Other errors ' & $code
-        Case Else
-            Return 'Ping Error. Not a good thing ' & $code
-    EndSwitch
-EndFunc   ;==>_PingError
+; These are constants for use with ComputeStats
+Const $NumberOfDataPoints = 0
+Const $MinimumValue = 1
+Const $MaximumValue = 2
+Const $MeansValue = 3
+Const $MedianValue = 4
+Const $ModeValue = 5
+Const $StandardDeviationValue = 6
+
+Func _ComputeStats($InDataArray, ByRef $ResultsDataArray)
+    ;_ArrayDisplay($InDataArray, @ScriptLineNumber)
+    Local $ModeArray1[1]
+    Local $ModeArray2[1]
+    Local $MedianArray[1]
+    Local $STDArray[1]
+
+    $ResultsDataArray[$NumberOfDataPoints] = UBound($InDataArray)
+    $ResultsDataArray[$MinimumValue] = 9e19
+    $ResultsDataArray[$MaximumValue] = 0
+    $ResultsDataArray[$MeansValue] = 0
+    $ResultsDataArray[$ModeValue] = 0
+    $ResultsDataArray[$StandardDeviationValue] = 0
+
+    Local $TotalOfAllValues = 0
+
+    For $i = 0 To UBound($InDataArray) - 1
+        ;Get the data for median value
+        _ArrayAdd($MedianArray, $InDataArray[$i])
+        _ArrayAdd($STDArray, $InDataArray[$i])
+        $TotalOfAllValues = $TotalOfAllValues + $InDataArray[$i]
+
+        ;Calculate the mode
+        Local $T = _ArraySearch($ModeArray1, $InDataArray[$i])
+        If $T = -1 Then ;Did not find the value
+            _ArrayAdd($ModeArray1, $InDataArray[$i])
+            _ArrayAdd($ModeArray2, 1)
+        Else ;Did find the value
+            $ModeArray2[$T] = $ModeArray2[$T] + 1
+        EndIf
+
+        ;Calulate minimum and maximum values
+        ConsoleWrite(@ScriptLineNumber & " " & $InDataArray[$i] & @CRLF)
+        If $InDataArray[$i] < $ResultsDataArray[$MinimumValue] Then $ResultsDataArray[$MinimumValue] = $InDataArray[$i]
+        If $InDataArray[$i] > $ResultsDataArray[$MaximumValue] Then $ResultsDataArray[$MaximumValue] = $InDataArray[$i]
+    Next
+    ;Finish means calulation
+    $ResultsDataArray[$MeansValue] = $TotalOfAllValues / $ResultsDataArray[$NumberOfDataPoints]
+
+    ;Finish the mode calculation
+    Local $biggest = 0
+    Local $biggestValue = ''
+    For $i = 0 To UBound($ModeArray2) - 1
+        Local $current = $ModeArray2[$i]
+        If $biggest < $current Then
+            $biggest = $current
+            $biggestValue = $ModeArray1[$i]
+        EndIf
+    Next
+    $ResultsDataArray[$ModeValue] = $biggestValue & " (" & $biggest & " instances)"
+
+    ;Finish the median
+    _ArraySort($MedianArray)
+    If Mod($NumberOfDataPoints, 2) = 0 Then
+        Local $a1 = $MedianArray[Floor(UBound($MedianArray) / 2)]
+        Local $a2 = $MedianArray[Ceiling(UBound($MedianArray) / 2)]
+        $ResultsDataArray[$MedianValue] = ($a1 + $a2) / 2
+    Else
+        $ResultsDataArray[$MedianValue] = $MedianArray[UBound($MedianArray) / 2]
+    EndIf
+
+    ; Standard deviation
+    _ArrayDelete($STDArray, 0)
+    Local $sumofall = 0
+    For $i = 0 To UBound($STDArray) - 1
+        $sumofall = $sumofall + ($STDArray[$i] - $ResultsDataArray[$MeansValue]) ^ 2
+    Next
+    $sumofall = $sumofall / UBound($STDArray) - 1
+    $ResultsDataArray[$StandardDeviationValue] = Sqrt(Abs($sumofall))
+    ;_ArrayDisplay($ResultsDataArray, @ScriptLineNumber)
+EndFunc   ;==>ComputeStats
 ;-----------------------------------------------

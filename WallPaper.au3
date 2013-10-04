@@ -2,10 +2,10 @@
 #AutoIt3Wrapper_icon=../icons/BrickWall.ico
 #AutoIt3Wrapper_outfile=WallPaper.exe
 #AutoIt3Wrapper_Compression=4
-#AutoIt3Wrapper_UseX64=n
+#AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Comment=A wallpaper changer
 #AutoIt3Wrapper_Res_Description=Wallpaper changer
-#AutoIt3Wrapper_Res_Fileversion=1.0.0.49
+#AutoIt3Wrapper_Res_Fileversion=1.0.0.39
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=Y
 #AutoIt3Wrapper_Res_ProductVersion=666
 #AutoIt3Wrapper_Res_LegalCopyright=Copyright 2011 Douglas B Kaynor
@@ -18,7 +18,7 @@
 #AutoIt3Wrapper_Res_Field=Made By|Douglas Kaynor
 #AutoIt3Wrapper_AU3Check_Stop_OnWarning=y
 #AutoIt3Wrapper_AU3Check_Parameters=-d -w 1 -w 2 -w 3 -w 4 -w 5 -w 6
-#AutoIt3Wrapper_Run_Tidy=yTX_Carrier_Error
+#AutoIt3Wrapper_Run_Tidy=y
 #Tidy_Parameters=/tc 4 /kv 2
 #endregion ;**** Directives created by AutoIt3Wrapper_GUI ****
 ;#AutoIt3Wrapper_Run_Obfuscator=n
@@ -28,23 +28,21 @@
 ;#AutoIt3Wrapper_Run_After=copy "%out%" "..\..\Programs_Updates\AutoIt3Wrapper"
 ;#NoTrayIcon
 ;#Tidy_Parameters=/gd /sf
-;#Tidy_Parameters=/gd /sf
 ;#Tidy_Parameters=/nsdp /sf
 ;#Tidy_Parameters=/sci=9
 #cs
     This area is used to store things todo, bugs, and other notes
-
+    
     Fixed:
     Fixed the way that the Splash screen works.
-
+    
     Todo:
-    Fix the get files procedure
-    Click on picture list shows preview image
     Verify file should sync file counts
     Invalid files type cause odd behavior
     Fix all help calls (F1)
     Hide window before movewin
     Get pictures from remote site(s)
+    Filter unwanted file types (ini and so on)
 #CE
 
 Opt("MustDeclareVars", 1)
@@ -58,7 +56,6 @@ Opt("GUIResizeMode", 0)
 #include <Constants.au3>
 #include <Date.au3>
 #include <EditConstants.au3>
-#include <File.au3>
 #include <GUIConstantsEx.au3>
 #include <GuiEdit.au3>
 #include <GUIListBox.au3>
@@ -73,17 +70,19 @@ Opt("GUIResizeMode", 0)
 #include <_DougFunctions.au3>
 
 _Debug("DBGVIEWCLEAR")
+DirCreate("AUXFiles")
 
 Global Const $tmp = StringSplit(@ScriptName, ".")
 Global Const $ProgramName = $tmp[1]
 
+;Global $AuxPath = @ScriptDir & "\AUXFiles\"
 Global Const $FileVersion = "  Ver: " & FileGetVersion(@AutoItExe, "Fileversion")
-Global Const $IView32Ini = $AuxPath & "i_view32.ini"
+Global Const $i_view32_ini = $AuxPath & "i_view32.ini"
 
-Global $OptionFilename = $AuxPath & "WallPaper-" & @ComputerName & ".opt"
-Global $ListFilename = $AuxPath & "WallPaper-" & @ComputerName & ".lst"
-Global Const $UsedFilename = $AuxPath & "WallPaper-" & @ComputerName & ".usd"
-Global Const $LogFilename = $AuxPath & "WallPaper-" & @ComputerName & ".log"
+Global $Option_filename = $AuxPath & "WallPaper-" & @ComputerName & ".opt"
+Global $List_filename = $AuxPath & "WallPaper-" & @ComputerName & ".lst"
+Global Const $Used_filename = $AuxPath & "WallPaper-" & @ComputerName & ".usd"
+Global Const $Log_filename = $AuxPath & "WallPaper-" & @ComputerName & ".log"
 Global $WallpaperTempJPG = $AuxPath & "WallpaperTemp.jpg"
 Global Const $WallpaperJPG = $AuxPath & "Wallpaper.jpg"
 Global Const $WallpaperMainInfo = $AuxPath & "WallpaperM.inf"
@@ -92,9 +91,9 @@ Global Const $WallpaperTempInfo = $AuxPath & "WallpaperT.inf"
 Global Const $FileHelp = $AuxPath & "WallpaperToDoList.txt"
 
 ;Global $ResultLocation = ""
-Global $WorkingFolder = "Unknown"
-Global $IrfanView = "Unknown"
-Global $SystemS = @CRLF & $ProgramName & @CRLF & $FileVersion & @CRLF & @OSVersion & @CRLF & @OSServicePack & @CRLF & @OSType & @CRLF & @OSArch
+Global $WorkingFolder = "JUNK"
+Global $IrfanView = "junk"
+Global $SystemS = $ProgramName & @CRLF & $FileVersion & @CRLF & @OSVersion & @CRLF & @OSServicePack & @CRLF & @OSType & @CRLF & @OSArch
 
 Global $FontName = "Courier New"
 Global $FontColorFG = 0x00FFFF
@@ -110,17 +109,16 @@ Global $SavedTime = -9
 Global $CurrentTime = 0
 Global $TimeDiff = 0
 Global $Running = False
-Global $Debug = False ; This will make the list load very fast when true
+Global $Pause = False
+Global $Debug = False
 Global $Hide = False
 Global $CurrentFile = 'Unknown'
 
 Global $FolderHandleArray[1]
 Global $FileHandleArray[1]
 
-_Debug(@ScriptLineNumber & " " & "-----------------" & $ProgramName & " Started -----------------", $LogFilename)
-
 If _Singleton($ProgramName, 1) = 0 Then
-    _Debug(@ScriptLineNumber & " " & $ProgramName & " is already running!", $LogFilename, True)
+    LogFile(@ScriptLineNumber & " " & $ProgramName & " is already running!", True)
     Exit
 EndIf
 
@@ -134,9 +132,10 @@ Opt("TrayOnEventMode", 1)
 TraySetIcon("..\icons\BrickWall.ico")
 Global $TrayChangeWallpaper = TrayCreateItem("Change wallpaper")
 TrayItemSetOnEvent(-1, "ChangeWallpaper")
-Global $ToggleRunning = TrayCreateItem("Start") ;StartStop
-TrayItemSetOnEvent(-1, "ToggleStartStop")
-
+Global $TrayStartRunning = TrayCreateItem("Start running")
+TrayItemSetOnEvent(-1, "StartRunning")
+Global $TrayTogglePause = TrayCreateItem("Toggle pause")
+TrayItemSetOnEvent(-1, "TogglePause")
 TrayCreateItem("")
 Global $TrayShowMainForm = TrayCreateItem("Show main form")
 TrayItemSetOnEvent(-1, "ShowMainForm")
@@ -152,7 +151,9 @@ TrayItemSetOnEvent(-1, "ShowMainInfo")
 Global $TrayEditCurrentFile = TrayCreateItem("Edit current file")
 TrayItemSetOnEvent(-1, "EditCurrentFile")
 Global $TrayGoToCurrentFolder = TrayCreateItem("Go to current folder")
-TrayItemSetOnEvent(-1, "TaskGoToFolder")
+TrayItemSetOnEvent(-1, "TaskGoToCurrentFolder")
+Global $TrayGoToEXEFolder = TrayCreateItem("Go to EXE")
+TrayItemSetOnEvent(-1, "TaskGoToEXEFolder")
 Global $TrayReloadCurrentFile = TrayCreateItem("Reload current file")
 TrayItemSetOnEvent(-1, "ReloadCurrentFile")
 TrayCreateItem("")
@@ -164,9 +165,9 @@ Global $exit = TrayCreateItem("Exit")
 TrayItemSetOnEvent(-1, "ExitEvent")
 
 FileInstall(".\AUXFiles\Wallpaper.jpg", $WallpaperJPG)
-FileInstall(".\AUXFiles\i_view32.ini", $IView32Ini)
+FileInstall(".\AUXFiles\i_view32.ini", $i_view32_ini)
 
-_Debug(@ScriptLineNumber & " Command line arguments: " & $CmdLine[0] & "  " & $CmdLineRaw, $LogFilename)
+LogFile(@ScriptLineNumber & " Command line arguments: " & $CmdLine[0] & "  " & $CmdLineRaw)
 
 For $x = 1 To $CmdLine[0]
     ConsoleWrite($x & " >> " & $CmdLine[$x] & @CRLF)
@@ -181,7 +182,7 @@ For $x = 1 To $CmdLine[0]
         Case StringInStr($CmdLine[$x], "hide") > 0
             $Hide = True
         Case Else
-            _Debug(@ScriptLineNumber & " Unknown cmdline option found: >>" & $CmdLine[$x] & "<<", $LogFilename, True)
+            LogFile(@ScriptLineNumber & " Unknown cmdline option found: >>" & $CmdLine[$x] & "<<", True)
             Exit
     EndSelect
 Next
@@ -197,12 +198,15 @@ Global $ButtonOptions = GUICtrlCreateButton("Options", 170, 10, 130, 25)
 GUICtrlSetTip(-1, "Go to the options menu")
 Global $ButtonSelectFilesMain = GUICtrlCreateButton("Select files", 170, 40, 130, 25)
 GUICtrlSetTip(-1, "Go to the file select menu")
-Global $ButtonStartStop = GUICtrlCreateButton("Start", 10, 70, 60, 25)
+Global $ButtonStart = GUICtrlCreateButton("Start", 10, 70, 60, 25)
 GUICtrlSetTip(-1, "Start the automatic wallpaper changer")
-;Global $ButtonStop = GUICtrlCreateButton("Stop", 70, 70, 60, 25)
-;GUICtrlSetTip(-1, "Stop the automatic wallpaper changer")
+Global $ButtonStop = GUICtrlCreateButton("Stop", 70, 70, 60, 25)
+GUICtrlSetTip(-1, "Stop the automatic wallpaper changer")
 Global $ButtonHide = GUICtrlCreateButton("Hide", 130, 70, 60, 25)
 GUICtrlSetTip(-1, "Hide forms, move to tray")
+
+Global $ButtonPause = GUICtrlCreateButton("Pause", 190, 70, 60, 25)
+GUICtrlSetTip(-1, "Pause operations")
 
 Global $ButtonAboutMain = GUICtrlCreateButton("About", 300, 10, 60, 25)
 GUICtrlSetTip(-1, "About the program and some Debug stuff")
@@ -348,6 +352,8 @@ Global $ButtonSearchFoldersAgain = GUICtrlCreateButton("Search again", 450, 70, 
 Global $ButtonMarkFoundFolders = GUICtrlCreateButton("Mark found", 235, 100, 200, 25)
 Global $ButtonToggleAllFolders = GUICtrlCreateButton("Toggle all", 450, 100, 200, 25)
 GUICtrlCreateLabel("Folder list", 15, 100, 95, 20, $SS_SUNKEN)
+
+;dbk
 Global $TreeViewSelectFolders = GUICtrlCreateTreeView(10, 130, 665, 200, BitOR($TVS_HASBUTTONS, $TVS_HASLINES, $TVS_LINESATROOT, $TVS_DISABLEDRAGDROP, $TVS_SHOWSELALWAYS, $TVS_CHECKBOXES, $WS_GROUP, $WS_TABSTOP), $WS_EX_CLIENTEDGE)
 Global $ListSelectFolderResults = GUICtrlCreateList("", 10, 340, 665, 246, BitOR($LBS_DISABLENOSCROLL, $LBS_SORT, $WS_BORDER, $WS_HSCROLL, $WS_VSCROLL))
 
@@ -362,6 +368,8 @@ Global $CheckAppendFiles = GUICtrlCreateCheckbox("Append new files", 180, 10, 16
 GUICtrlCreateLabel("Files in list:", 360, 10, 120, 15)
 
 Global $LabelActiveCount = GUICtrlCreateLabel("", 480, 10, 50, 15)
+
+;dbk Files search
 GUICtrlCreateLabel("Search", 10, 35, 70, 15)
 Global $InputBoxSearchFiles = GUICtrlCreateInput("", 80, 30, 140, 25)
 Global $ButtonSearchFiles = GUICtrlCreateButton("Search", 220, 30, 70, 25)
@@ -369,8 +377,8 @@ Global $ButtonSearchFilesAgain = GUICtrlCreateButton("Search again", 300, 30, 12
 Global $ButtonMarkFoundFiles = GUICtrlCreateButton("Mark found", 430, 30, 110, 25)
 Global $ButtonToggleAllFiles = GUICtrlCreateButton("Toggle all", 550, 30, 110, 25)
 
-Global $TreeViewActiveFiles = GUICtrlCreateTreeView(10, 60, 680, 480, BitOR($TVS_HASBUTTONS, $TVS_HASLINES, $TVS_LINESATROOT, $TVS_DISABLEDRAGDROP, $TVS_SHOWSELALWAYS, $WS_GROUP, $WS_TABSTOP), $WS_EX_CLIENTEDGE)
-GUICtrlSetTip(-1, "List active files")
+Global $TreeViewActiveFiles = GUICtrlCreateTreeView(10, 60, 680, 480, BitOR($TVS_HASBUTTONS, $TVS_HASLINES, $TVS_LINESATROOT, $TVS_DISABLEDRAGDROP, $TVS_SHOWSELALWAYS, $TVS_CHECKBOXES, $WS_GROUP, $WS_TABSTOP), $WS_EX_CLIENTEDGE)
+GUICtrlSetTip(-1, "list active files")
 
 Global $EditStatusSelect = GUICtrlCreateEdit("Status", 10, 550, 770, 50, $WS_HSCROLL)
 GUICtrlSetTip(-1, "Name of current wallpaper")
@@ -379,10 +387,13 @@ GUICtrlSetTip(-1, "Show file information")
 Global $ButtonSelectFolder = GUICtrlCreateButton("Select folder", 700, 10, 150, 25)
 
 Global $ButtonGetFiles = GUICtrlCreateButton("Get files", 700, 40, 150, 25)
-Global $ButtonRemoveAllFiles = GUICtrlCreateButton("Remove all", 700, 70, 150, 25)
-Global $ButtonVerifyFiles = GUICtrlCreateButton("Verify files", 700, 100, 150, 25)
-Global $ButtonEditPicture = GUICtrlCreateButton("Edit picture", 700, 130, 150, 25)
-Global $ButtonOpenFolder = GUICtrlCreateButton("Go to folder", 700, 160, 150, 25)
+Global $ButtonRemoveChecked = GUICtrlCreateButton("Remove checked", 700, 70, 150, 25)
+Global $ButtonRemoveAllFiles = GUICtrlCreateButton("Remove all", 700, 130, 150, 25)
+Global $ButtonVerifyFiles = GUICtrlCreateButton("Verify files", 700, 160, 150, 25)
+Global $ButtonEditPicture = GUICtrlCreateButton("Edit picture", 700, 190, 150, 25)
+Global $ButtonOpenFolder = GUICtrlCreateButton("Go to folder", 700, 220, 150, 25)
+Global $ButtonFilterFileList = GUICtrlCreateButton("Filter File List", 700, 250, 150, 25)
+Global $ButtonGotoEXE = GUICtrlCreateButton("Go to EXE", 850, 250, 150, 25)
 Global $ButtonDoneSelect = GUICtrlCreateButton("Done", 850, 10, 90, 25)
 Global $ButtonSaveList = GUICtrlCreateButton("Save", 850, 40, 90, 25)
 Global $ButtonLoadList = GUICtrlCreateButton("Load", 850, 70, 90, 25)
@@ -390,15 +401,13 @@ Global $ButtonEditList = GUICtrlCreateButton("Edit text", 850, 100, 90, 25)
 Global $ButtonCancelSelect = GUICtrlCreateButton("Cancel", 850, 130, 90, 25)
 Global $ButtonAboutSelect = GUICtrlCreateButton("About", 850, 160, 90, 25)
 Global $ButtonHelpSelect = GUICtrlCreateButton("Help", 850, 190, 90, 25)
-Global $ButtonAddToUsed = GUICtrlCreateButton("Add to used list", 700, 220, 200, 25)
-Global $ButtonDeleteFromList = GUICtrlCreateButton("Delete from list", 700, 250, 200, 25)
-Global $ButtonRecycleFromComputer = GUICtrlCreateButton("Recycle from computer", 700, 280, 200, 25)
-Global $ButtonSetAsWallpaper = GUICtrlCreateButton("Set as wallpaper", 700, 310, 200, 25)
+Global $ButtonPreviewSelect = GUICtrlCreateButton("Preview", 850, 220, 90, 25)
+Global $ButtonSetAsWallpaper = GUICtrlCreateButton("Set as wallpaper", 700, 290, 200, 25)
 
-
-
+LogFile(@ScriptLineNumber & " " & "-----------------" & $ProgramName & " Started -----------------")
 If FileExists($WallpaperJPG) = False Then
-    _Debug(@ScriptLineNumber & " " & $WallpaperJPG & " does not exist", $LogFilename, True)
+    LogFile(@ScriptLineNumber & " " & $WallpaperJPG & " does not exist")
+    MsgBox(16, $WallpaperJPG, "File does not exist" & @CRLF & $WallpaperJPG)
 EndIf
 ;left, top, width, height
 Global $PicPreview = GUICtrlCreatePic($WallpaperJPG, 700, 340, 200, 200)
@@ -411,7 +420,7 @@ Global $PicPreview = GUICtrlCreatePic($WallpaperJPG, 700, 340, 200, 200)
 
 SetDefaults()
 LoadOptions("Start")
-
+If Not FileExists($WorkingFolder) Then $WorkingFolder = _AddSlash2PathString(EnvGet("USERPROFILE"))
 GUICtrlSetData($InputWorkingFolder, $WorkingFolder)
 GUICtrlSetData($InputIrfanviewFolder, $IrfanView)
 TestForIrfanView()
@@ -425,13 +434,21 @@ Else
     ShowMainForm()
 EndIf
 
-Global $editor = _ChoseTextEditor()
-_debug(@ScriptLineNumber & " Text editor: " & $editor, $LogFilename)
+Const $edit1 = "c:\program files\notepad++\notepad++.exe"
+Const $edit2 = "c:\program files (x86)\notepad++\notepad++.exe"
+Const $edit3 = "notepad.exe"
+Global $editor = ""
 
-If Not FileExists($IrfanView) Then LocateIrfanView()
+If FileExists($edit1) Then
+    $editor = $edit1
+ElseIf FileExists($edit2) Then
+    $editor = $edit2
+Else
+    $editor = $edit3
+EndIf
+LogFile(@ScriptLineNumber & " Text editor: " & $editor)
 
 GUISetHelp($editor & " " & $FileHelp, $MainForm)
-GUIRegisterMsg($WM_NOTIFY, "WM_NOTIFY")
 
 ;HotKeySet("%{f11}", "ChangeWallpaper")
 ;HotKeySet("%E", "GUI_Enable")
@@ -442,25 +459,20 @@ While 1
     Global $nMsg = GUIGetMsg(1)
     Switch $nMsg[0]
         Case $GUI_EVENT_CLOSE
-            If $nMsg[1] = $MainForm Then
-                Exit
-            Else
-                GUISetState(@SW_HIDE, $OptionForm)
-                GUISetState(@SW_SHOW, $MainForm)
-                GUISetState(@SW_HIDE, $SelectFilesForm)
-                GUISetState(@SW_HIDE, $SelectFoldersForm)
-            EndIf
+            Exit
+            ; Main form
         Case $GUI_EVENT_RESIZED
 
         Case $ButtonChangeWallpaper
             ChangeWallpaper()
-        Case $ButtonStartStop
-            ToggleStartStop()
-            ;Case $ButtonStop
-            ;    $Running = False
-            ;	ToggleRunning()
+        Case $ButtonStart
+            StartRunning()
+        Case $ButtonStop
+            $Running = False
         Case $ButtonHide
             HideAllForms()
+        Case $ButtonPause
+            TogglePause()
         Case $ButtonOptions
             ShowOptionsForm()
         Case $ButtonSelectFilesMain
@@ -469,7 +481,7 @@ While 1
             Help($ProgramName)
 
         Case $ButtonAboutMain
-            _About($ProgramName, $SystemS)
+            About($ProgramName)
         Case $ButtonExitMain
             Exit
 
@@ -530,8 +542,10 @@ While 1
             HandleSizetoFit()
         Case $CheckboxShrinkToFit
             HandleSizetoFit()
+
+        Case $ButtonPreviewSelect
+            ShowPreview()
         Case $TreeViewActiveFiles
-            ConsoleWrite(@ScriptLineNumber & " We got here!!!!!" & @CRLF)
             ShowPreview()
         Case $SliderFitPercent
             GUICtrlSetData($LabelFitPercentValue, GUICtrlRead($SliderFitPercent))
@@ -542,12 +556,18 @@ While 1
         Case $ButtonHelpOptions
             Help("Select options")
         Case $ButtonAboutOptions
-            _About("Select options", $SystemS)
+            About("Select options")
 
         Case $InputIrfanviewFolder
-            LocateIrfanView()
+            $IrfanView = GUICtrlRead($InputIrfanviewFolder)
+            ConsoleWrite(@ScriptLineNumber & " " & $IrfanView & @CRLF)
         Case $ButtonIrfanviewFolder
-            LocateIrfanView()
+            $IrfanView = GUICtrlRead($InputIrfanviewFolder)
+            If FileExists($IrfanView) Then
+                MsgBox(48, "Success", "Irfanview path updated" & @CRLF & $IrfanView)
+            Else
+                MsgBox(48, "Fail", "Irfanview path is not valid" & @CRLF & $IrfanView)
+            EndIf
 
         Case $ButtonDoneOption
             GUISetState(@SW_HIDE, $OptionForm)
@@ -574,7 +594,7 @@ While 1
             GUISetState(@SW_SHOW, $SelectFilesForm)
             GUISetState(@SW_HIDE, $SelectFoldersForm)
         Case $ButtonSelectFolderAbout
-            _About("Select folders", $SystemS)
+            About("Select folders")
         Case $InputBoxSearchFolders
             SearchFolders(True)
         Case $ButtonSearchFolders
@@ -594,14 +614,18 @@ While 1
             GUISetState(@SW_SHOW, $SelectFoldersForm)
         Case $ButtonGetFiles
             GetFiles()
-        Case $ButtonAddToUsed
-            RemoveAFile('Add to used list')
-        Case $ButtonDeleteFromList
-            RemoveAFile('Delete from list')
-        Case $ButtonRecycleFromComputer
-            RemoveAFile('Recycle from computer')
+        Case $ButtonRemoveChecked
+            RemoveChecked()
         Case $ButtonOpenFolder
             GoToCurrentFolder("select")
+
+        Case $ButtonFilterFileList
+            FilterFileList()
+
+        Case $ButtonGotoEXE
+            GotoEXEFolder()
+
+
         Case $ButtonRemoveAllFiles
             RemoveAll()
         Case $ButtonVerifyFiles
@@ -620,7 +644,7 @@ While 1
             ToggleAllFilesChecks()
 
         Case $ButtonInfoMain
-            _debug(@ScriptLineNumber & " EditStatusMain", $LogFilename)
+            LogFile(@ScriptLineNumber & " EditStatusMain")
             ClipPut(GUICtrlRead($EditStatusMain))
             EditText($WallpaperMainInfo)
         Case $ButtonEditMain
@@ -631,12 +655,12 @@ While 1
             GoToCurrentFolder("main")
 
         Case $ButtonInfoSelect
-            _Debug(@ScriptLineNumber & " LabelStatusSelect", $LogFilename)
+            LogFile(@ScriptLineNumber & " LabelStatusSelect")
             ShowPreview()
             ClipPut(GUICtrlRead($EditStatusSelect))
             EditText($WallpaperSelectInfo)
         Case $PicPreview
-            _debug(@ScriptLineNumber & " PicPreview", $LogFilename)
+            LogFile(@ScriptLineNumber & " PicPreview")
             ShowPreview()
             ;ClipPut(GUICtrlRead($EditStatusSelect))
             ;EditText($WallpaperSelectInfo)
@@ -657,7 +681,7 @@ While 1
             GUISetState(@SW_HIDE, $SelectFilesForm)
             GUISetState(@SW_HIDE, $SelectFoldersForm)
         Case $ButtonAboutSelect
-            _About("Select files", $SystemS)
+            About("Select files")
         Case $ButtonHelpSelect
             Help("Select files")
         Case $ButtonSetAsWallpaper
@@ -677,40 +701,19 @@ While 1
     EndSwitch
 
     If $Running Then CheckChangeCounter()
-    ;ConsoleWrite(@ScriptLineNumber & " " & $Running & @CRLF)
 WEnd
 ;-----------------------------------------------
-;defined in #include <WindowsConstants.au3>
-Func WM_NOTIFY($hWnd, $iMsg, $wParam, $lParam)
-    #forceref $hWnd, $iMsg, $wParam
-    Local $tNMHDR, $hWndFrom, $iIDFrom, $iCode
-    $tNMHDR = DllStructCreate($tagNMHDR, $lParam)
-    $hWndFrom = DllStructGetData($tNMHDR, "hWndFrom")
-    $iIDFrom = DllStructGetData($tNMHDR, "IDFrom")
-    $iCode = DllStructGetData($tNMHDR, "Code")
-    ;ConsoleWrite(@ScriptLineNumber & " Got here " & $iIDFrom & "   " & $TreeViewActiveFiles & @CRLF)
-    Switch $iIDFrom
-        Case $TreeViewActiveFiles
-            Switch $iCode
-                Case $NM_CLICK
-                    Local $tPoint = _WinAPI_GetMousePos(True, $hWndFrom), $tHitTest
-                    $tHitTest = _GUICtrlTreeView_HitTestEx($hWndFrom, DllStructGetData($tPoint, 1), DllStructGetData($tPoint, 2))
-                    If BitAND(DllStructGetData($tHitTest, "Flags"), $TVHT_ONITEM) Then
-                        _GUICtrlTreeView_SelectItem($hWndFrom, DllStructGetData($tHitTest, 'Item'))
-                    EndIf
-                    Local $SelectedFile = _GUICtrlTreeView_GetText($TreeViewActiveFiles, _GUICtrlTreeView_GetSelection($TreeViewActiveFiles))
-                    GUICtrlSetData($EditStatusSelect, $SelectedFile)
-                    ShowPreview()
-
-            EndSwitch
-    EndSwitch
-    Return $GUI_RUNDEFMSG
-EndFunc   ;==>WM_NOTIFY
-;-----------------------------------------------
-Func ToggleStartStop()
+Func StartRunning()
+    If Not FileExists($IrfanView) Then
+        $Running = False
+        LogFile(@ScriptLineNumber & " StartRunning: " & $IrfanView & " does not exist", True)
+        Return
+    EndIf
+    $Running = True
+    $Pause = False
     ChangeWallpaper()
     SetUpDelayTime()
-EndFunc   ;==>ToggleStartStop
+EndFunc   ;==>StartRunning
 ;-----------------------------------------------
 Func FindGUI()
     WinMove("WallPaper ", "", 10, 10)
@@ -719,14 +722,10 @@ Func FindGUI()
     WinMove("Select options", "", 10, 10)
 EndFunc   ;==>FindGUI
 ;-----------------------------------------------
-Func LocateIrfanView()
-    $IrfanView = GUICtrlRead($InputIrfanviewFolder)
-    If FileExists($IrfanView) Then
-        MsgBox(48, "Success", "Irfanview path updated" & @CRLF & $IrfanView)
-    Else
-        MsgBox(48, "Fail", "Irfanview path is not valid" & @CRLF & $IrfanView)
-    EndIf
-EndFunc   ;==>LocateIrfanView
+Func TogglePause()
+    $Pause = Not $Pause
+    LogFile(@ScriptLineNumber & " Pause: " & $Pause)
+EndFunc   ;==>TogglePause
 ;-----------------------------------------------
 ; This function returns true if the screen saver is running
 Func TestforScreenSaver()
@@ -740,7 +739,7 @@ EndFunc   ;==>TestforScreenSaver
 Func CheckChangeCounter()
     If Not FileExists($IrfanView) Then
         $Running = False
-        _debug(@ScriptLineNumber & " CheckChangeCounter: " & $IrfanView & " does not exist", $LogFilename, True)
+        LogFile(@ScriptLineNumber & " CheckChangeCounter: " & $IrfanView & " does not exist", True)
         Return
     EndIf
 
@@ -765,12 +764,22 @@ Func CheckChangeCounter()
 
     If $CurrentTime > $TimeDiff * 60 Then
         SetUpDelayTime()
-        TestforScreenSaver()
+        Local $T = TestforScreenSaver()
+        If $Pause Or $T Then
+            LogFile(@ScriptLineNumber & " Pause: " & $Pause & "    TestforScreenSaver: " & $T)
+            Return
+        EndIf
         ;ConsoleWrite(@ScriptLineNumber & " " & $CurrentTime & " " & $TimeDiff * 60 & @CRLF)
         ChangeWallpaper()
     EndIf
-    GUICtrlSetData($LabelCountMain, StringFormat("%d %d", $CurrentTime, $TimeDiff * 60))
-    TraySetToolTip(StringFormat("%s  %d  %d", $TS & @CRLF, $CurrentTime, $TimeDiff * 60))
+
+    If $Pause Then
+        GUICtrlSetData($LabelCountMain, "Paused")
+        TraySetToolTip(StringFormat("%s  Paused", $TS & @CRLF))
+    Else
+        GUICtrlSetData($LabelCountMain, StringFormat("%d %d", $CurrentTime, $TimeDiff * 60))
+        TraySetToolTip(StringFormat("%s  %d  %d", $TS & @CRLF, $CurrentTime, $TimeDiff * 60))
+    EndIf
 EndFunc   ;==>CheckChangeCounter
 ;-----------------------------------------------
 Func SetUpDelayTime()
@@ -791,13 +800,13 @@ Func SetUpDelayTime()
         $TimeDiff = Random(GUICtrlRead($LabelMinV), GUICtrlRead($LabelMaxV), 1)
         GUICtrlSetData($LabelValue, $TimeDiff)
     Else
-        _debug(@ScriptLineNumber & " We should not have gotten here: SetUpDelayTime", $LogFilename, True)
+        LogFile(@ScriptLineNumber & " We should not have gotten here: SetUpDelayTime", True)
     EndIf
 EndFunc   ;==>SetUpDelayTime
 ;-----------------------------------------------
 Func RemoveAll()
     GuiDisable($GUI_DISABLE)
-    _Debug(@ScriptLineNumber & @ScriptLineNumber & "RemoveAll", $LogFilename)
+    LogFile(@ScriptLineNumber & @ScriptLineNumber & "RemoveAll")
     _GUICtrlTreeView_DeleteAll($TreeViewActiveFiles)
     ReDim $FileHandleArray[1]
 
@@ -806,52 +815,33 @@ Func RemoveAll()
     GuiDisable($GUI_ENABLE)
 EndFunc   ;==>RemoveAll
 ;-----------------------------------------------
-Func RemoveAFile($type)
+Func RemoveChecked()
     GuiDisable($GUI_DISABLE)
-    Local $index = _GUICtrlTreeView_GetSelection($TreeViewActiveFiles)
-    Local $text = _GUICtrlTreeView_GetText($TreeViewActiveFiles, $index)
-    Local $indexS = _ArraySearch($FileHandleArray, $index)
-    ConsoleWrite(@ScriptLineNumber & " " & $index & "   " & $indexS & "   >>" & $text & "<<" & @CRLF)
-    If MsgBox(36, $type, $type & ' ' & $text & ' from the list. Are you sure?') = 7 Then
-        GuiDisable($GUI_ENABLE)
-        Return
-    EndIf
-
-    _ArrayDelete($FileHandleArray, $indexS)
-    _GUICtrlTreeView_Delete($TreeViewActiveFiles, $index)
-
-    If $type = 'Delete from list' Then
-        ; Nothing special to do for this option
-    ElseIf $type = 'Recycle from computer' Then
-        FileRecycle($text)
-    ElseIf $type = 'Add to used list' Then
-        FileWriteLine($UsedFilename, _SystemLocalTime() & " ~ " & $text)
-    EndIf
+    Local $x = 0
+    While $x < UBound($FileHandleArray)
+        If _GUICtrlTreeView_GetChecked($TreeViewActiveFiles, $FileHandleArray[$x]) Then
+            _GUICtrlTreeView_Delete($TreeViewActiveFiles, $FileHandleArray[$x])
+            _ArrayDelete($FileHandleArray, $x)
+        Else
+            $x = $x + 1
+        EndIf
+    WEnd
 
     VerifyFileCounts()
     GUICtrlSetData($LabelActiveCount, _GUICtrlTreeView_GetCount($TreeViewActiveFiles))
-    GUICtrlSetData($EditStatusSelect, $text & $type)
-    _Debug(@ScriptLineNumber & '  ' & $text & $type, $LogFilename)
-
-
-    If $type = 'Delete from list' Or $type = 'Recycle from computer' Then
-        MsgBox(64, $type & ' completed', $type & ' completed' & @CRLF & _
-                'Save the list to make it permenent')
-    EndIf
-
     GuiDisable($GUI_ENABLE)
-EndFunc   ;==>RemoveAFile
+EndFunc   ;==>RemoveChecked
 ;-----------------------------------------------
 Func EditPicture()
     GuiDisable($GUI_DISABLE)
-    _Debug(@ScriptLineNumber & ' EditPicture', $LogFilename)
+    LogFile(@ScriptLineNumber & " EditPicture")
     Local $x = _GUICtrlTreeView_GetSelection($TreeViewActiveFiles)
     Local $File = _GUICtrlTreeView_GetText($TreeViewActiveFiles, $x)
     ConsoleWrite(@ScriptLineNumber & " " & $x & "   " & $File & @CRLF)
     If FileExists($IrfanView) Then
-        _Debug(@ScriptLineNumber & " ShellExecuteWait results: " & ShellExecuteWait($IrfanView, $File, "", "open", @SW_SHOW), $LogFilename)
+        LogFile(@ScriptLineNumber & " ShellExecuteWait results: " & ShellExecuteWait($IrfanView, $File, "", "open", @SW_SHOW))
     Else
-        _Debug(@ScriptLineNumber & " EditCurrentFile: " & $IrfanView & " does not exist", $LogFilename, True)
+        LogFile(@ScriptLineNumber & " EditCurrentFile: " & $IrfanView & " does not exist", True)
     EndIf
     GuiDisable($GUI_ENABLE)
 EndFunc   ;==>EditPicture
@@ -859,7 +849,7 @@ EndFunc   ;==>EditPicture
 Func VerifyFiles()
     GuiDisable($GUI_DISABLE)
     If Not $Hide Then SplashImageOn("Wallpaper is starting. Please wait.", $AuxPath & "Wallpaper.jpg", -1, -1, -1, -1, 18)
-    _Debug(@ScriptLineNumber & " VerifyFiles: begin files exist", $LogFilename)
+    LogFile(@ScriptLineNumber & " VerifyFiles: begin files exist")
 
     Local $ArrayFailed[1]
     Local $ArrayGood[1]
@@ -879,10 +869,10 @@ Func VerifyFiles()
         EndIf
     Next
 
-    _Debug(@ScriptLineNumber & " VerifyFiles: files exist complete", $LogFilename)
+    LogFile(@ScriptLineNumber & " VerifyFiles: files exist complete")
 
     _ArraySort($ArrayGood)
-    _Debug(@ScriptLineNumber & " VerifyFiles: sort complete", $LogFilename)
+    LogFile(@ScriptLineNumber & " VerifyFiles: sort complete")
 
     _GUICtrlTreeView_DeleteAll($TreeViewActiveFiles)
 
@@ -890,7 +880,7 @@ Func VerifyFiles()
     For $i = 0 To UBound($ArrayGood) - 2
         If StringCompare($ArrayGood[$i], $ArrayGood[$i + 1]) = 0 Then $ArrayGood[$i] = ""
     Next
-    _Debug(@ScriptLineNumber & " VerifyFiles: Done unique", $LogFilename)
+    LogFile(@ScriptLineNumber & " VerifyFiles: Done unique")
     _ArrayDelete($ArrayGood, 0)
 
     For $STR In $ArrayGood
@@ -904,41 +894,41 @@ Func VerifyFiles()
     VerifyFileCounts()
 
     GUICtrlSetData($LabelActiveCount, _GUICtrlTreeView_GetCount($TreeViewActiveFiles))
-    _Debug(@ScriptLineNumber & " VerifyFiles: complete", $LogFilename)
+    LogFile(@ScriptLineNumber & " VerifyFiles: complete")
     SplashOff()
     GuiDisable($GUI_ENABLE)
 EndFunc   ;==>VerifyFiles
 ;-----------------------------------------------
 Func VerifyFileCounts()
-    _Debug(@ScriptLineNumber & " VerifyFilesCounts", $LogFilename)
+    LogFile(@ScriptLineNumber & " VerifyFilesCounts")
     Local $a = _GUICtrlTreeView_GetCount($TreeViewActiveFiles)
     Local $b = UBound($FileHandleArray)
     ConsoleWrite(@ScriptLineNumber & " File count verify: " & $a & " " & $b & @CRLF)
     If _GUICtrlTreeView_GetCount($TreeViewActiveFiles) <> UBound($FileHandleArray) Then
-        MsgBox(48, "File list count mismatch", "TreeViewActiveFiles: " & $a & @CRLF & "FileHandleArray: " & $b, 2)
-        _Debug(@ScriptLineNumber & " File list count mismatch: TreeViewActiveFiles:" & $a & "  FileHandleArray:" & $b, $LogFilename)
+        ;MsgBox(48, "File list count mismatch", "TreeViewActiveFiles: " & $a & @CRLF & "FileHandleArray: " & $b, 2)
+        LogFile(@ScriptLineNumber & "File list count mismatch: TreeViewActiveFiles:" & $a & "  FileHandleArray:" & $b)
     EndIf
 EndFunc   ;==>VerifyFileCounts
 ;-----------------------------------------------
 ; This function returns true is the file has already been displayed, false if not
 Func CheckForUsed($File)
     If GUICtrlRead($CheckboxCheckForUsed) = $GUI_UNCHECKED Then
-        _Debug(@ScriptLineNumber & " CheckForUsed skipped " & $File, $LogFilename)
+        LogFile(@ScriptLineNumber & " CheckForUsed skipped " & $File)
         Return False
     EndIf
 
     Local $UsedArray
-    _FileReadToArray($UsedFilename, $UsedArray)
+    _FileReadToArray($Used_filename, $UsedArray)
     Local $count = 0
     While 1
         If $count > UBound($UsedArray) - 1 Then ExitLoop
         If StringInStr($UsedArray[$count], $File) <> 0 Then
-            _Debug(@ScriptLineNumber & " CheckForUsed TRUE " & $File & " has already been displayed", $LogFilename)
+            LogFile(@ScriptLineNumber & " CheckForUsed TRUE " & $File & " has already been displayed")
             Return True
         EndIf
         $count += 1
     WEnd
-    _Debug(@ScriptLineNumber & " CheckForUsed FALSE " & $File & " has not been displayed", $LogFilename)
+    LogFile(@ScriptLineNumber & " CheckForUsed FALSE " & $File & " has not been displayed")
     Return False
 EndFunc   ;==>CheckForUsed
 ;-----------------------------------------------
@@ -946,7 +936,7 @@ EndFunc   ;==>CheckForUsed
 ;Checks to verify if it has been displayed
 ;Tries all files before giving up
 Func GetAFileToDisplay()
-    _Debug(@ScriptLineNumber & " GetAFileToDisplay", $LogFilename)
+    LogFile(@ScriptLineNumber & " GetAFileToDisplay")
     Local Const $MaxTries = 50
     Local $count = 0
 
@@ -966,20 +956,20 @@ Func GetAFileToDisplay()
         If CheckForUsed($CurrentFile) = False Then Return $CurrentFile
     Next
 
-    FileDelete($UsedFilename)
-    _Debug(@ScriptLineNumber & " " & $UsedFilename & ": used list cleared", $LogFilename)
+    FileDelete($Used_filename)
+    LogFile(@ScriptLineNumber & " " & $Used_filename & ": used list cleared")
 
     Return $CurrentFile
 EndFunc   ;==>GetAFileToDisplay
 ;-----------------------------------------------
 Func ChangeWallpaper()
     If Not FileExists($IrfanView) Then
-        _Debug(@ScriptLineNumber & " ChangeWallpaper: " & $IrfanView & " does not exist", $LogFilename, True)
+        LogFile(@ScriptLineNumber & " ChangeWallpaper: " & $IrfanView & " does not exist", True)
         Return
     EndIf
 
     GuiDisable($GUI_DISABLE)
-    _Debug(@ScriptLineNumber & " ChangeWallpaper", $LogFilename)
+    LogFile(@ScriptLineNumber & " ChangeWallpaper")
     LogFileLimit()
     VerifyFileCounts()
 
@@ -989,19 +979,19 @@ Func ChangeWallpaper()
         $CurrentFile = GetAFileToDisplay()
     Until ProcessWallpaper($CurrentFile) Or $count > 10
 
-    _Debug(@ScriptLineNumber & " ChangeWallpaper " & $CurrentFile, $LogFilename)
+    LogFile(@ScriptLineNumber & " ChangeWallpaper " & $CurrentFile)
     $SavedTime = TimerInit()
     GuiDisable($GUI_ENABLE)
 EndFunc   ;==>ChangeWallpaper
 ;-----------------------------------------------
 Func SetAsWallpaper()
     If Not FileExists($IrfanView) Then
-        _Debug(@ScriptLineNumber & " SetAsWallpaper: " & $IrfanView & " does not exist", $LogFilename, True)
+        LogFile(@ScriptLineNumber & " SetAsWallpaper: " & $IrfanView & " does not exist", True)
         Return
     EndIf
 
     GuiDisable($GUI_DISABLE)
-    _Debug(@ScriptLineNumber & " SetAsWallpaper", $LogFilename)
+    LogFile(@ScriptLineNumber & " SetAsWallpaper")
     $SavedTime = TimerInit()
 
     Local $x = _GUICtrlTreeView_GetSelection($TreeViewActiveFiles)
@@ -1021,7 +1011,7 @@ EndFunc   ;==>SetAsWallpaper
 ; Returns 0 if neither of the above is true
 
 Func CheckPictureInfo($FileSource, $FileTemp, $FileOutput)
-    _Debug(@ScriptLineNumber & " CheckPictureInfo " & $FileSource & " " & $FileTemp & " " & $FileOutput, $LogFilename)
+    LogFile(@ScriptLineNumber & " CheckPictureInfo " & $FileSource & " " & $FileTemp & " " & $FileOutput)
     If Not FileExists($IrfanView) Then Return
     Local $A1 = ProcessPictureSize($FileSource)
     Local $A2 = ProcessPictureSize($FileTemp)
@@ -1059,7 +1049,7 @@ EndFunc   ;==>CheckPictureInfo
 ;-----------------------------------------------
 ;Takes a Picture file name and path and returns an array of data
 Func ProcessPictureSize($TestFile)
-    _Debug(@ScriptLineNumber & " ProcessPictureSize " & $TestFile, $LogFilename)
+    LogFile(@ScriptLineNumber & " ProcessPictureSize " & $TestFile)
     If Not FileExists($IrfanView) Then Return
 
     Local $FileArray[1]
@@ -1068,19 +1058,21 @@ Func ProcessPictureSize($TestFile)
 
     ;this section creates a info file from a Picture file
     If Not FileExists($TestFile) Then
-        _Debug(@ScriptLineNumber & " ProcessPictureSize error: " & $TestFile & " does not exist " & @error, $LogFilename.True)
+        LogFile(@ScriptLineNumber & " ProcessPictureSize error: " & $TestFile & " does not exist " & @error)
+        MsgBox(16, @ScriptLineNumber & " ProcessPictureSize error", $TestFile & " does not exist")
         Return -1
     Else
         Local $tststr = FileGetShortName($TestFile) & " /info=" & $TempFileOut
 
 
         Local $Result = ShellExecuteWait($IrfanView, $tststr, "", "open", @SW_HIDE)
-        _Debug(@ScriptLineNumber & " ProcessPictureSize. ShellExecuteWait results: " & $Result & " " & $tststr, $LogFilename)
+        LogFile(@ScriptLineNumber & " ProcessPictureSize. ShellExecuteWait results: " & $Result & " " & $tststr)
     EndIf
 
     ;read the file info into an array
     If _FileReadToArray($TempFileOut, $FileArray) = 0 Then
-        _Debug(@ScriptLineNumber & " ProcessPictureSize error " & $TempFileOut & " could not be opened for reading. Error: " & @error, $LogFilename, True)
+        LogFile(@ScriptLineNumber & " ProcessPictureSize error " & $TempFileOut & " could not be opened for reading. Error: " & @error)
+        MsgBox(16, @ScriptLineNumber & " ProcessPictureSize error", $TempFileOut & " could not be opened for reading")
         Return -1
     EndIf
 
@@ -1092,14 +1084,14 @@ EndFunc   ;==>ProcessPictureSize
 ;-----------------------------------------------
 Func ShowPreview()
     If Not FileExists($IrfanView) Then
-        _Debug(@ScriptLineNumber & " ShowPreview: " & $IrfanView & " does not exist", $LogFilename, True)
+        LogFile(@ScriptLineNumber & " ShowPreview: " & $IrfanView & " does not exist", True)
         Return
     EndIf
 
     GuiDisable($GUI_DISABLE)
     Local $RunPID
 
-    _Debug(@ScriptLineNumber & " ShowPreview", $LogFilename)
+    LogFile(@ScriptLineNumber & " ShowPreview")
     GUICtrlSetData($EditStatusSelect, "Working....")
 
     Local $x = _GUICtrlTreeView_GetSelection($TreeViewActiveFiles)
@@ -1119,9 +1111,9 @@ Func ShowPreview()
     If GUICtrlRead($CheckboxAspect) = $GUI_CHECKED Then $AspectRatio = " /aspectratio "
     Local $ConvertCmd = $File & $AspectRatio & " /resize=(200,200) /resample /convert=" & $WallpaperTempJPG
     $RunPID = ShellExecuteWait($IrfanView, $ConvertCmd, "", "open", @SW_HIDE)
-    _Debug(@ScriptLineNumber & " ShowPreview. ShellExecuteWait results: " & $RunPID & " " & $ConvertCmd, $LogFilename)
-    _Debug(@ScriptLineNumber & " ShowPreview ShellExecuteWait results: " & $RunPID & "   " & $ConvertCmd, $LogFilename)
-    _Debug(@ScriptLineNumber & " GUICtrlSetImage results: " & GUICtrlSetImage($PicPreview, $WallpaperTempJPG, $LogFilename))
+    LogFile(@ScriptLineNumber & " ShowPreview. ShellExecuteWait results: " & $RunPID & " " & $ConvertCmd)
+    LogFile(@ScriptLineNumber & " ShowPreview ShellExecuteWait results: " & $RunPID & "   " & $ConvertCmd)
+    LogFile(@ScriptLineNumber & " GUICtrlSetImage results: " & GUICtrlSetImage($PicPreview, $WallpaperTempJPG))
 
     ;This line gets the combined data for both source and temp files
     CheckPictureInfo(GUICtrlRead($EditStatusSelect), $WallpaperTempJPG, $WallpaperSelectInfo)
@@ -1144,10 +1136,11 @@ EndFunc   ;==>ShowPreview
 ;-----------------------------------------------
 ;This fuction converts the source JPG to $WallpaperTempJPG in the correct size
 Func ConvertFile($File)
-    _Debug(@ScriptLineNumber & " ConvertFile: " & $File, $LogFilename)
-    FileWriteLine($UsedFilename, _SystemLocalTime() & " ~ " & $File)
+    LogFile(@ScriptLineNumber & " ConvertFile: " & $File)
+    FileWriteLine($Used_filename, _SystemLocalTime() & " ~ " & $File)
     If Not FileExists($File) Then
-        _Debug(@ScriptLineNumber & "  ConvertFile. File does not exist: " & $File, $LogFilename, True)
+        LogFile(@ScriptLineNumber & "  ConvertFile. File does not exist: " & $File)
+        MsgBox(16, @ScriptLineNumber & " ConvertFile", $File & " does not exist")
         Return
     EndIf
 
@@ -1163,31 +1156,32 @@ Func ConvertFile($File)
 
     If FileExists($IrfanView) Then
         Local $RunPID = ShellExecuteWait($IrfanView, $ConvertCmd, "", "open", @SW_HIDE)
-        _Debug(@ScriptLineNumber & " ConvertFile. ShellExecuteWait results: " & $RunPID & " " & $ConvertCmd, $LogFilename)
+        LogFile(@ScriptLineNumber & " ConvertFile. ShellExecuteWait results: " & $RunPID & " " & $ConvertCmd)
     Else
-        _Debug(@ScriptLineNumber & " ConvertFile: " & $IrfanView & " does not exist", $LogFilename, True)
+        LogFile(@ScriptLineNumber & " ConvertFile: " & $IrfanView & " does not exist", True)
         Return
     EndIf
 
     ;Local $Result = ShellExecuteWait($Infraview, FileGetShortName($File) & $Size & $AspectRatio & $Advanced & " /resample /convert=" & $WallpaperTempJPG, "", "open")
-    _Debug(@ScriptLineNumber & " " & $ConvertCmd, $LogFilename)
+    LogFile(@ScriptLineNumber & " " & $ConvertCmd)
     GUICtrlSetData($EditStatusMain, $File)
-    _Debug(@ScriptLineNumber & " ConvertFile. ShellExecuteWait results: " & $RunPID, $LogFilename)
+    LogFile(@ScriptLineNumber & " ConvertFile. ShellExecuteWait results: " & $RunPID)
 EndFunc   ;==>ConvertFile
 ;-----------------------------------------------
 ; $File is a JPG to display
 ; Returns true if file is diplayed and false if not
 Func ProcessWallpaper($File)
-    _Debug(@ScriptLineNumber & " ProcessWallpaper: " & $File, $LogFilename)
+    LogFile(@ScriptLineNumber & " ProcessWallpaper: " & $File)
     If $File = '' Then
-        _Debug(@ScriptLineNumber & " ProcessWallpaper. Filename is blank", $LogFilename, True)
+        LogFile(@ScriptLineNumber & " ProcessWallpaper. Filename is blank")
+        MsgBox(48, @ScriptLineNumber & " ProcessWallpaper", "Filename is blank")
         $Running = False
         $Hide = False
         Return -1
     EndIf
 
     If FileExists($File) = False Then
-        _Debug(@ScriptLineNumber & "ProcessWallpaper. File does not exist" & $File, $LogFilename, True)
+        LogFile(@ScriptLineNumber & "ProcessWallpaper. File does not exist" & $File)
         If MsgBox(49, @ScriptLineNumber & " ProcessWallpaper", "File does not exist: " & $File, 5) = 2 Then Exit
         Return
     EndIf
@@ -1232,20 +1226,21 @@ Func ProcessWallpaper($File)
 
     ChangeDestopWallpaper($WallpaperTempJPG, $WallSetting)
 
-    _Debug(@ScriptLineNumber & " ProcessWallpaper complete", $LogFilename)
+    LogFile(@ScriptLineNumber & " ProcessWallpaper complete")
     Return True
 EndFunc   ;==>ProcessWallpaper
 ;-----------------------------------------------
-;$OptionFilename
-;$ListFilename
+;$Option_filename
+;$List_filename
 Func TestForRequiredFiles()
-    If Not FileExists($OptionFilename) Then
-        MsgBox(48, "Required file not found ", $OptionFilename)
+    Return
+    If Not FileExists($Option_filename) Then
+        MsgBox(48, "Required file not found ", $Option_filename)
         $Hide = False
         $Running = False
     EndIf
-    If Not FileExists($ListFilename) Then
-        MsgBox(48, "Required file not found ", $ListFilename)
+    If Not FileExists($List_filename) Then
+        MsgBox(48, "Required file not found ", $List_filename)
         $Hide = False
         $Running = False
     EndIf
@@ -1253,7 +1248,7 @@ Func TestForRequiredFiles()
     ;Abort if no valid pictures are found DBK\
     Local $TA
     Local $Found = False
-    _FileReadToArray($ListFilename, $TA)
+    _FileReadToArray($List_filename, $TA)
     For $x In $TA
         If FileExists($x) Then
             $Found = True
@@ -1262,7 +1257,7 @@ Func TestForRequiredFiles()
     Next
 
     If Not $Found Then
-        MsgBox(48, "No valid picture files found", "No valid picture files found in " & @CRLF & $ListFilename)
+        MsgBox(48, "No valid picture files found", "No valid picture files found in " & @CRLF & $List_filename)
         $Hide = False
         $Running = False
     EndIf
@@ -1274,19 +1269,19 @@ Func TestForIrfanView()
     Local $tmp = "C:\Program Files\IrfanView\i_view32.exe"
     If FileExists($tmp) Then
         $IrfanView = $tmp
-        _Debug(@ScriptLineNumber & " TestForIrfanView found: " & $IrfanView, $LogFilename)
+        LogFile(@ScriptLineNumber & " TestForIrfanView found: " & $IrfanView)
         Return
     EndIf
 
     $tmp = "C:\Program Files (x86)\IrfanView\i_view32.exe"
     If FileExists($tmp) Then
         $IrfanView = $tmp
-        _Debug(@ScriptLineNumber & " TestForIrfanView found: " & $IrfanView, $LogFilename)
+        LogFile(@ScriptLineNumber & " TestForIrfanView found: " & $IrfanView)
         Return
     EndIf
 
     If FileExists($IrfanView) Then
-        _Debug(@ScriptLineNumber & " TestForIrfanView found: " & $IrfanView, $LogFilename)
+        LogFile(@ScriptLineNumber & " TestForIrfanView found: " & $IrfanView)
         Return
     EndIf
 
@@ -1295,7 +1290,7 @@ Func TestForIrfanView()
         If @error = 1 Then ExitLoop ; this handles the cancel button
         If FileExists($tmp) Then
             $IrfanView = $tmp
-            _Debug(@ScriptLineNumber & " TestForIrfanView found: " & $IrfanView, $LogFilename)
+            LogFile(@ScriptLineNumber & " TestForIrfanView found: " & $IrfanView)
             Return
         EndIf
     WEnd
@@ -1307,7 +1302,8 @@ Func TestForIrfanView()
 
     GUICtrlSetData($InputIrfanviewFolder, $IrfanView)
 
-    _Debug(@ScriptLineNumber & " " & $msg, $LogFilename, True)
+    LogFile(@ScriptLineNumber & " " & $msg)
+    MsgBox(16, "IrfanView not found", $msg)
 
 EndFunc   ;==>TestForIrfanView
 
@@ -1345,8 +1341,9 @@ Func HandleDisplayName($FileName = "")
 
     ;Now the ini file needs to be fixed to reflect the options
     Local $ArrayINI
-    If _FileReadToArray($IView32Ini, $ArrayINI) = 0 Then ; read the ini data in
-        _Debug(@ScriptLineNumber & " File could not be opened for reading " & $ArrayINI, $LogFilename)
+    If _FileReadToArray($i_view32_ini, $ArrayINI) = 0 Then ; read the ini data in
+        LogFile(@ScriptLineNumber & " File could not be opened for reading " & $ArrayINI)
+        MsgBox(16, "Ini file error", "File could not be opened for reading" & @CRLF & $ArrayINI & @CRLF & @error)
         Return
     EndIf
 
@@ -1401,10 +1398,11 @@ Func HandleDisplayName($FileName = "")
         EndIf
     Next
 
-    _ArrayDelete($ArrayINI, 0)
-    If _FileWriteFromArray($IView32Ini, $ArrayINI) = 0 Then ; write the ini data out
-        _Debug(@ScriptLineNumber & "File could not be opened for writing" & "  " & $ArrayINI & "  " & @error, $LogFilename, True)
 
+    _ArrayDelete($ArrayINI, 0)
+    If _FileWriteFromArray($i_view32_ini, $ArrayINI) = 0 Then ; write the ini data out
+        LogFile(@ScriptLineNumber & "File could not be opened for writing" & "  " & $ArrayINI & "  " & @error)
+        MsgBox(16, "Ini file error", "File could not be opened for writing" & @CRLF & $ArrayINI & @CRLF & @error)
         Return
     EndIf
 
@@ -1436,7 +1434,7 @@ Func HandleChangeOptions($type)
         GUICtrlSetState($SliderMax, $GUI_ENABLE)
         GUICtrlSetState($LabelValue, $GUI_ENABLE)
     Else
-        _Debug("How did we get here? HandleChangeOptions:" & $type, $LogFilename, True)
+        LogFile("How did we get here? HandleChangeOptions:" & $type, True)
     EndIf
     SetUpDelayTime()
 EndFunc   ;==>HandleChangeOptions
@@ -1444,7 +1442,7 @@ EndFunc   ;==>HandleChangeOptions
 Func ToggleAllFoldersChecks()
     GuiDisable($GUI_DISABLE)
     Static $ToggleFolderState = True
-    _Debug(@ScriptLineNumber & " ToggleAllFoldersChecks " & $ToggleFolderState, $LogFilename)
+    LogFile(@ScriptLineNumber & " ToggleAllFoldersChecks " & $ToggleFolderState)
     ;clears all check marks for folderlist
     For $x = 0 To UBound($FolderHandleArray) - 1
         _GUICtrlTreeView_SetChecked($TreeViewSelectFolders, $FolderHandleArray[$x], $ToggleFolderState)
@@ -1454,7 +1452,7 @@ Func ToggleAllFoldersChecks()
 EndFunc   ;==>ToggleAllFoldersChecks
 ;-----------------------------------------------
 Func MarkAllFolderFound()
-    _Debug(@ScriptLineNumber & " MarkAllFoldersFound", $LogFilename)
+    LogFile(@ScriptLineNumber & " MarkAllFoldersFound")
     GuiDisable($GUI_DISABLE)
     For $x = 0 To UBound($FolderHandleArray) - 1
         Local $TS = _GUICtrlTreeView_GetText($TreeViewSelectFolders, $FolderHandleArray[$x])
@@ -1470,7 +1468,7 @@ EndFunc   ;==>MarkAllFolderFound
 ;-----------------------------------------------
 Func SearchFolders($Reset)
     Static $SearchFoldersPosition
-    _Debug(@ScriptLineNumber & " SearchFolders " & $Reset, $LogFilename)
+    LogFile(@ScriptLineNumber & " SearchFolders " & $Reset)
     GuiDisable($GUI_DISABLE)
     If $Reset Then
         $SearchFoldersPosition = 0
@@ -1493,7 +1491,7 @@ EndFunc   ;==>SearchFolders
 Func ToggleAllFilesChecks()
     GuiDisable($GUI_DISABLE)
     Static $ToggleFilesState = True
-    _Debug(@ScriptLineNumber & " ToggleAllFilesChecks " & $ToggleFilesState & "  " & UBound($FileHandleArray), $LogFilename)
+    LogFile(@ScriptLineNumber & " ToggleAllFilesChecks " & $ToggleFilesState & "  " & UBound($FileHandleArray))
     ;clears all check marks for file list
     For $x = 0 To UBound($FileHandleArray) - 1
         _GUICtrlTreeView_SetChecked($TreeViewActiveFiles, $FileHandleArray[$x], $ToggleFilesState)
@@ -1503,7 +1501,7 @@ Func ToggleAllFilesChecks()
 EndFunc   ;==>ToggleAllFilesChecks
 ;-----------------------------------------------
 Func MarkAllFilesFound()
-    _Debug(@ScriptLineNumber & " MarkAllFilesFound", $LogFilename)
+    LogFile(@ScriptLineNumber & " MarkAllFilesFound")
     GuiDisable($GUI_DISABLE)
     For $x = 0 To UBound($FileHandleArray) - 1
         Local $TS = _GUICtrlTreeView_GetText($TreeViewActiveFiles, $FileHandleArray[$x])
@@ -1520,7 +1518,7 @@ EndFunc   ;==>MarkAllFilesFound
 Func SearchFiles($Reset)
     Static $SearchFilesPosition
 
-    _Debug(@ScriptLineNumber & " SearchFiles " & $Reset, $LogFilename)
+    LogFile(@ScriptLineNumber & " SearchFiles " & $Reset)
     GuiDisable($GUI_DISABLE)
     If $Reset Then
         $SearchFilesPosition = 0
@@ -1542,12 +1540,12 @@ EndFunc   ;==>SearchFiles
 ;-----------------------------------------------
 ;This function allows the user to edit or view any file, useful for changing the config file
 Func EditText($File = "")
-    _Debug(@ScriptLineNumber & " Edit " & $File, $LogFilename)
+    LogFile(@ScriptLineNumber & " Edit " & $File)
     If $File = "" Then $File = FileOpenDialog("View or Edit a file", @ScriptDir, "Wallpaper (Wallpaper*.*)|All (*.*)", 1)
     If @error <> 0 Then Return
 
     If Not FileExists($File) Then
-        _Debug(@ScriptLineNumber & " EditText error. " & $File & " does not exist", $LogFilename)
+        LogFile(@ScriptLineNumber & " EditText error. " & $File & " does not exist")
         MsgBox(16, "EditText error", "File does not exist" & @CRLF & $File, 2)
         Return
     EndIf
@@ -1558,19 +1556,19 @@ EndFunc   ;==>EditText
 Func SaveList()
     GuiDisable($GUI_DISABLE)
 
-    _Debug(@ScriptLineNumber & " SaveList", $LogFilename)
-    $ListFilename = FileSaveDialog("Save list file", $AuxPath, _
+    LogFile(@ScriptLineNumber & " SaveList")
+    $List_filename = FileSaveDialog("Save list file", $AuxPath, _
             $ProgramName & "Lists (*.lst)|Wallpaper (Wallpaper.*)|All files (*.*)", 18, "WallPaper-" & @ComputerName & ".lst")
 
-    Local $File = FileOpen($ListFilename, 2)
+    Local $File = FileOpen($List_filename, 2)
     ; Check if file opened for writing OK
     If $File = -1 Then
-        _Debug("SaveList: Unable to open file for writing: " & $ListFilename, $LogFilename, True)
-        _Debug(@ScriptLineNumber & " SaveList: Unable to open file for writing: " & $ListFilename, $LogFilename)
+        LogFile("SaveList: Unable to open file for writing: " & $List_filename, True)
+        LogFile(@ScriptLineNumber & " SaveList: Unable to open file for writing: " & $List_filename)
         GuiDisable($GUI_ENABLE)
         Return
     EndIf
-    _Debug(@ScriptLineNumber & " SaveList  " & $ListFilename, $LogFilename)
+    LogFile(@ScriptLineNumber & " SaveList  " & $List_filename)
     If Not $Hide Then SplashImageOn("Wallpaper is starting. Please wait.", $AuxPath & "Wallpaper.jpg", -1, -1, -1, -1, 18)
     FileWriteLine($File, "Valid for Wallpaper list")
 
@@ -1586,68 +1584,57 @@ EndFunc   ;==>SaveList
 ;-----------------------------------------------
 Func LoadList($type = "start")
     GuiDisable($GUI_DISABLE)
-    _Debug(@ScriptLineNumber & " LoadList " & $type & "  " & $ListFilename, $LogFilename)
+    LogFile(@ScriptLineNumber & " LoadList " & $type)
 
     If StringCompare($type, "menu") = 0 Then
-        $ListFilename = FileOpenDialog("Load options file", $AuxPath, _
+        $List_filename = FileOpenDialog("Load options file", $AuxPath, _
                 $ProgramName & "Lists (*.lst)|Wallpaper (Wallpaper.*)|All files (*.*)", 18, $AuxPath & "WallPaper-" & @ComputerName & ".opt")
     EndIf
 
     If Not $Hide Then SplashImageOn("Wallpaper is starting. Please wait.", $AuxPath & "Wallpaper.jpg", -1, -1, -1, -1, 18)
     Local $TempArray
-    Local $Result = _FileReadToArray($ListFilename, $TempArray)
+    Local $Result = _FileReadToArray($List_filename, $TempArray)
 
     ; Check if file opened for reading OK
     If $Result <> 1 Then
-        _Debug(@ScriptLineNumber & " LoadList: _FileReadToArray failed: " & $ListFilename, $LogFilename)
-        MsgBox(16, $ListFilename, "File does not exist" & @CRLF & $ListFilename)
+        LogFile(@ScriptLineNumber & " LoadList: _FileReadToArray failed: " & $List_filename)
+        MsgBox(16, $List_filename, "File does not exist" & @CRLF & $List_filename)
         SplashOff()
         GuiDisable($GUI_ENABLE)
         Return
     EndIf
-    _Debug(@ScriptLineNumber & " Done reading file " & $ListFilename, $LogFilename)
+    LogFile(@ScriptLineNumber & " Done reading file " & $List_filename)
 
     ; Read in the first line to verify the file is of the correct type
     If StringCompare($TempArray[1], "Valid for WallPaper list") <> 0 Then
-        _Debug(@ScriptLineNumber & " Not an vaild list file for WallPaper", $LogFilename, True)
+        LogFile("Not an valid list file for WallPaper", True)
+        LogFile(@ScriptLineNumber & " Not an vaild list file for WallPaper")
         SplashOff()
         GuiDisable($GUI_ENABLE)
         Return
     EndIf
-
-    If $Debug = True Then
-        _Debug("Debug is true.  Lines in array: " & UBound($TempArray), $LogFilename)
-        Local $TA[1]
-        For $x = 1 To 10
-            _ArrayAdd($TA, $TempArray[$x])
-        Next
-        $TempArray = $TA
-        _Debug("Debug cleanup done.", $LogFilename)
-        ;_ArrayDisplay($TempArray, @ScriptLineNumber)
-    EndIf
-
     _GUICtrlTreeView_DeleteAll($TreeViewActiveFiles)
 
     ;_ArrayDisplay($TempArray, @ScriptLineNumber)
 
-    ConsoleWrite(@ScriptLineNumber & " Running arraysort and unique (debug false)" & @CRLF)
+
     _ArraySort($TempArray) ; sort the entries
-    _Debug(@ScriptLineNumber & " Done with arraysort", $LogFilename)
+    LogFile(@ScriptLineNumber & " Done with arraysort")
 
     For $i = 0 To UBound($TempArray) - 2 ; remove non-unique entries
         If StringCompare($TempArray[$i], $TempArray[$i + 1]) = 0 Then $TempArray[$i] = ""
     Next
-    _Debug(@ScriptLineNumber & " Done with unique", $LogFilename)
+    LogFile(@ScriptLineNumber & " Done with unique")
+
     ReDim $FileHandleArray[1]
     For $i In $TempArray ; if not a string of character 2 is not : then ignore the line
         If StringInStr($i, ":") = 2 And VerifyFileTypes($i) >= 0 Then
             _ArrayAdd($FileHandleArray, _GUICtrlTreeView_Add($TreeViewActiveFiles, 0, $i))
         EndIf
     Next
-
     _ArrayDelete($FileHandleArray, 0)
     SplashOff()
-    _Debug(@ScriptLineNumber & " LoadList done. Files in list: " & _GUICtrlTreeView_GetCount($TreeViewActiveFiles) & "  " & $ListFilename, $LogFilename)
+    LogFile(@ScriptLineNumber & " LoadList done. Files in list: " & _GUICtrlTreeView_GetCount($TreeViewActiveFiles) & "  " & $List_filename)
     GUICtrlSetData($LabelActiveCount, _GUICtrlTreeView_GetCount($TreeViewActiveFiles))
     GuiDisable($GUI_ENABLE)
 EndFunc   ;==>LoadList
@@ -1666,7 +1653,7 @@ EndFunc   ;==>VerifyFileTypes
 ;-----------------------------------------------
 Func SetDefaults()
     GuiDisable($GUI_DISABLE)
-    _Debug(@ScriptLineNumber & " SetDefaults", $LogFilename)
+    LogFile(@ScriptLineNumber & " SetDefaults")
 
     WinMove("WallPaper", "", 10, 10)
     WinMove("Select files", "", 10, 10)
@@ -1737,20 +1724,21 @@ EndFunc   ;==>SetDefaults
 ;-----------------------------------------------
 Func SaveOptions()
     GuiDisable($GUI_DISABLE)
-    _Debug(@ScriptLineNumber & " SaveOptions", $LogFilename)
-    $OptionFilename = FileSaveDialog("Save options file", $AuxPath, _
+    LogFile(@ScriptLineNumber & " SaveOptions")
+    $Option_filename = FileSaveDialog("Save options file", $AuxPath, _
             $ProgramName & "Options (*.opt)|Wallpaper (Wallpaper.*)|All files (*.*)", 18, "WallPaper-" & @ComputerName & ".opt")
 
-    Local $File = FileOpen($OptionFilename, 2)
+    Local $File = FileOpen($Option_filename, 2)
     ; Check if file opened for writing OK
     If $File = -1 Then
-        _Debug(@ScriptLineNumber & " SaveOptions: Unable to open file for writing: " & $OptionFilename, $LogFilename, True)
+        LogFile(@ScriptLineNumber & " SaveOptions: Unable to open file for writing: " & $Option_filename)
+        LogFile("SaveOptions: Unable to open file for writing: " & $Option_filename, True)
         GuiDisable($GUI_ENABLE)
         Return
     EndIf
 
     FileWriteLine($File, "Valid for " & $ProgramName & " options")
-    FileWriteLine($File, "Options file for " & $OptionFilename & "  " & _DateTimeFormat(_NowCalc(), 0))
+    FileWriteLine($File, "Options file for " & $Option_filename & "  " & _DateTimeFormat(_NowCalc(), 0))
     FileWriteLine($File, "Help 1 is enabled, 4 is disabled for checkboxes")
     FileWriteLine($File, "Irfanview:" & $IrfanView)
     FileWriteLine($File, "WorkingFolder:" & $WorkingFolder)
@@ -1812,32 +1800,35 @@ Func SaveOptions()
     FileWriteLine($File, "SelectOptionsWinpos:" & $F[0] & " " & $F[1] & " " & $F[2] & " " & $F[3])
 
     FileClose($File)
-    _Debug(@ScriptLineNumber & " Done SaveOptions", $LogFilename)
+    LogFile(@ScriptLineNumber & " Done SaveOptions")
     GuiDisable($GUI_ENABLE)
 EndFunc   ;==>SaveOptions
 ;-----------------------------------------------
 ;This loads the options file
 Func LoadOptions($type = "start")
     GuiDisable($GUI_DISABLE)
-    _Debug(@ScriptLineNumber & " LoadOptions  " & $type, $LogFilename)
+    LogFile(@ScriptLineNumber & " LoadOptions  " & $type)
 
     If StringCompare($type, "menu") = 0 Then
-        $OptionFilename = FileOpenDialog("Load options file", $AuxPath, _
+        $Option_filename = FileOpenDialog("Load options file", $AuxPath, _
                 $ProgramName & "Options (*.opt)|Wallpaper (Wallpaper.*)|All files (*.*)", 18, "WallPaper-" & @ComputerName & ".opt")
     EndIf
 
-    Local $File = FileOpen($OptionFilename, 0)
+    Local $File = FileOpen($Option_filename, 0)
     ; Check if file opened for reading OK
     If $File = -1 Then
-        _Debug(@ScriptLineNumber & " LoadOptions: Unable to open file for reading: " & $OptionFilename, $LogFilename, True)
+        LogFile(@ScriptLineNumber & " LoadOptions: Unable to open file for reading: " & $Option_filename)
+        MsgBox(16, $Option_filename, "LoadOptions: Unable to open file for reading: " & @CRLF & $Option_filename)
         GuiDisable($GUI_ENABLE)
         Return
     EndIf
 
-    _Debug(@ScriptLineNumber & " LoadOptions " & $OptionFilename, $LogFilename)
+    LogFile(@ScriptLineNumber & " LoadOptions " & $Option_filename)
     ; Read in the first line to verify the file is of the correct type
     If StringCompare(FileReadLine($File, 1), "Valid for WallPaper options") <> 0 Then
-        _Debug(@ScriptLineNumber & " Not an options file for WallPaper", $LogFilename, True)
+        LogFile(@ScriptLineNumber & " Not an options file for WallPaper")
+        LogFile("Not an options file for WallPaper ", True)
+        FileClose($File)
         GuiDisable($GUI_ENABLE)
         Return
     EndIf
@@ -1870,12 +1861,7 @@ Func LoadOptions($type = "start")
             $F = StringSplit($F, " ", 2)
             WinMove("Select options", "", $F[0], $F[1], $F[2], $F[3])
         EndIf
-        #cs
-            _ArrayAdd($Settings,"Irfanview:")
-            _ArrayAdd($Settings,$IrfanView)
-            _ArrayAdd($Settings,"WorkingFolder:")
-            _ArrayAdd($Settings,$WorkingFolder)
-        #ce
+
         If StringInStr($LineIn, "Irfanview:") Then $IrfanView = StringMid($LineIn, StringInStr($LineIn, ":") + 1)
         If StringInStr($LineIn, "WorkingFolder:") Then $WorkingFolder = StringMid($LineIn, StringInStr($LineIn, ":") + 1)
         ; select folder page
@@ -1930,15 +1916,7 @@ Func LoadOptions($type = "start")
     FileClose($File)
 
     If Not FileExists($WorkingFolder) Then
-        _Debug(@ScriptLineNumber & " Working folder does not exist: " & $WorkingFolder, $LogFilename)
-        Local $R = ShellExecuteWait("E:\TrueCrypt\TrueCrypt.exe", "/v data.tc /lZ /a /p Dorothy!1951 /q", "E:\TrueCrypt", "open", @SW_SHOW)
-        _Debug(@ScriptLineNumber & " Attempted to mount Z drive.   Result:" & $R, $LogFilename)
-        If Not FileExists($WorkingFolder) Then
-            If Not FileExists($WorkingFolder) Then
-                $WorkingFolder = _AddSlash2PathString(EnvGet("USERPROFILE"))
-                If MsgBox(1 + 16, "Working Folder error", "Working folder set to: " & $WorkingFolder) = 2 Then Exit
-            EndIf
-        EndIf
+        If MsgBox(1 + 16, "Working Folder error", $WorkingFolder & @CRLF & "does not exist" & @CRLF & "OK to continue, Cancel to quit") = 2 Then Exit
     EndIf
 
     HandleDisplayName()
@@ -1947,9 +1925,31 @@ Func LoadOptions($type = "start")
     GuiDisable($GUI_ENABLE)
 EndFunc   ;==>LoadOptions
 ;-----------------------------------------------
+Func About(Const $FormID)
+    GuiDisable($GUI_DISABLE)
+    LogFile(@ScriptLineNumber & " About " & $FormID)
+    Local $d = WinGetPos($FormID)
+    Local $WinPos
+    If IsArray($d) = True Then
+        ConsoleWrite(@ScriptLineNumber & $FormID & @CRLF)
+        $WinPos = StringFormat("%s" & @CRLF & "WinPOS: %d  %d " & @CRLF & "WinSize: %d %d " & @CRLF & "Desktop: %d %d ", _
+                $FormID, $d[0], $d[1], $d[2], $d[3], @DesktopWidth, @DesktopHeight)
+    Else
+        $WinPos = ">>>About ERROR, Check the window name<<<"
+    EndIf
+    LogFile(@CRLF & $SystemS & @CRLF & $WinPos & @CRLF & "Written by Doug Kaynor!", True)
+    GuiDisable($GUI_ENABLE)
+EndFunc   ;==>About
+;-----------------------------------------------
+Func LogFile($string, $ShowMSGBox = False)
+    $string = StringReplace($string, "-1", "", 1)
+    _FileWriteLog($Log_filename, $string)
+    _Debug($string, $ShowMSGBox)
+EndFunc   ;==>LogFile
+;-----------------------------------------------
 Func Help(Const $FormID)
     GuiDisable($GUI_DISABLE)
-    _Debug(@ScriptLineNumber & " Help " & $FormID, $LogFilename)
+    LogFile(@ScriptLineNumber & " Help " & $FormID)
     Local $helpstr = 'Startup options: ' & @CRLF & _
             "help or ?   Display this help file" & @CRLF & _
             "Run         Start changing wallpaper on startup" & @CRLF & _
@@ -1959,12 +1959,12 @@ Func Help(Const $FormID)
             "F1  = Help" & @CRLF & _
             "F10 = Change wallpaper" & @CRLF & _
             "F11 = Unlock GUI"
-    _Debug(@ScriptName & @CRLF & $FileVersion & @CRLF & @CRLF & $helpstr, '', True)
+    LogFile(@ScriptName & @CRLF & $FileVersion & @CRLF & @CRLF & $helpstr, True)
     GuiDisable($GUI_ENABLE)
 EndFunc   ;==>Help
 ;-----------------------------------------------
 Func ShowMainInfo()
-    _Debug(@ScriptLineNumber & " EditStatusMain", $LogFilename)
+    LogFile(@ScriptLineNumber & " EditStatusMain")
     ClipPut(GUICtrlRead($EditStatusMain))
     EditText($WallpaperMainInfo)
 EndFunc   ;==>ShowMainInfo
@@ -1972,20 +1972,39 @@ EndFunc   ;==>ShowMainInfo
 Func EditCurrentFile()
     GuiDisable($GUI_DISABLE)
     Local $File = GUICtrlRead($EditStatusMain)
-    _Debug(@ScriptLineNumber & " Editcurrentfile  " & $File, $LogFilename)
+    ConsoleWrite(@ScriptLineNumber & " Editcurrentfile " & $File & @CRLF)
+    LogFile(@ScriptLineNumber & " Editcurrentfile  " & $File)
     If FileExists($IrfanView) Then
-        _Debug(@ScriptLineNumber & " ShellExecuteWait results: " & ShellExecuteWait($IrfanView, $File, "", "open", @SW_SHOW), $LogFilename)
+        LogFile(@ScriptLineNumber & " ShellExecuteWait results: " & ShellExecuteWait($IrfanView, $File, "", "open", @SW_SHOW))
     Else
-        _Debug(@ScriptLineNumber & " EditCurrentFile: " & $IrfanView & " does not exist", $LogFilename, True)
+        LogFile(@ScriptLineNumber & " EditCurrentFile: " & $IrfanView & " does not exist", True)
     EndIf
     GuiDisable($GUI_ENABLE)
 EndFunc   ;==>EditCurrentFile
 ;-----------------------------------------------
-Func TaskGoToFolder()
-    GoToCurrentFolder("main")
-EndFunc   ;==>TaskGoToFolder
+;This will remove all matching files from the list of pictures to display
+Func FilterFileList()
+    LogFile(@ScriptLineNumber & " FilterFileList")
+EndFunc   ;==>FilterFileList
 ;-----------------------------------------------
+Func TaskGoToEXEFolder()
+    GoToExeFolder()
+EndFunc   ;==>TaskGoToEXEFolder
+;-----------------------------------------------
+Func GoToEXEFolder()
+    ;LogFile(@ScriptLineNumber & " GoToEXEFolder  " & $pathx)
+    ;LogFile(@ScriptLineNumber & " ShellExecuteWait results: " & ShellExecuteWait("explorer.exe", $pathx, "", "open", @SW_SHOW))
+    GuiDisable($GUI_ENABLE)
+    ConsoleWrite(@ScriptLineNumber & "  " & @ScriptDir & @CRLF)
+    LogFile(@ScriptLineNumber & " ShellExecuteWait results: " & ShellExecuteWait("explorer.exe", @ScriptDir, "", "open", @SW_SHOW))
+    GuiDisable($GUI_ENABLE)
+EndFunc   ;==>GoToEXEFolder
+;-----------------------------------------------
+Func TaskGoToCurrentFolder()
+    GoToCurrentFolder("main")
 
+EndFunc   ;==>TaskGoToCurrentFolder
+;-----------------------------------------------
 Func GoToCurrentFolder($type)
     GuiDisable($GUI_DISABLE)
 
@@ -2012,15 +2031,16 @@ Func GoToCurrentFolder($type)
 
     ConsoleWrite(@ScriptLineNumber & " pathx: " & $pathx & @CRLF)
 
-    _Debug(@ScriptLineNumber & " GoToCurrentFolder  " & $pathx, $LogFilename)
-    _Debug(@ScriptLineNumber & " ShellExecuteWait results: " & ShellExecuteWait("explorer.exe", $pathx, "", "open", @SW_SHOW), $LogFilename)
+    LogFile(@ScriptLineNumber & " GoToCurrentFolder  " & $pathx)
+    LogFile(@ScriptLineNumber & " ShellExecuteWait results: " & ShellExecuteWait("explorer.exe", $pathx, "", "open", @SW_SHOW))
     GuiDisable($GUI_ENABLE)
 EndFunc   ;==>GoToCurrentFolder
 ;-----------------------------------------------
 Func ReloadCurrentFile()
     GuiDisable($GUI_DISABLE)
     Local $File = GUICtrlRead($EditStatusMain)
-    _Debug(@ScriptLineNumber & " ReloadCurrentFile " & $File, $LogFilename)
+    LogFile(@ScriptLineNumber & " ReloadCurrentFile " & $File)
+    ConsoleWrite(@ScriptLineNumber & " ReloadCurrentFile " & $File & @CRLF)
     ProcessWallpaper($File)
     ;ConvertFile($File)
     GuiDisable($GUI_ENABLE)
@@ -2058,18 +2078,18 @@ Func HideAllForms()
 EndFunc   ;==>HideAllForms
 ;-----------------------------------------------
 Func LogFileLimit()
-    _Debug(@ScriptLineNumber & " LogFileLimit", $LogFilename)
+    LogFile(@ScriptLineNumber & " LogFileLimit")
     Const $MAXFS = 30000
     Local $AA[1]
-    _Debug(@ScriptLineNumber & " Current size:" & FileGetSize($LogFilename) & " Max size:" & $MAXFS, $LogFilename)
-    If FileGetSize($LogFilename) > $MAXFS Then
-        _FileReadToArray($LogFilename, $AA)
-        FileDelete($LogFilename)
+    LogFile(@ScriptLineNumber & " Current size:" & FileGetSize($Log_filename) & " Max size:" & $MAXFS)
+    If FileGetSize($Log_filename) > $MAXFS Then
+        _FileReadToArray($Log_filename, $AA)
+        FileDelete($Log_filename)
         For $x = UBound($AA) / 2 To UBound($AA) - 1
-            FileWriteLine($LogFilename, $AA[$x])
+            FileWriteLine($Log_filename, $AA[$x])
         Next
     EndIf
-    _Debug(@ScriptLineNumber & " LogFileLimit completed. Current size:" & FileGetSize($LogFilename), $LogFilename)
+    LogFile(@ScriptLineNumber & " LogFileLimit completed. Current size:" & FileGetSize($Log_filename))
 EndFunc   ;==>LogFileLimit
 ;-----------------------------------------------
 Func ExitEvent()
@@ -2137,7 +2157,6 @@ Func GetFolders()
         ; $FolderArray = _FileListToArray($WorkingFolder, "*")
     EndIf
     _ArrayDelete($FolderArray, 0)
-
     _ArrayUnique($FolderArray)
     _ArraySort($FolderArray)
 
@@ -2214,7 +2233,7 @@ EndFunc   ;==>CleanPaths
 ;-----------------------------------------------
 Func GetFiles() ; dbk
     GuiDisable($GUI_DISABLE)
-    _Debug(@ScriptLineNumber & " GetFiles started", $LogFilename)
+    LogFile(@ScriptLineNumber & " GetFiles started")
     SplashImageOn("Working", $AuxPath & "Wallpaper.jpg", -1, -1, -1, -1, 18)
     Local $FileArray
 
@@ -2261,9 +2280,8 @@ Func GetFiles() ; dbk
 
     ;_ArrayDisplay($FileHandleArray, @ScriptLineNumber)
     SplashOff()
-    _Debug(@ScriptLineNumber & " GetFiles completed", $LogFilename)
+    LogFile(@ScriptLineNumber & " GetFiles completed")
     GuiDisable($GUI_ENABLE)
 EndFunc   ;==>GetFiles
 ;-----------------------------------------------
-
 

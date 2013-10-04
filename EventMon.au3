@@ -2,12 +2,12 @@
 #AutoIt3Wrapper_outfile=EventMon.exe
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_UseX64=n
-#AutoIt3Wrapper_Res_Comment=An EventLog monitoring tool
-#AutoIt3Wrapper_Res_Description=An EventLog monitoring tool
-#AutoIt3Wrapper_Res_Fileversion=1.0.1.3
+#AutoIt3Wrapper_Res_Comment=A EventLog tool
+#AutoIt3Wrapper_Res_Description=EventLog tool
+#AutoIt3Wrapper_Res_Fileversion=1.0.0.32
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=Y
 #AutoIt3Wrapper_Res_ProductVersion=666
-#AutoIt3Wrapper_Res_LegalCopyright=Copyright 2012 Douglas B Kaynor
+#AutoIt3Wrapper_Res_LegalCopyright=Copyright 2011 Douglas B Kaynor
 #AutoIt3Wrapper_Res_SaveSource=y
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Res_Field=AutoIt Version|%AutoItVer%
@@ -32,7 +32,6 @@ Opt("WinTitleMatchMode", 2)
 #include <Date.au3>
 #include <EventLog.au3>
 #include <GUIConstantsEx.au3>
-#include <GuiFontAndColors.au3>
 #include <GuiListView.au3>
 #include <ListViewConstants.au3>
 #include <Misc.au3>
@@ -42,13 +41,15 @@ Opt("WinTitleMatchMode", 2)
 #include <WindowsConstants.au3>
 #include <_DougFunctions.au3>
 
+;DirCreate("AUXFiles")
+;Global $AuxPath = @ScriptDir & "\AUXFiles\"
 ;FileInstall($AuxPath & "Working.jpg", $AuxPath & "Working.jpg", 0)
 
 ;Global Const $tmp = StringSplit(@ScriptName, ".")
-Global Const $ProgramName = "EventMon"
+Global Const $ProgramName = "Event log monitor"
 Global $Project_filename = @ScriptDir & "\AUXFiles\" & $ProgramName & ".prj"
 Global $LOG_filename = @ScriptDir & "\AUXFiles\" & $ProgramName & ".log"
-Global $LastSearchFound = -1
+
 Global $hEventLog
 
 If _Singleton($ProgramName, 1) = 0 Then
@@ -59,136 +60,163 @@ EndIf
 Global Const $FileVersion = "  Ver: " & FileGetVersion(@AutoItExe, "Fileversion")
 Global $SystemS = $ProgramName & @CRLF & $FileVersion & @CRLF & @OSVersion & @CRLF & @OSServicePack & @CRLF & @OSType & @CRLF & @OSArch
 
+; Mainform
 Global $MainFormOptions = BitOR($WS_MINIMIZEBOX, $WS_SIZEBOX, $WS_THICKFRAME, $WS_SYSMENU, $WS_CAPTION, $WS_POPUP, $WS_POPUPWINDOW, $WS_GROUP, $WS_BORDER, $WS_CLIPSIBLINGS)
-Global $MainForm = GUICreate($ProgramName & "  " & $FileVersion, 715, 580, 10, 10, $MainFormOptions)
-;GUISetFont(9, 400, -1, "courier")
+Global $MainForm = GUICreate("Event log monitor  " & $FileVersion, 630, 515, 200, 150, $MainFormOptions)
 
-Global $ButtonGetData = GUICtrlCreateButton("Get data", 20, 10, 75, 25)
-GUICtrlSetTip($ButtonGetData, "Fetch the data from selected logs")
-Global $ButtonEventViewer = GUICtrlCreateButton("Event viewer", 100, 10, 75, 25)
-GUICtrlSetTip($ButtonEventViewer, "Open the event control viewer")
+Global $ButtonGetData = GUICtrlCreateButton("Get data", 10, 10, 75, 25)
+GUICtrlSetTip(-1, "Fetch the data from selected logs")
+GUICtrlSetResizing(-1, 802)
 Global $ButtonClearLogs = GUICtrlCreateButton("Clear logs", 180, 10, 75, 25)
-GUICtrlSetTip($ButtonClearLogs, "Clear all logs. Check 'Save' if you want to save before clearing")
-Global $ButtonOpenSaveFolder = GUICtrlCreateButton("Open save", 260, 10, 75, 25)
-GUICtrlSetTip($ButtonOpenSaveFolder, "Open the log save location.")
-Global $ButtonAbout = GUICtrlCreateButton("About", 340, 10, 75, 25)
-GUICtrlSetTip($ButtonAbout, "Display application information.")
-Global $ButtonHelp = GUICtrlCreateButton("Help", 420, 10, 75, 25)
-GUICtrlSetTip($ButtonHelp, "Display application help")
-Global $ButtonExit = GUICtrlCreateButton("Exit", 500, 10, 75, 25)
-GUICtrlSetTip($ButtonExit, "Exit this application")
+GUICtrlSetTip(-1, "Clear all logs. Check 'Save' if you want to save before clearing")
+GUICtrlSetResizing(-1, 802)
+Global $ButtonEventViewer = GUICtrlCreateButton("Event viewer", 95, 10, 75, 25)
+GUICtrlSetTip(-1, "Open the event control viewer")
+GUICtrlSetResizing(-1, 802)
+Global $ButtonOpenSaveFolder = GUICtrlCreateButton("Open save", 265, 10, 75, 25)
+GUICtrlSetTip(-1, "Open the log save location.")
+GUICtrlSetResizing(-1, 802)
+Global $ButtonAbout = GUICtrlCreateButton("About", 350, 10, 75, 25)
+GUICtrlSetTip(-1, "Display application information.")
+GUICtrlSetResizing(-1, 802)
+Global $ButtonHelp = GUICtrlCreateButton("Help", 430, 10, 75, 25)
+GUICtrlSetTip(-1, "Display application help")
+GUICtrlSetResizing(-1, 802)
+Global $ButtonExit = GUICtrlCreateButton("Exit", 520, 10, 75, 25)
+GUICtrlSetTip(-1, "Exit this application")
+GUICtrlSetResizing(-1, 802)
 
-;left, top , width , height
-Global $GroupOptions = GUICtrlCreateGroup("Options", 15, 40, 600, 45)
-Global $CheckSave = GUICtrlCreateCheckbox("Save", 25, 55, 60, 25)
-GUICtrlSetTip($CheckSave, "Save logs before clearing")
-Global $CheckSplash = GUICtrlCreateCheckbox("Splash", 100, 55, 60, 25)
-GUICtrlSetTip($CheckSplash, "Display splash")
-Global $CheckAbort = GUICtrlCreateCheckbox("Abort", 190, 55, 70, 25)
-GUICtrlSetTip($CheckAbort, "Abort operations")
-Global $CheckJunkFilter = GUICtrlCreateCheckbox("Junk filter", 262, 55, 70, 25)
-GUICtrlSetTip($CheckJunkFilter, "Junk filter for description")
-Global $ButtonSaveProject = GUICtrlCreateButton("Save project", 350, 50, 75, 25)
-GUICtrlSetTip($ButtonSaveProject, "Save the current settings")
-Global $ButtonLoadProject = GUICtrlCreateButton("Load project", 435, 50, 75, 25)
-GUICtrlSetTip($ButtonLoadProject, "Load saved settings")
-Global $ButtonLoadDefaults = GUICtrlCreateButton("Load defaults", 520, 50, 75, 25)
-GUICtrlSetTip($ButtonLoadDefaults, "Load default settings")
+Global $ButtonSaveProject = GUICtrlCreateButton("Save project", 350, 40, 75, 25)
+GUICtrlSetTip(-1, "Save the current settings")
+GUICtrlSetResizing(-1, 802)
+
+Global $ButtonLoadProject = GUICtrlCreateButton("Load project", 430, 40, 75, 25)
+GUICtrlSetTip(-1, "Load saved settings")
+GUICtrlSetResizing(-1, 802)
+
+Global $ButtonLoadDefaults = GUICtrlCreateButton("Load defaults", 520, 40, 75, 25)
+GUICtrlSetTip(-1, "Load default settings")
+GUICtrlSetResizing(-1, 802)
+
+Global $GroupOptions = GUICtrlCreateGroup("Options", 30, 40, 240, 40)
+GUICtrlSetResizing(-1, 802)
+Global $CheckSave = GUICtrlCreateCheckbox("Save", 40, 55, 50, 20)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Save logs before clearing")
+Global $CheckSplash = GUICtrlCreateCheckbox("Splash", 110, 55, 50, 20)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Display splash")
+Global $CheckAbort = GUICtrlCreateCheckbox("Abort", 170, 55, 50, 20)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Abort operations")
 GUICtrlCreateGroup("", -99, -99, 1, 1)
 
-; text, left, top, width, height
-Global $GroupLogType = GUICtrlCreateGroup("Log type", 15, 90, 400, 45)
-Global $CheckSystem = GUICtrlCreateCheckbox("System", 25, 105, 70, 25)
-GUICtrlSetTip($CheckSystem, "Process system logs")
-Global $CheckSecurity = GUICtrlCreateCheckbox("Security", 95, 105, 70, 25)
-GUICtrlSetTip($CheckSecurity, "Process security logs")
-Global $CheckApplication = GUICtrlCreateCheckbox("Application", 165, 105, 70, 25)
-GUICtrlSetTip($CheckApplication, "Process application logs")
-Global $ButtonToggleLogType = GUICtrlCreateButton("Toggle", 240, 105, 75, 25)
-GUICtrlSetTip($ButtonToggleLogType, "Toggle log type selections")
-Global $ButtonDefaultsLogType = GUICtrlCreateButton("Defaults", 330, 105, 75, 25)
-GUICtrlSetTip($ButtonDefaultsLogType, "Set log type selections to defaults")
+Global $GroupLogType = GUICtrlCreateGroup("Log type", 30, 80, 340, 40)
+GUICtrlSetResizing(-1, 802)
+Global $CheckSystem = GUICtrlCreateCheckbox("System", 40, 95, 60, 20)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Process system logs")
+Global $CheckSecurity = GUICtrlCreateCheckbox("Security", 110, 95, 70, 20)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Process security logs")
+Global $CheckApplication = GUICtrlCreateCheckbox("Application", 180, 95, 70, 20)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Process application logs")
+Global $ButtonToggleLogType = GUICtrlCreateButton("Toggle", 260, 95, 50, 20)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Toggle log type selections")
+Global $ButtonDefaultsLogType = GUICtrlCreateButton("Defaults", 315, 95, 50, 20)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Set log type selections to defaults")
 GUICtrlCreateGroup("", -99, -99, 1, 1)
 
-GUICtrlCreateGroup("Loop", 425, 90, 260, 45)
-Global $CheckLoop = GUICtrlCreateCheckbox("Loop", 435, 105, 50, 25)
-GUICtrlSetTip($CheckLoop, "Start/Stop looping")
-Global $SliderDelay = GUICtrlCreateSlider(490, 105, 150, 25)
-GUICtrlSetLimit($SliderDelay, 60, 1)
-GUICtrlSetData($SliderDelay, 1)
-GUICtrlSetTip($SliderDelay, "Loop delay setting")
-Global $LabelSliderDelay = GUICtrlCreateLabel("", 650, 105, 20, 25, $SS_SUNKEN)
-GUICtrlSetTip($LabelSliderDelay, "Current loop delay setting")
-GUICtrlCreateGroup("", -99, -99, 1, 1)
-Global $GroupType = GUICtrlCreateGroup("Message type", 15, 140, 650, 45)
-Global $CheckInformation = GUICtrlCreateCheckbox("Information", 25, 155, 70, 25)
-GUICtrlSetTip($CheckInformation, "Show information events")
-Global $CheckWarnings = GUICtrlCreateCheckbox("Warnings", 105, 155, 70, 25)
-GUICtrlSetTip($CheckWarnings, "Show warning events")
-Global $CheckErrors = GUICtrlCreateCheckbox("Errors", 190, 155, 50, 25)
-GUICtrlSetTip($CheckErrors, "Show error events")
-Global $CheckSuccessAudits = GUICtrlCreateCheckbox("Success Audits", 260, 155, 97, 25)
-GUICtrlSetTip($CheckSuccessAudits, "Show successful audit events")
-Global $CheckFailAudits = GUICtrlCreateCheckbox("Fail Audits", 370, 155, 81, 25)
-GUICtrlSetTip($CheckFailAudits, "Show failed audit events")
-Global $CheckOther = GUICtrlCreateCheckbox("Other", 465, 155, 50, 25)
-GUICtrlSetTip($CheckOther, "Other")
-Global $ButtonToggleEventType = GUICtrlCreateButton("Toggle", 525, 155, 59, 25)
-GUICtrlSetTip($ButtonToggleEventType, "Toggle event type selections")
-Global $ButtonDefaultsEventType = GUICtrlCreateButton("Defaults", 600, 155, 59, 25)
-GUICtrlSetTip($ButtonDefaultsEventType, "Set log type selections to defaults")
+Global $GroupEventType = GUICtrlCreateGroup("Event type", 30, 120, 530, 40)
+GUICtrlSetResizing(-1, 802)
+Global $CheckInformation = GUICtrlCreateCheckbox("Information", 40, 135, 70, 20)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Show information events")
+Global $CheckWarnings = GUICtrlCreateCheckbox("Warnings", 115, 135, 70, 20)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Show warning events")
+Global $CheckErrors = GUICtrlCreateCheckbox("Errors", 185, 135, 50, 20)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Show error events")
+Global $CheckSuccessAudits = GUICtrlCreateCheckbox("Success Audits", 235, 135, 90, 20)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Show successful audit events")
+Global $CheckFailAudits = GUICtrlCreateCheckbox("Fail Audits", 330, 135, 70, 20)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Show failed audit events")
+Global $CheckOther = GUICtrlCreateCheckbox("Other", 400, 135, 50, 20)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Other")
+Global $ButtonToggleEventType = GUICtrlCreateButton("Toggle", 450, 135, 50, 20)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Toggle event type selections")
+Global $ButtonDefaultsEventType = GUICtrlCreateButton("Defaults", 505, 135, 50, 20)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Set log type selections to defaults")
 GUICtrlCreateGroup("", -99, -99, 1, 1)
 
-;"text", left, top [, width [, height
-GUICtrlCreateGroup("Filter/Find data", 15, 190, 630, 45)
-Global $InputFilter = GUICtrlCreateInput("", 25, 205, 130, 25)
-GUICtrlSetTip(-1, "Input a filter string. (Supports regular expressions)")
-Global $ButtonFind = GUICtrlCreateButton("Find", 160, 205, 30, 25)
-Global $CheckFilterExclude = GUICtrlCreateCheckbox("Exclude", 200, 205, 60, 25)
+GUICtrlCreateGroup("Filter event type", 30, 160, 240, 40)
+GUICtrlSetResizing(-1, 802)
+Global $InputFilterNumber = GUICtrlCreateInput('', 40, 175, 150, 20)
+GUICtrlSetTip(-1, "Input a data filter. Supports regular expressions")
+GUICtrlSetResizing(-1, 802)
+Global $CheckExcludeNumber = GUICtrlCreateCheckbox('Exclude', 200, 175, 85, 20)
 GUICtrlSetTip(-1, "Exclude or include the filter string")
-Global $RadioFilterAll = GUICtrlCreateRadio("All", 270, 205, 60, 25)
-Global $RadioFilterNumber = GUICtrlCreateRadio("Number", 315, 205, 60, 25)
-Global $RadioFilterType = GUICtrlCreateRadio("Type", 380, 205, 60, 25)
-Global $RadioFilterDate = GUICtrlCreateRadio("Date", 440, 205, 60, 25)
-Global $RadioFilterSource = GUICtrlCreateRadio("Source", 500, 205, 60, 25)
-Global $RadioFilterDescription = GUICtrlCreateRadio("Description", 560, 205, 80, 25)
-GUICtrlSetState($RadioFilterAll, $GUI_CHECKED)
-
-GUICtrlSetTip(-1, "Select filter type")
+GUICtrlSetResizing(-1, 802)
 GUICtrlCreateGroup("", -99, -99, 1, 1)
 
-Global $LabelStatus = GUICtrlCreateLabel("Status main", 20, 250, 670, 25, $SS_SUNKEN)
-GUICtrlSetTip($LabelStatus, "Status message")
+GUICtrlCreateGroup("Filter event source", 300, 160, 240, 40)
+GUICtrlSetResizing(-1, 802)
+Global $InputFilterSource = GUICtrlCreateInput('', 310, 175, 150, 20)
+GUICtrlSetTip(-1, "Input a data filter. Supports regular expressions")
+GUICtrlSetResizing(-1, 802)
+Global $CheckExcludeName = GUICtrlCreateCheckbox('Exclude', 470, 175, 85, 20)
+GUICtrlSetTip(-1, "Exclude or include the filter string")
+GUICtrlSetResizing(-1, 802)
+GUICtrlCreateGroup("", -99, -99, 1, 1)
 
-;$ListView constants
+GUICtrlCreateGroup("Loop", 370, 80, 250, 40)
+GUICtrlSetResizing(-1, 802)
+Global $CheckLoop = GUICtrlCreateCheckbox("Loop", 380, 95, 40, 20)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Start/Stop looping")
+Global $SliderDelay = GUICtrlCreateSlider(440, 95, 140, 20, $TBS_AUTOTICKS);, BitOR($TBS_AUTOTICKS, $TBS_NOTICKS))
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetLimit(-1, 60, 1)
+GUICtrlSetData(-1, 2)
+GUICtrlSetTip(-1, "Loop delay setting")
+Global $LabelSliderDelay = GUICtrlCreateLabel(GUICtrlRead($SliderDelay), 580, 95, 20, 20, $SS_SUNKEN)
+GUICtrlSetResizing(-1, 802)
+GUICtrlSetTip(-1, "Current loop delay setting")
+GUICtrlCreateGroup("", -99, -99, 1, 1)
+
 Const $Number = 0
 Const $Type = 1
 Const $Date = 2
 Const $Source = 3
 Const $Description = 4
-Global $ListView = GUICtrlCreateListView("Number|Event type|Date logged|Event source|Event description", 20, 290, 670, 280, -1, BitOR($WS_EX_CLIENTEDGE, $LVS_EX_GRIDLINES, $LVS_EX_FULLROWSELECT))
-GUICtrlSendMsg($ListView, $LVM_SETCOLUMNWIDTH, $Number, 70)
-GUICtrlSendMsg($ListView, $LVM_SETCOLUMNWIDTH, $Type, 80)
-GUICtrlSendMsg($ListView, $LVM_SETCOLUMNWIDTH, $Date, 130)
-GUICtrlSendMsg($ListView, $LVM_SETCOLUMNWIDTH, $Source, 200)
-GUICtrlSendMsg($ListView, $LVM_SETCOLUMNWIDTH, $Description, 200)
-GUICtrlSetTip($ListView, "This is the list box")
 
-GUISetState(@SW_SHOW)
-#endregion ### END Koda GUI section ###
+Global $ListView = GUICtrlCreateListView("Number|Event type|Date logged|Event source|Event description", 20, 210, 590, 280, $LVS_REPORT, BitOR($LVS_EX_FULLROWSELECT, $WS_EX_CLIENTEDGE, $LVS_EX_GRIDLINES))
+GUICtrlSetTip(-1, "This is the list box")
+GUICtrlSetResizing(-1, BitOR($GUI_DOCKTOP, $GUI_DOCKBOTTOM))
+GUICtrlSendMsg(-1, $LVM_SETCOLUMNWIDTH, $Number, 70)
+GUICtrlSendMsg(-1, $LVM_SETCOLUMNWIDTH, $Type, 120)
+GUICtrlSendMsg(-1, $LVM_SETCOLUMNWIDTH, $Date, 145)
+GUICtrlSendMsg(-1, $LVM_SETCOLUMNWIDTH, $Source, 150)
+GUICtrlSendMsg(-1, $LVM_SETCOLUMNWIDTH, $Description, 1000)
 
-For $x = 0 To 100 ; This sets the resize mode for all GUI items (assumingg 100 items)
-    GUICtrlSetResizing($x, $GUI_DOCKALL)
-Next
-
-;Change the resize mode to selected items
-GUICtrlSetResizing($ListView, $GUI_DOCKTOP + $GUI_DOCKBOTTOM + $GUI_DOCKRIGHT + $GUI_DOCKLEFT)
-GUICtrlSetResizing($LabelStatus, $GUI_DOCKHEIGHT + $GUI_DOCKTOP + $GUI_DOCKRIGHT + $GUI_DOCKLEFT)
+Global $LabelStatus = GUICtrlCreateLabel("Status main", 10, 490, 590, 20, $SS_SUNKEN)
+GUICtrlSetResizing(-1, 64)
+GUICtrlSetTip(-1, "Status message")
 
 Static $ToggleState = $GUI_CHECKED
 Static $SavedTime = TimerInit()
 
 SetDefaults()
+
 LoadProject("start")
 
 GUISetState(@SW_SHOW)
@@ -223,22 +251,14 @@ While 1
         Case $ButtonLoadDefaults
             SetDefaults('all')
         Case $ButtonAbout
-            _About($ProgramName, $SystemS)
+            About($ProgramName)
         Case $ButtonHelp
-            ShellExecute($AuxPath & 'EventMon.htm')
+            Help()
         Case $ButtonExit
-            _Debug(@ScriptLineNumber & '  ButtonExit')
+            _Debug("$ButtonExit")
             Exit
-        Case $ButtonFind
-            FindDataInList()
-
-        Case $InputFilter
-            $LastSearchFound = -1
-        Case $CheckAbort
-            GuiDisable($GUI_ENABLE)
-            ConsoleWrite(@ScriptLineNumber & ' CheckAbort ' & @CRLF)
         Case $GUI_EVENT_CLOSE
-            _Debug(@ScriptLineNumber & '  GUI_EVENT_CLOSE')
+            _Debug("GUI_EVENT_CLOSE")
             Exit
     EndSwitch
     CheckChangeCounter()
@@ -307,7 +327,6 @@ Func ClearLogs()
 EndFunc   ;==>ClearLogs
 ;-----------------------------------------------
 Func GetData()
-    GuiDisable($GUI_DISABLE)
     Local $ListView_item
     GUICtrlSetState($CheckAbort, $GUI_UNCHECKED)
 
@@ -341,7 +360,6 @@ Func GetData()
     EndIf
 
     SplashOff()
-    GuiDisable($GUI_ENABLE)
 EndFunc   ;==>GetData
 ;-----------------------------------------------
 Func GetInformation($hEventLog)
@@ -404,32 +422,24 @@ Func GetStats($hEventLog)
                 ;$TmpString = "Other:" & String($a[6]) & "  " & String($a[7])
         EndSwitch
         Local $E
-
-        If StringLen($TmpString) > 0 Then ;There is a tmpstring
-            $E = StringSplit($TmpString, "~", 1)
-            If StringLen(GUICtrlRead($InputFilter)) = 0 Then ; There are no filters
+        If StringLen($TmpString) > 0 Then ; There is a tmpstring
+            If StringLen(GUICtrlRead($InputFilterNumber)) = 0 And StringLen(GUICtrlRead($InputFilterSource)) = 0 Then ; There is no filter
+                $E = StringSplit($TmpString, "~", 1)
                 DisplayResults($E, $Counter)
-            Else ; Here we have a filter
+            Else ;Here we have at least one filter
+                $E = StringSplit($TmpString, "~")
                 Local $F = StringSplit($E[2], ":", 2)
-                ;ConsoleWrite(@ScriptLineNumber & ': ' & _ArrayToString($E) & @CRLF)
-                If UBound($F) > 1 Then
-                    Local $Result
-                    Local $Tmp
-                    ;dbk
+                ConsoleWrite(@ScriptLineNumber & ": " & _ArrayToString($F) & @CRLF)
+                ConsoleWrite(@ScriptLineNumber & ": " & UBound($F) & @CRLF)
+                If UBound($F) > 2 Then
+                    Local $result
+                    $result = StringRegExp($F[1], GUICtrlRead($InputFilterNumber), 0)
+                    If GUICtrlRead($CheckExcludeNumber) = $GUI_CHECKED And $result = 0 Then DisplayResults($E, $Counter)
+                    If GUICtrlRead($CheckExcludeNumber) = $GUI_UNCHECKED And $result > 0 Then DisplayResults($E, $Counter)
 
-                    ; ConsoleWrite(@ScriptLineNumber & ': ' & _ArrayToString($E) & @CRLF)
-                    ; ConsoleWrite(@ScriptLineNumber & ': ' & _ArrayToString($F) & @CRLF)
-                    If GUICtrlRead($RadioFilterAll) = $GUI_CHECKED Then $Tmp = $TmpString
-                    If GUICtrlRead($RadioFilterNumber) = $GUI_CHECKED Then $Tmp = $E[1]
-                    If GUICtrlRead($RadioFilterType) = $GUI_CHECKED Then $Tmp = $E[2]
-                    If GUICtrlRead($RadioFilterDate) = $GUI_CHECKED Then $Tmp = $E[3]
-                    If GUICtrlRead($RadioFilterSource) = $GUI_CHECKED Then $Tmp = $E[4]
-                    If GUICtrlRead($RadioFilterDescription) = $GUI_CHECKED Then $Tmp = $E[5]
-                    $Result = StringRegExp(StringUpper($Tmp), StringUpper(GUICtrlRead($InputFilter)), 0) ; EVENT TYPE filter. Returns 1 (matched) or 0 (no match)
-
-                    If GUICtrlRead($CheckFilterExclude) = $GUI_UNCHECKED And $Result = 1 Then DisplayResults($E, $Counter)
-                    If GUICtrlRead($CheckFilterExclude) = $GUI_CHECKED And $Result = 0 Then DisplayResults($E, $Counter)
-
+                    $result = StringRegExp($F[3], GUICtrlRead($InputFilterSource), 0)
+                    If GUICtrlRead($CheckExcludeName) = $GUI_CHECKED And $result = 0 Then DisplayResults($E, $Counter)
+                    If GUICtrlRead($CheckExcludeName) = $GUI_UNCHECKED And $result > 0 Then DisplayResults($E, $Counter)
                 EndIf
             EndIf
         EndIf
@@ -439,21 +449,8 @@ Func GetStats($hEventLog)
 
 EndFunc   ;==>GetStats
 ;-----------------------------------------------
-Func FindDataInList()
-    Local $t = GUICtrlRead($InputFilter)
-    Local $iI = _GUICtrlListView_FindInText($ListView, $t, $LastSearchFound, True, False)
-    $LastSearchFound = $iI
-    ConsoleWrite(@ScriptLineNumber & ' ' & $t & '   ' & $iI & @CRLF)
-    _GUICtrlListView_EnsureVisible($ListView, $iI)
-    _GUICtrlListView_SetItemSelected($ListView, $iI)
-EndFunc   ;==>FindDataInList
-;-----------------------------------------------
 Func DisplayResults($E, $Counter)
     Local $ListView_item
-    If GUICtrlRead($CheckJunkFilter) = $GUI_CHECKED Then $E[5] = StringRegExpReplace($E[5], '[^a-z A-Z 0-9]', '')
-
-    ;If StringInStr($E[5], 'local') > 0 Then ConsoleWrite(@ScriptLineNumber & " " & $E[5] & @CRLF)
-    ;StringRegExpReplace($TmpString, '[^:print:]', '')
     If $E[0] >= 1 Then $ListView_item = _GUICtrlListView_AddItem($ListView, StringFormat("%3s  %6s", $Counter, $E[1]))
     If $E[0] >= 2 Then _GUICtrlListView_AddSubItem($ListView, $ListView_item, $E[2], $Type)
     If $E[0] >= 3 Then _GUICtrlListView_AddSubItem($ListView, $ListView_item, $E[3], $Date)
@@ -462,25 +459,18 @@ Func DisplayResults($E, $Counter)
 EndFunc   ;==>DisplayResults
 ;-----------------------------------------------
 Func SetDefaults($Type = 'all')
-    _Debug(@ScriptLineNumber & '  ' & $ProgramName & '  ' & $Type)
-    _CheckWindowLocation($MainForm, 'center')
+    _Debug($ProgramName)
+    WinMove($ProgramName, "", 10, 10, 630, 515)
     GUICtrlSetData($SliderDelay, 2)
     GUICtrlSetData($LabelSliderDelay, GUICtrlRead($SliderDelay))
     GUICtrlSetState($CheckSave, $GUI_UNCHECKED)
     GUICtrlSetState($CheckSplash, $GUI_UNCHECKED)
     GUICtrlSetState($CheckAbort, $GUI_UNCHECKED)
-    GUICtrlSetState($CheckJunkFilter, $GUI_CHECKED)
+    GUICtrlSetState($CheckExcludeNumber, $GUI_UNCHECKED)
+    GUICtrlSetState($CheckExcludeName, $GUI_UNCHECKED)
     GUICtrlSetState($CheckLoop, $GUI_UNCHECKED)
-
-    GUICtrlSetData($InputFilter, "")
-    GUICtrlSetState($CheckFilterExclude, $GUI_UNCHECKED)
-    GUICtrlSetState($RadioFilterAll, $GUI_CHECKED)
-    GUICtrlSetState($RadioFilterNumber, $GUI_UNCHECKED)
-    GUICtrlSetState($RadioFilterType, $GUI_UNCHECKED)
-    GUICtrlSetState($RadioFilterDate, $GUI_UNCHECKED)
-    GUICtrlSetState($RadioFilterSource, $GUI_UNCHECKED)
-    GUICtrlSetState($RadioFilterDescription, $GUI_UNCHECKED)
-
+    GUICtrlSetData($InputFilterNumber, "")
+    GUICtrlSetData($InputFilterSource, "")
     If $Type = "log" Or $Type = 'all' Then
         GUICtrlSetState($CheckSystem, $GUI_CHECKED)
         GUICtrlSetState($CheckSecurity, $GUI_CHECKED)
@@ -497,17 +487,17 @@ Func SetDefaults($Type = 'all')
 EndFunc   ;==>SetDefaults
 ;-----------------------------------------------
 Func SaveProject()
-    _Debug(@ScriptLineNumber & ' SaveProject')
-    $Project_filename = FileSaveDialog('Save project file', @ScriptDir & '\AUXFiles\', _
-            $ProgramName & ' projects (E*.prj)|All projects (*.prj)|All files (*.*)', 18, @ScriptDir & '\AUXFiles\' & $ProgramName & '.prj')
+    _Debug("SaveProject")
+    $Project_filename = FileSaveDialog("Save project file", @ScriptDir & "\AUXFiles\", _
+            $ProgramName & " projects (E*.prj)|All projects (*.prj)|All files (*.*)", 18, @ScriptDir & "\AUXFiles\" & $ProgramName & ".prj")
 
     Local $file = FileOpen($Project_filename, 2)
     ; Check if file opened for writing OK
     If $file = -1 Then
-        _Debug(@ScriptLineNumber & ' SaveProject: Unable to open file for writing: ' & $Project_filename, '', '', True)
+        _Debug("SaveProject: Unable to open file for writing: " & $Project_filename, 0x10, 5)
         Return
     EndIf
-    _Debug(@ScriptLineNumber & "  SaveProject  " & $Project_filename)
+    _Debug("SaveProject  " & $Project_filename)
     FileWriteLine($file, "Valid for EventMon project")
     FileWriteLine($file, "Project file for " & @ScriptName & "  " & _DateTimeFormat(_NowCalc(), 0))
     FileWriteLine($file, "Help 1 is enabled, 4 is disabled for checkboxes")
@@ -522,20 +512,12 @@ Func SaveProject()
     FileWriteLine($file, "CheckSuccessAudits:" & GUICtrlRead($CheckSuccessAudits))
     FileWriteLine($file, "CheckFailAudits:" & GUICtrlRead($CheckFailAudits))
     FileWriteLine($file, "CheckOther:" & GUICtrlRead($CheckOther))
-
-    FileWriteLine($file, "CheckJunkFilter:" & GUICtrlRead($CheckJunkFilter))
-    FileWriteLine($file, "CheckLoop:" & GUICtrlRead($CheckLoop))
+    FileWriteLine($file, "CheckExclude:" & GUICtrlRead($CheckExcludeNumber))
+    FileWriteLine($file, "CheckExclude:" & GUICtrlRead($CheckExcludeName))
     FileWriteLine($file, "LabelSliderDelay:" & GUICtrlRead($LabelSliderDelay))
     FileWriteLine($file, "SliderDelay:" & GUICtrlRead($SliderDelay))
-
-    FileWriteLine($file, "InputFilter:" & GUICtrlRead($InputFilter))
-    FileWriteLine($file, "CheckFilterExclude" & GUICtrlRead($CheckFilterExclude))
-    FileWriteLine($file, "RadioFilterAll:" & GUICtrlRead($RadioFilterAll))
-    FileWriteLine($file, "RadioFilterNumber" & GUICtrlRead($RadioFilterNumber))
-    FileWriteLine($file, "RadioFilterType" & GUICtrlRead($RadioFilterType))
-    FileWriteLine($file, "$RadioFilterDate" & GUICtrlRead($RadioFilterDate))
-    FileWriteLine($file, "$RadioFilterSource" & GUICtrlRead($RadioFilterSource))
-    FileWriteLine($file, "$RadioFilterDescription" & GUICtrlRead($RadioFilterDescription))
+    FileWriteLine($file, "InputFilterNumber:" & GUICtrlRead($InputFilterNumber))
+    FileWriteLine($file, "InputFilterSource:" & GUICtrlRead($InputFilterSource))
     Local $F = GetWinPos($ProgramName)
     FileWriteLine($file, $ProgramName & "_pos:" & $F[0] & " " & $F[1] & " " & $F[2] & " " & $F[3])
 
@@ -544,7 +526,7 @@ EndFunc   ;==>SaveProject
 ;-----------------------------------------------
 ;This loads the project file but into the tree control but not into the list
 Func LoadProject($Type)
-    _Debug(@ScriptLineNumber & ' LoadProject  ' & $Type)
+    _Debug("LoadProject  " & $Type)
 
     If StringCompare($Type, "menu") = 0 Then
         $Project_filename = FileOpenDialog("Load project file", @ScriptDir & "\AUXFiles\", _
@@ -554,11 +536,11 @@ Func LoadProject($Type)
     Local $file = FileOpen($Project_filename, 0)
     ; Check if file opened for reading OK
     If $file = -1 Then
-        _Debug(@ScriptLineNumber & "  LoadProject: Unable to open file for reading: " & $Project_filename, '', '', True)
+        _Debug("LoadProject: Unable to open file for reading: " & $Project_filename, 0x10, 5)
         Return
     EndIf
 
-    _Debug(@ScriptLineNumber & '  LoadProject   ' & $Project_filename)
+    _Debug("LoadProject   " & $Project_filename)
     ; Read in the first line to verify the file is of the correct type
     If StringCompare(FileReadLine($file, 1), "Valid for EventMon project") <> 0 Then
         MsgBox(16, "Invalid project file", "Not a valid EventMon project file")
@@ -571,15 +553,15 @@ Func LoadProject($Type)
         Local $LineIn = FileReadLine($file)
         If @error = -1 Then ExitLoop
 
-        _Debug(@ScriptLineNumber & '  LoadProject  ' & $LineIn)
+        _Debug("LoadProject   " & $LineIn)
         If StringInStr($LineIn, ";") = 1 Then ContinueLoop
 
         Local $F
         If StringInStr($LineIn, $ProgramName & "_pos:") Then
-            _Debug(@ScriptLineNumber & '  MainWinpos: ' & $LineIn)
+            _Debug("MainWinpos: " & $LineIn)
             $F = StringMid($LineIn, StringInStr($LineIn, ":") + 1)
             $F = StringSplit($F, " ", 2)
-            ConsoleWrite(@ScriptLineNumber & ": 2 " & _ArrayToString($F) & @CRLF)
+            _Debug(ConsoleWrite(@ScriptLineNumber & ": 2 " & _ArrayToString($F) & @CRLF))
             WinMove($ProgramName, "", $F[0], $F[1], $F[2], $F[3])
         EndIf
 
@@ -589,30 +571,30 @@ Func LoadProject($Type)
         If StringInStr($LineIn, "CheckSecurity:") Then GUICtrlSetState($CheckSecurity, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
         If StringInStr($LineIn, "CheckApplication:") Then GUICtrlSetState($CheckApplication, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
         If StringInStr($LineIn, "CheckInformation:") Then GUICtrlSetState($CheckInformation, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
-        If StringInStr($LineIn, "CheckJunkFilter:") Then GUICtrlSetState($CheckJunkFilter, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
+        If StringInStr($LineIn, "CheckAbort:") Then GUICtrlSetState($CheckAbort, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
         If StringInStr($LineIn, "CheckWarnings:") Then GUICtrlSetState($CheckWarnings, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
         If StringInStr($LineIn, "CheckErrors:") Then GUICtrlSetState($CheckErrors, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
         If StringInStr($LineIn, "CheckSuccessAudits:") Then GUICtrlSetState($CheckSuccessAudits, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
         If StringInStr($LineIn, "CheckFailAudits:") Then GUICtrlSetState($CheckFailAudits, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
         If StringInStr($LineIn, "CheckOther:") Then GUICtrlSetState($CheckOther, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
+        If StringInStr($LineIn, "CheckExcludeNumber:") Then GUICtrlSetState($CheckExcludeNumber, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
+        If StringInStr($LineIn, "CheckExcludeName:") Then GUICtrlSetState($CheckExcludeName, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
         If StringInStr($LineIn, "CheckLoop:") Then GUICtrlSetState($CheckLoop, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
         If StringInStr($LineIn, "LabelSliderDelay:") Then GUICtrlSetData($LabelSliderDelay, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
         If StringInStr($LineIn, "SliderDelay:") Then GUICtrlSetData($SliderDelay, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
-
-        If StringInStr($LineIn, "InputFilter:") Then GUICtrlSetData($InputFilter, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
-        If StringInStr($LineIn, "CheckFilterExclude:") Then GUICtrlSetData($CheckFilterExclude, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
-        If StringInStr($LineIn, "RadioFilterAll:") Then GUICtrlSetData($RadioFilterAll, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
-        If StringInStr($LineIn, "RadioFilterNumber:") Then GUICtrlSetData($RadioFilterNumber, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
-        If StringInStr($LineIn, "RadioFilterType:") Then GUICtrlSetData($RadioFilterType, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
-        If StringInStr($LineIn, "RadioFilterDate:") Then GUICtrlSetData($RadioFilterDate, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
-        If StringInStr($LineIn, "RadioFilterSource:") Then GUICtrlSetData($RadioFilterSource, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
-        If StringInStr($LineIn, "RadioFilterDescription:") Then GUICtrlSetData($RadioFilterDescription, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
-        ; If the main window is not visible, make it visible
-        _SetWindowPosition($MainForm, $ProgramName, $LineIn)
-        _CheckWindowLocation($MainForm)
+        If StringInStr($LineIn, "InputFilterNumber:") Then GUICtrlSetData($InputFilterNumber, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
+        If StringInStr($LineIn, "InputFilterSource:") Then GUICtrlSetData($InputFilterSource, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
     WEnd
 
     FileClose($file)
+
+    ; If the main window is not visible, make it visible
+    $F = GetWinPos($ProgramName)
+    _debug(@ScriptLineNumber & " " & $F[0] & " " & @DesktopWidth)
+    _debug(@ScriptLineNumber & " " & $F[1] & " " & @DesktopHeight & @CRLF)
+    If $F[0] > @DesktopWidth Or $F[1] > @DesktopHeight Then WinMove($ProgramName, "", 10, 10, 630, 515)
+    If $F[0] < 0 Or $F[1] < 0 Then WinMove($ProgramName, "", 10, 10, 630, 515)
+
 EndFunc   ;==>LoadProject
 ;-----------------------------------------------
 Func Toggle($Type = 'all')
@@ -638,6 +620,27 @@ Func Toggle($Type = 'all')
     EndIf
 EndFunc   ;==>Toggle
 ;-----------------------------------------------
+Func About(Const $FormID)
+    Local $D = GetWinPos($FormID)
+    Local $WinPos
+    If IsArray($D) = True Then
+        ConsoleWrite(@ScriptLineNumber & $FormID & @CRLF)
+        $WinPos = StringFormat("%s" & @CRLF & "WinPOS: %d  %d " & @CRLF & "WinSize: %d %d " & @CRLF & "Desktop: %d %d ", _
+                $FormID, $D[0], $D[1], $D[2], $D[3], @DesktopWidth, @DesktopHeight)
+    Else
+        $WinPos = ">>>About ERROR, Check the window name<<<"
+    EndIf
+    MsgBox(64, "About", $SystemS & @CRLF & $WinPos & @CRLF & "Written by Doug Kaynor!")
+EndFunc   ;==>About
+;-----------------------------------------------
+Func Help()
+    Local $helpstr = "EventLog  " & $FileVersion & @CRLF & _
+            "Startup options: " & @CRLF & _
+            "help or ?   Display this help file" & @CRLF & _
+            "clear       Clear all logs." & @CRLF
+    MsgBox(64, "Help", @CRLF & @CRLF & $helpstr)
+EndFunc   ;==>Help
+;-----------------------------------------------
 Func GetWinPos($WinName)
     Local $F
     Local $G
@@ -646,16 +649,9 @@ Func GetWinPos($WinName)
         Sleep(100)
         $G = $G + 1
         If $G > 100 Then ExitLoop
-        _Debug(@ScriptLineNumber & '  Filewrite error: ' & $G & '  ' & _ArrayToString($F) & @CRLF)
+        _Debug(ConsoleWrite("Filewrite error: " & $G & "  " & _ArrayToString($F) & @CRLF))
     WEnd
     Return ($F)
 EndFunc   ;==>GetWinPos
-;-----------------------------------------------
-Func GuiDisable($choice) ;$GUI_ENABLE $GUI_DISABLE
-    For $x = 1 To 200
-        GUICtrlSetState($x, $choice)
-    Next
-    GUICtrlSetState($CheckAbort, $GUI_ENABLE)
-EndFunc   ;==>GuiDisable
 ;-----------------------------------------------
 
