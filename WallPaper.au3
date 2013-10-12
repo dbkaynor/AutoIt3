@@ -34,7 +34,6 @@
     This area is used to store things todo, bugs, and other notes
     
     Fixed:
-    Fixed the way that the Splash screen works.
     
     Todo:
     Verify file should sync file counts
@@ -80,9 +79,10 @@ Global Const $FileVersion = "  Ver: " & FileGetVersion(@AutoItExe, "Fileversion"
 Global Const $i_view32_ini = $AuxPath & "i_view32.ini"
 
 Global $Option_filename = $AuxPath & "WallPaper-" & @ComputerName & ".opt"
-Global $List_filename = $AuxPath & "WallPaper-" & @ComputerName & ".lst"
+Global $Picture_filename = $AuxPath & "WallPaper-" & @ComputerName & ".lst"
 Global Const $Used_filename = $AuxPath & "WallPaper-" & @ComputerName & ".usd"
 Global Const $Log_filename = $AuxPath & "WallPaper-" & @ComputerName & ".log"
+Global $Filter_filename = $AuxPath & "WallPaper-" & @ComputerName & ".flt"
 Global $WallpaperTempJPG = $AuxPath & "WallpaperTemp.jpg"
 Global Const $WallpaperJPG = $AuxPath & "Wallpaper.jpg"
 Global Const $WallpaperMainInfo = $AuxPath & "WallpaperM.inf"
@@ -393,7 +393,7 @@ Global $ButtonVerifyFiles = GUICtrlCreateButton("Verify files", 700, 160, 150, 2
 Global $ButtonEditPicture = GUICtrlCreateButton("Edit picture", 700, 190, 150, 25)
 Global $ButtonOpenFolder = GUICtrlCreateButton("Go to folder", 700, 220, 150, 25)
 Global $ButtonFilterFileList = GUICtrlCreateButton("Filter File List", 700, 250, 150, 25)
-Global $ButtonGotoEXE = GUICtrlCreateButton("Go to EXE", 850, 250, 150, 25)
+Global $ButtonGotoEXE = GUICtrlCreateButton("Go to EXE", 850, 250, 90, 25)
 Global $ButtonDoneSelect = GUICtrlCreateButton("Done", 850, 10, 90, 25)
 Global $ButtonSaveList = GUICtrlCreateButton("Save", 850, 40, 90, 25)
 Global $ButtonLoadList = GUICtrlCreateButton("Load", 850, 70, 90, 25)
@@ -618,14 +618,10 @@ While 1
             RemoveChecked()
         Case $ButtonOpenFolder
             GoToCurrentFolder("select")
-
         Case $ButtonFilterFileList
             FilterFileList()
-
         Case $ButtonGotoEXE
             GotoEXEFolder()
-
-
         Case $ButtonRemoveAllFiles
             RemoveAll()
         Case $ButtonVerifyFiles
@@ -1231,7 +1227,7 @@ Func ProcessWallpaper($File)
 EndFunc   ;==>ProcessWallpaper
 ;-----------------------------------------------
 ;$Option_filename
-;$List_filename
+;$Picture_filename
 Func TestForRequiredFiles()
     Return
     If Not FileExists($Option_filename) Then
@@ -1239,8 +1235,8 @@ Func TestForRequiredFiles()
         $Hide = False
         $Running = False
     EndIf
-    If Not FileExists($List_filename) Then
-        MsgBox(48, "Required file not found ", $List_filename)
+    If Not FileExists($Picture_filename) Then
+        MsgBox(48, "Required file not found ", $Picture_filename)
         $Hide = False
         $Running = False
     EndIf
@@ -1248,7 +1244,7 @@ Func TestForRequiredFiles()
     ;Abort if no valid pictures are found DBK\
     Local $TA
     Local $Found = False
-    _FileReadToArray($List_filename, $TA)
+    _FileReadToArray($Picture_filename, $TA)
     For $x In $TA
         If FileExists($x) Then
             $Found = True
@@ -1257,7 +1253,7 @@ Func TestForRequiredFiles()
     Next
 
     If Not $Found Then
-        MsgBox(48, "No valid picture files found", "No valid picture files found in " & @CRLF & $List_filename)
+        MsgBox(48, "No valid picture files found", "No valid picture files found in " & @CRLF & $Picture_filename)
         $Hide = False
         $Running = False
     EndIf
@@ -1342,8 +1338,8 @@ Func HandleDisplayName($FileName = "")
     ;Now the ini file needs to be fixed to reflect the options
     Local $ArrayINI
     If _FileReadToArray($i_view32_ini, $ArrayINI) = 0 Then ; read the ini data in
-        LogFile(@ScriptLineNumber & " File could not be opened for reading " & $ArrayINI)
-        MsgBox(16, "Ini file error", "File could not be opened for reading" & @CRLF & $ArrayINI & @CRLF & @error)
+        LogFile(@ScriptLineNumber & "i_view32.ini could not be opened for reading :" & $ArrayINI)
+        MsgBox(16, "i_view32.ini file error", "i_view32.ini could not be opened for reading:" & @CRLF & $ArrayINI & @CRLF & @error)
         Return
     EndIf
 
@@ -1557,18 +1553,18 @@ Func SaveList()
     GuiDisable($GUI_DISABLE)
 
     LogFile(@ScriptLineNumber & " SaveList")
-    $List_filename = FileSaveDialog("Save list file", $AuxPath, _
+    $Picture_filename = FileSaveDialog("Save list file", $AuxPath, _
             $ProgramName & "Lists (*.lst)|Wallpaper (Wallpaper.*)|All files (*.*)", 18, "WallPaper-" & @ComputerName & ".lst")
 
-    Local $File = FileOpen($List_filename, 2)
+    Local $File = FileOpen($Picture_filename, 2)
     ; Check if file opened for writing OK
     If $File = -1 Then
-        LogFile("SaveList: Unable to open file for writing: " & $List_filename, True)
-        LogFile(@ScriptLineNumber & " SaveList: Unable to open file for writing: " & $List_filename)
+        LogFile("SaveList: Unable to open file for writing: " & $Picture_filename, True)
+        LogFile(@ScriptLineNumber & " SaveList: Unable to open file for writing: " & $Picture_filename)
         GuiDisable($GUI_ENABLE)
         Return
     EndIf
-    LogFile(@ScriptLineNumber & " SaveList  " & $List_filename)
+    LogFile(@ScriptLineNumber & " SaveList  " & $Picture_filename)
     If Not $Hide Then SplashImageOn("Wallpaper is starting. Please wait.", $AuxPath & "Wallpaper.jpg", -1, -1, -1, -1, 18)
     FileWriteLine($File, "Valid for Wallpaper list")
 
@@ -1587,23 +1583,23 @@ Func LoadList($type = "start")
     LogFile(@ScriptLineNumber & " LoadList " & $type)
 
     If StringCompare($type, "menu") = 0 Then
-        $List_filename = FileOpenDialog("Load options file", $AuxPath, _
+        $Picture_filename = FileOpenDialog("Load options file", $AuxPath, _
                 $ProgramName & "Lists (*.lst)|Wallpaper (Wallpaper.*)|All files (*.*)", 18, $AuxPath & "WallPaper-" & @ComputerName & ".opt")
     EndIf
 
     If Not $Hide Then SplashImageOn("Wallpaper is starting. Please wait.", $AuxPath & "Wallpaper.jpg", -1, -1, -1, -1, 18)
     Local $TempArray
-    Local $Result = _FileReadToArray($List_filename, $TempArray)
+    Local $Result = _FileReadToArray($Picture_filename, $TempArray)
 
     ; Check if file opened for reading OK
     If $Result <> 1 Then
-        LogFile(@ScriptLineNumber & " LoadList: _FileReadToArray failed: " & $List_filename)
-        MsgBox(16, $List_filename, "File does not exist" & @CRLF & $List_filename)
+        LogFile(@ScriptLineNumber & " LoadList: _FileReadToArray failed: " & $Picture_filename)
+        MsgBox(16, $Picture_filename, "File does not exist" & @CRLF & $Picture_filename)
         SplashOff()
         GuiDisable($GUI_ENABLE)
         Return
     EndIf
-    LogFile(@ScriptLineNumber & " Done reading file " & $List_filename)
+    LogFile(@ScriptLineNumber & " Done reading file " & $Picture_filename)
 
     ; Read in the first line to verify the file is of the correct type
     If StringCompare($TempArray[1], "Valid for WallPaper list") <> 0 Then
@@ -1634,7 +1630,7 @@ Func LoadList($type = "start")
     Next
     _ArrayDelete($FileHandleArray, 0)
     SplashOff()
-    LogFile(@ScriptLineNumber & " LoadList done. Files in list: " & _GUICtrlTreeView_GetCount($TreeViewActiveFiles) & "  " & $List_filename)
+    LogFile(@ScriptLineNumber & " LoadList done. Files in list: " & _GUICtrlTreeView_GetCount($TreeViewActiveFiles) & "  " & $Picture_filename)
     GUICtrlSetData($LabelActiveCount, _GUICtrlTreeView_GetCount($TreeViewActiveFiles))
     GuiDisable($GUI_ENABLE)
 EndFunc   ;==>LoadList
@@ -1944,7 +1940,10 @@ EndFunc   ;==>About
 Func LogFile($string, $ShowMSGBox = False)
     $string = StringReplace($string, "-1", "", 1)
     _FileWriteLog($Log_filename, $string)
-    _Debug($string, $ShowMSGBox)
+    If $ShowMSGBox Then
+        MsgBox(16, 'Debug message', $string)
+        _Debug($string, $ShowMSGBox)
+    EndIf
 EndFunc   ;==>LogFile
 ;-----------------------------------------------
 Func Help(Const $FormID)
@@ -1985,6 +1984,53 @@ EndFunc   ;==>EditCurrentFile
 ;This will remove all matching files from the list of pictures to display
 Func FilterFileList()
     LogFile(@ScriptLineNumber & " FilterFileList")
+    If Not FileExists($Filter_filename) Then
+        LogFile(@ScriptLineNumber & " FilterFileList: " & $Filter_filename & " does not exist", True)
+        Return
+    Else
+        ; Check if filter file opened for reading OK
+        Local $FiltersA
+        If Not _FileReadToArray($Filter_filename, $FiltersA) Then
+            LogFile(@ScriptLineNumber & " FilterFileList: Unable to open filter file for reading: " & $Filter_filename & ' ' & @error, True)
+            GuiDisable($GUI_ENABLE)
+            Return
+        EndIf
+
+        ; Read in the first line to verify the file is of the correct type
+        Local $TstString = "Valid for WallPaper filters"
+        ConsoleWrite(@ScriptLineNumber & " " & $TstString & @CRLF)
+        ConsoleWrite(@ScriptLineNumber & " " & $FiltersA[1] & @CRLF)
+        If Not StringCompare($FiltersA[1], $TstString) = 0 Then
+            LogFile(@ScriptLineNumber & " Not a valid filter file for WallPaper" & @CRLF & $TstString & @CRLF & $FiltersA[1], True)
+            GuiDisable($GUI_ENABLE)
+            Return
+        EndIf
+
+        ; Check if picture file opened for reading OK
+        Local $PicturesA
+        If Not _FileReadToArray($Picture_filename, $PicturesA) Then
+            LogFile(@ScriptLineNumber & " FilterFileList: Unable to open picture file for reading: " & $Picture_filename + ' ' & @error, True)
+            GuiDisable($GUI_ENABLE)
+            Return
+        EndIf
+
+        ConsoleWrite(@ScriptLineNumber & " FiltersA:" & $FiltersA[0] & @CRLF)
+        ConsoleWrite(@ScriptLineNumber & " $PicturesA:" & $PicturesA[0] & @CRLF)
+
+        For $FilterData In $FiltersA
+            For $PictureName In $PicturesA
+                ConsoleWrite(@ScriptLineNumber & " " & $FilterData & '   ' & $PictureName & @CRLF)
+                ;StringInStr
+                ;StringRegExp
+            Next
+        Next
+
+        LogFile(@ScriptLineNumber & " FilterFileList: Both files opened OK", True)
+
+
+
+    EndIf
+
 EndFunc   ;==>FilterFileList
 ;-----------------------------------------------
 Func TaskGoToEXEFolder()
@@ -2284,4 +2330,5 @@ Func GetFiles() ; dbk
     GuiDisable($GUI_ENABLE)
 EndFunc   ;==>GetFiles
 ;-----------------------------------------------
+
 
