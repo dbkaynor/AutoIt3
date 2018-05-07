@@ -1,13 +1,12 @@
-#region ;**** Directives created by AutoIt3Wrapper_GUI ****
+#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Run_Tidy=y
 #Tidy_Parameters=/tc 4 /kv 2
 #AutoIt3Wrapper_AU3Check_Stop_OnWarning=y
 #AutoIt3Wrapper_AU3Check_Parameters=-d -w 1 -w 2 -w 3 -w 4 -w 5 -w 6
-#endregion ;**** Directives created by AutoIt3Wrapper_GUI ****
+#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 
 #cs  This is a list of functions in this UDF
     Func _Help($msg)
-    Func _GuiDisable($choice)
     Func _AutoSplit($InString, $delimiters, $flag, $index)
     Func _About($WindowName, $SystemS='', $MessageS='')
     Func _FileInfo($file
@@ -43,6 +42,10 @@
     Func _SetWindowPosition($KeyName, $WindowName, $ReadLine)
     Func _SaveWindowPosition($KeyName,debug	$WindowName, $FileName)
     Func _ComputeStats($InDataArray, $ResultsDataArray)
+    Func _stringPad($string, $padChar = ' ', $count = 10, $left = True)
+    Func _GUIEnable()
+    Func _GuiDisable($choice, $DoNotDisable = '', $MaxGUIItems = 100)
+    Func _DesktopDimensions()
 #ce
 
 #include-once
@@ -56,6 +59,7 @@ Opt("GUICoordMode", 1) ; 0=relative, 1=absolute, 2=cell
 #include <Date.au3>
 #include <File.au3>
 #include <GUIConstants.au3>
+#include <MsgBoxConstants.au3>
 #include <misc.au3>
 #include <String.au3>
 
@@ -66,45 +70,13 @@ Global $RFSarray[1]
 
 ;-----------------------------------------------
 Func _Help($msg)
-    MsgBox(64, "Help", $msg)
+    MsgBox($MB_ICONINFORMATION + $MB_TOPMOST, "Help", $msg)
 EndFunc   ;==>_Help
-;-----------------------------------------------
-
 ;-----------------------------------------------
 ; Will either disable, enable, or toggle all gui items
 ; The gui item in $DoNotDisable will be enabled
 ; $MaxGUIItems specifies how many gui items to operate on
-Func _GuiDisable($choice, $DoNotDisable = '', $MaxGUIItems = 100)
-    Static $LastState
-    Local $Setting
 
-    Switch $choice
-        Case "Enable"
-            $Setting = $GUI_ENABLE
-        Case "Disable"
-            $Setting = $GUI_DISABLE
-        Case "Toggle"
-            If $LastState = $GUI_DISABLE Then
-                $Setting = $GUI_ENABLE
-            Else
-                $Setting = $GUI_DISABLE
-            EndIf
-        Case Else
-            ;Func _Debug($DebugMSG, $Log_filename = '', $ShowMsgBox = False, $Timeout = 0, $Verbose = False)
-            _Debug(@ScriptLineNumber & " Invalid choice at GuiDisable " & $choice, '', True)
-    EndSwitch
-
-    For $x = 0 To $MaxGUIItems
-        GUICtrlSetState($x, $Setting)
-    Next
-
-    If IsNumber($DoNotDisable) Then
-        ConsoleWrite(@ScriptLineNumber & ": " & $DoNotDisable & @LF)
-        GUICtrlSetState($DoNotDisable, $GUI_ENABLE)
-    EndIf
-
-EndFunc   ;==>_GuiDisable
-;-----------------------------------------------
 Func _AutoSplit($InString, $delimiters, $flag, $index)
     Local $ta = StringSplit($InString, $delimiters, $flag)
     Return $ta[$index]
@@ -131,7 +103,7 @@ Func _FileInfo($file, $MsgBox = True)
             @LF & "Modified Time: " & _FormatedFileGetTime($file, 0), _
             @LF & "Create time:   " & _FormatedFileGetTime($file, 1), _
             @LF & "Access Time:   " & _FormatedFileGetTime($file, 2))
-    If $MsgBox Then MsgBox(64, 'File info', $FileInfoString)
+    If $MsgBox Then MsgBox($MB_ICONINFORMATION + $MB_TOPMOST, 'File info', $FileInfoString)
     Return $FileInfoString
 EndFunc   ;==>_FileInfo
 ;-----------------------------------------------
@@ -355,7 +327,6 @@ Func _TrimArray(ByRef $array, $Mode = 7)
     ;_ArrayDisplay($Array, "$Array " & @ScriptLineNumber)
 
 EndFunc   ;==>_TrimArray
-
 ;-----------------------------------------------
 ; #FUNCTION# ====================================================================================================================
 ;
@@ -383,13 +354,12 @@ EndFunc   ;==>_TrimArray
 ;						@Error=2 Invalid $s_Filter
 ;                       @Error=3 Invalid $i_Flag
 ;                       @Error=4 No File(s) Found
-
 ;
 ;===============================================================================
 Func _FileListToArrayR($sPath, $sFilter = "*", $iFlag = 0, $iRecurse = 0, $iBaseDir = 1, $sExclude = "", $i_Options = 1)
     ;ConsoleWrite(@ScriptLineNumber & "  New version of _FileListToArray" & @lf)
     ;Declare local variables
-    Local $sFileString, $asList[1], $sep = "|", $sFileString1, $sFilter1 = $sFilter;$hSearch, $sFile,
+    Local $sFileString, $asList[1], $sep = "|", $sFileString1, $sFilter1 = $sFilter ;$hSearch, $sFile,
     Local $i_ReturnAsString = BitAND($i_Options, 2)
     Local $i_deleteduplicate = BitAND($i_Options, 1)
     ;Set default filter to wildcard
@@ -405,7 +375,7 @@ Func _FileListToArrayR($sPath, $sFilter = "*", $iFlag = 0, $iRecurse = 0, $iBase
     If (StringInStr($sFilter, "\")) Or (StringInStr($sFilter, "/")) Or (StringInStr($sFilter, ":")) Or (StringInStr($sFilter, ">")) Or (StringInStr($sFilter, "<")) Or (StringStripWS($sFilter, 8) = "") Then Return SetError(2, 2, "")
 
     ;Only allow 0,1,2 for flag options
-    If Not ($iFlag = 0 Or $iFlag = 1 Or $iFlag = 2) Then Return SetError(3, 3, "");~     $sFilter = StringReplace("*" & $sFilter & "*", "**", "*")
+    If Not ($iFlag = 0 Or $iFlag = 1 Or $iFlag = 2) Then Return SetError(3, 3, "") ;~     $sFilter = StringReplace("*" & $sFilter & "*", "**", "*")
 
     ;Determine seperator character
     If StringInStr($sFilter, ';') Then $sep = ";" ;$sFilter &= ';'
@@ -415,14 +385,14 @@ Func _FileListToArrayR($sPath, $sFilter = "*", $iFlag = 0, $iRecurse = 0, $iBase
     $sFilter &= $sep
 
     ;Declare local variables, Implode file filter
-    Local $aFilterSplit = StringSplit(StringStripWS($sFilter, 8), $sep), $sHoldSplit, $arFolders[2] = [$sPath, ""];~     $cw = ConsoleWrite("UBound($aFilterSplit) =" & UBound($aFilterSplit) & @LF)
+    Local $aFilterSplit = StringSplit(StringStripWS($sFilter, 8), $sep), $sHoldSplit, $arFolders[2] = [$sPath, ""] ;~     $cw = ConsoleWrite("UBound($aFilterSplit) =" & UBound($aFilterSplit) & @LF)
 
     If $sExclude <> "" Then $sExclude = "(?i)(" & StringReplace(StringReplace(StringReplace($sExclude, ".", "\."), "*", ".*"), "?", ".") & ")" ;change the filters to RegExp filters
 
     ;ConsoleWrite("$sExclude=" & $sExclude & @LF)
     ;exit
     ;If recursion is desired, build an array of all sub-folders in search path (eliminates the need to run a conditional statement against FileAttrib)
-    If $iRecurse Then;$cw = ConsoleWrite("UBound($aFilterSplit) =" & UBound($aFilterSplit) & @LF)
+    If $iRecurse Then ;$cw = ConsoleWrite("UBound($aFilterSplit) =" & UBound($aFilterSplit) & @LF)
 
         ConsoleWrite(@ScriptLineNumber & " recursion" & @LF)
 
@@ -447,11 +417,11 @@ Func _FileListToArrayR($sPath, $sFilter = "*", $iFlag = 0, $iRecurse = 0, $iBase
         ElseIf $iFlag = 0 Then
             _FileListToArrayRecAll1($sPath, $sFileString, "*")
         EndIf
-    Else;If ($iFlag <> 2) then
+    Else ;If ($iFlag <> 2) then
 
         ;_ArrayDisplay($arFolders,"$arFolders")
         ;Loop through folder array
-        For $iCF = 0 To UBound($arFolders) - 1;    $cw = ConsoleWrite("$iCF=" & $iCF & " $arFolders[$iCF]    =" & @LF & $arFolders[$iCF] & @LF)
+        For $iCF = 0 To UBound($arFolders) - 1 ;    $cw = ConsoleWrite("$iCF=" & $iCF & " $arFolders[$iCF]    =" & @LF & $arFolders[$iCF] & @LF)
 
             ;Verify folder name isn't just whitespace
             If StringStripWS($arFolders[$iCF], 8) = '' Then ContinueLoop
@@ -467,7 +437,7 @@ Func _FileListToArrayR($sPath, $sFilter = "*", $iFlag = 0, $iRecurse = 0, $iBase
 
                 ;Replace multiple asterisks in file filter
                 $sFilter = StringReplace("*" & $sFilter & "*", "**", "*")
-                Select; options for not recursing; quicker than filtering after for single directory
+                Select ; options for not recursing; quicker than filtering after for single directory
 
                     ;Below needs work, _FileListToArrayBrief1a and _FileListToArrayBrief2a
                     ;should be consolidated with an option passed for the files / folders flag [says Ultima -but slower?]
@@ -487,14 +457,14 @@ Func _FileListToArrayR($sPath, $sFilter = "*", $iFlag = 0, $iRecurse = 0, $iBase
                         ;Folders only , not recursed
                     Case Not $iRecurse And $iFlag = 2
                         _FileListToArrayFolders1($arFolders[$iCF], $sFileString, $aFilterSplit[$iCC], $iRecurse, $sExclude)
-                EndSelect;$cw = ConsoleWrite("$iCC=" & $iCC & " $sFileString    =" & @LF & $sFileString & @LF)
+                EndSelect ;$cw = ConsoleWrite("$iCC=" & $iCC & " $sFileString    =" & @LF & $sFileString & @LF)
 
                 ;Append pipe symbol and current file filter onto $sHoldSplit ???????
-                If $iCF = 0 Then $sHoldSplit &= $sep & $aFilterSplit[$iCC]; $cw = ConsoleWrite("$iCC=" & $iCC & " $sFileString    =" & @LF & $sFileString & @LF)
+                If $iCF = 0 Then $sHoldSplit &= $sep & $aFilterSplit[$iCC] ; $cw = ConsoleWrite("$iCC=" & $iCC & " $sFileString    =" & @LF & $sFileString & @LF)
             Next
 
             ;Replace multiple asterisks
-            If $iCF = 0 Then $sFilter = StringReplace(StringTrimLeft($sHoldSplit, 1), "**", "*");,$cw = ConsoleWrite("$iCC=" & $iCC & " $sFilter    =" & @LF & $sFilter & @LF)
+            If $iCF = 0 Then $sFilter = StringReplace(StringTrimLeft($sHoldSplit, 1), "**", "*") ;,$cw = ConsoleWrite("$iCC=" & $iCC & " $sFilter    =" & @LF & $sFilter & @LF)
         Next
     EndIf
     ;Below needs work....
@@ -520,16 +490,16 @@ Func _FileListToArrayR($sPath, $sFilter = "*", $iFlag = 0, $iRecurse = 0, $iBase
         EndIf
     ElseIf $iRecurse And ($iFlag = 2) Then
         $sFileString = StringStripCR($sFileString1)
-    EndIf;If UBound($asList) > 1 Then ConsoleWrite("$asList[1]     =" & @LF & $asList[1] & @LF);~
+    EndIf ;If UBound($asList) > 1 Then ConsoleWrite("$asList[1]     =" & @LF & $asList[1] & @LF);~
 
     ;past ARRAY.AU3 DEPENDENCY
     If IsArray($asList) And UBound($asList) > 0 And $asList[0] <> "" And Not IsNumber($asList[0]) Then _ArrayInsert($asList, 0, UBound($asList))
     If IsArray($asList) And UBound($asList) > 1 And $asList[0] <> "" Then Return $asList
     If (Not $iBaseDir) Or (Not $iRecurse And Not $iFlag And Not $iBaseDir) Then $sFileString = StringReplace($sFileString, $sPath & "\", "", 0, 2)
     If $i_ReturnAsString Then Return StringTrimRight($sFileString, 1)
-    Local $arReturn = StringSplit(StringTrimRight($sFileString, 1), "*");~     local $a=ConsoleWrite("$sFileString :"&@lf&StringReplace($sFileString,"|",@lf)&@lf),$timerstamp1=TimerInit()
-    If $i_deleteduplicate And IsArray($arReturn) And UBound($arReturn) > 1 And $arReturn[1] <> "" And Not (UBound($aFilterSplit) = 3 And $aFilterSplit[2] == "") Then _ArrayDeleteDupes1($arReturn);and  $arFolders[1]<>""
-    Return $arReturn;~     Return StringSplit(StringTrimRight($sFileString, 1), "*")
+    Local $arReturn = StringSplit(StringTrimRight($sFileString, 1), "*") ;~     local $a=ConsoleWrite("$sFileString :"&@lf&StringReplace($sFileString,"|",@lf)&@lf),$timerstamp1=TimerInit()
+    If $i_deleteduplicate And IsArray($arReturn) And UBound($arReturn) > 1 And $arReturn[1] <> "" And Not (UBound($aFilterSplit) = 3 And $aFilterSplit[2] == "") Then _ArrayDeleteDupes1($arReturn) ;and  $arFolders[1]<>""
+    Return $arReturn ;~     Return StringSplit(StringTrimRight($sFileString, 1), "*")
 EndFunc   ;==>_FileListToArrayR
 ;-----------------------------------------------
 ;===============================================================================
@@ -601,7 +571,7 @@ Func _FileListToArrayFolders1($sPathF, ByRef $sFileStringF, $sFilterF, $iRecurse
             $sFileF = FileFindNextFile($hSearch)
             If @error Then ExitLoop
 
-            $sPathF2 = $sPathF & "\" & $sFileF; if folders only and this pattern matches exclude pattern, no further list or subdir
+            $sPathF2 = $sPathF & "\" & $sFileF ; if folders only and this pattern matches exclude pattern, no further list or subdir
             If StringRegExp($sPathF2, $sExcludeF) Then ContinueLoop
             If StringInStr(FileGetAttrib($sPathF2), "D") Then ;directories only wanted; and  the attrib shows is  directory
                 $sFileStringF &= $sPathF2 & "*" ;this writes the filename to the delimited string with * as delimiter with * as delimiter
@@ -680,7 +650,7 @@ Func _FileListToArrayFiles1($sPathF, ByRef $sFileStringF, $sFilterF, $sExcludeF 
             $sFileF = FileFindNextFile($hSearch)
             If @error Then ExitLoop
 
-            $sPathF2 = $sPathF & "\" & $sFileF;directories not wanted; and  the attrib shows not  directory
+            $sPathF2 = $sPathF & "\" & $sFileF ;directories not wanted; and  the attrib shows not  directory
             If Not StringInStr(FileGetAttrib($sPathF2), "D") Then
                 $sFileStringF &= $sPathF2 & "*" ;this writes the filename to the delimited string with * as delimiter
             EndIf
@@ -690,7 +660,7 @@ Func _FileListToArrayFiles1($sPathF, ByRef $sFileStringF, $sFilterF, $sExcludeF 
             $sFileF = FileFindNextFile($hSearch)
             If @error Then ExitLoop
 
-            $sPathF2 = $sPathF & "\" & $sFileF;directories not wanted; and  the attrib shows not  directory; and filename [only]  does not match exclude
+            $sPathF2 = $sPathF & "\" & $sFileF ;directories not wanted; and  the attrib shows not  directory; and filename [only]  does not match exclude
             If Not StringInStr(FileGetAttrib($sPathF2), "D") _
                     And Not StringRegExp($sFileF, $sExcludeF) Then $sFileStringF &= $sPathF2 & "*" ;this writes the filename to the delimited string with * as delimiter
         WEnd
@@ -724,7 +694,7 @@ Func _FileListToArrayRecAll1($sPathF, ByRef $sFileStringF, $sFilterF, $sExcludeF
 
             $sPathF2 = $sPathF & "\" & $sFileF
             $sFileStringF &= $sPathF2 & "*" ;this writes the filename to the delimited string with * as delimiter
-            If StringInStr(FileGetAttrib($sPathF2), "D") Then _FileListToArrayRecAll1($sPathF2, $sFileStringF, $sFilterF);, $iFlagF, $iRecurseF)
+            If StringInStr(FileGetAttrib($sPathF2), "D") Then _FileListToArrayRecAll1($sPathF2, $sFileStringF, $sFilterF) ;, $iFlagF, $iRecurseF)
         WEnd
     Else
         While 1
@@ -734,7 +704,7 @@ Func _FileListToArrayRecAll1($sPathF, ByRef $sFileStringF, $sFilterF, $sExcludeF
             $sPathF2 = $sPathF & "\" & $sFileF
             If StringInStr(FileGetAttrib($sPathF2), "D") Then
                 $sFileStringF &= $sPathF2 & "*" ;this writes the directoryname
-                _FileListToArrayRecAll1($sPathF2, $sFileStringF, $sFilterF, $sExcludeF);, $iFlagF, $iRecurseF)
+                _FileListToArrayRecAll1($sPathF2, $sFileStringF, $sFilterF, $sExcludeF) ;, $iFlagF, $iRecurseF)
             Else ;if not directory, check Exclude match
                 If Not StringRegExp($sFileF, $sExcludeF) Then $sFileStringF &= $sPathF2 & "*" ;this writes the filename to the delimited string with * as delimiter
             EndIf
@@ -769,7 +739,7 @@ Func _FileListToArrayRecFiles1($sPathF, ByRef $sFileStringF, $sFilterF, $sExclud
 
             $sPathF2 = $sPathF & "\" & $sFileF
             If StringInStr(FileGetAttrib($sPathF2), "D") Then
-                _FileListToArrayRecFiles1($sPathF2, $sFileStringF, $sFilterF);, $iFlagF, $iRecurseF)
+                _FileListToArrayRecFiles1($sPathF2, $sFileStringF, $sFilterF) ;, $iFlagF, $iRecurseF)
             Else
                 $sFileStringF &= $sPathF2 & "*" ;this writes the filename to the delimited string with * as delimiter
             EndIf
@@ -781,7 +751,7 @@ Func _FileListToArrayRecFiles1($sPathF, ByRef $sFileStringF, $sFilterF, $sExclud
 
             $sPathF2 = $sPathF & "\" & $sFileF
             If StringInStr(FileGetAttrib($sPathF2), "D") Then
-                _FileListToArrayRecFiles1($sPathF2, $sFileStringF, $sFilterF, $sExcludeF);, $iFlagF, $iRecurseF)
+                _FileListToArrayRecFiles1($sPathF2, $sFileStringF, $sFilterF, $sExcludeF) ;, $iFlagF, $iRecurseF)
             Else
                 If Not StringRegExp($sFileF, $sExcludeF) Then $sFileStringF &= $sPathF2 & "*" ;this writes the filename to the delimited string with * as delimiter
             EndIf
@@ -844,7 +814,6 @@ EndFunc   ;==>_FileListToArrayBrief2a
 ;
 ; Author(s):        randallc; modified from SolidSnake, SmoKe_N, GEOsoft and big_daddy
 ;===============================================================================
-
 Func _FileListToArrayBrief1a($sPathF, ByRef $sFileStringF, $sFilterF, $sExcludeF = "")
     Local $hSearch = FileFindFirstFile($sPathF & "\" & $sFilterF), $sFileF
     If $hSearch = -1 Then Return SetError(4, 4, "")
@@ -867,7 +836,7 @@ Func _FileListToArrayBrief1a($sPathF, ByRef $sFileStringF, $sFilterF, $sExcludeF
 EndFunc   ;==>_FileListToArrayBrief1a
 ;-----------------------------------------------
 Func _Debug($DebugMSG, $Log_filename = '', $ShowMsgBox = False, $Timeout = 0, $Verbose = False)
-    ConsoleWrite(@ScriptLineNumber & " " & StringInStr($DebugMSG, "-1") & @LF)
+    ;ConsoleWrite(@ScriptLineNumber & " " & StringInStr($DebugMSG, "-1") & @LF)
     ConsoleWrite($DebugMSG)
 
     If $Verbose Then
@@ -879,8 +848,8 @@ Func _Debug($DebugMSG, $Log_filename = '', $ShowMsgBox = False, $Timeout = 0, $V
 
     DllCall("kernel32.dll", "none", "OutputDebugString", "str", $DebugMSG)
 
-    If $Log_filename Then _FileWriteLog($Log_filename, $DebugMSG)
-    If $ShowMsgBox = True Then MsgBox(48, @ScriptName & " Debug", $DebugMSG, $Timeout)
+    If StringLen($Log_filename) > 0 Then _FileWriteLog($Log_filename, $DebugMSG)
+    If $ShowMsgBox = True Then MsgBox($MB_ICONWARNING + $MB_TOPMOST, @ScriptName & " Debug", $DebugMSG, $Timeout)
 EndFunc   ;==>_Debug
 ;-----------------------------------------------
 ;WinGetProcess ( "title" [, "text"] )
@@ -900,7 +869,7 @@ Func _CheckWindowLocation($WindowName, $Position = 'null')
     Local $array = WinGetPos($WindowName, "")
 
     If IsArray($array) = 0 Then
-        MsgBox(16, "_CheckWindowLocation error", 'Window not found: ' & $WindowName)
+        MsgBox($MB_ICONERROR + $MB_TOPMOST, "_CheckWindowLocation error", 'Window not found: ' & $WindowName)
         Return -1
     EndIf
 
@@ -910,7 +879,7 @@ Func _CheckWindowLocation($WindowName, $Position = 'null')
     Local $Height = $array[3]
 
     Switch $Position
-        Case 'null'; This option puts the window onto the screen is any portion is off screen
+        Case 'null' ; This option puts the window onto the screen is any portion is off screen
             ;First check the X position
             If $X_Position < 0 Or @DesktopWidth < $X_Position + $Width Then
                 WinMove($WindowName, "", (@DesktopWidth / 2) - ($Width / 2), $Y_Position)
@@ -938,7 +907,7 @@ Func _CheckWindowLocation($WindowName, $Position = 'null')
         Case 'SE'
             WinMove($WindowName, "", @DesktopWidth - $Width, @DesktopHeight - $Height)
         Case Else
-            MsgBox(16, '_CheckWindowLocation error', 'Unknown position specified')
+            MsgBox($MB_ICONERROR + $MB_TOPMOST, '_CheckWindowLocation error', 'Unknown position specified')
             Return -2
     EndSwitch
 
@@ -951,7 +920,7 @@ Func _SetWindowPosition($KeyName, $WindowName, $ReadLine)
         Local $F = StringMid($ReadLine, StringInStr($ReadLine, ":") + 1)
         $F = StringSplit($F, " ", 2)
 
-        If WinMove($WindowName, "", $F[0], $F[1], $F[2], $F[3]) = 0 Then MsgBox(16, "SetWindowPosition error", $WindowName)
+        If WinMove($WindowName, "", $F[0], $F[1], $F[2], $F[3]) = 0 Then MsgBox($MB_ICONERROR + $MB_TOPMOST, "SetWindowPosition error", $WindowName)
 
     EndIf
 EndFunc   ;==>_SetWindowPosition
@@ -970,7 +939,6 @@ Const $MeansValue = 3
 Const $MedianValue = 4
 Const $ModeValue = 5
 Const $StandardDeviationValue = 6
-
 Func _ComputeStats($InDataArray, ByRef $ResultsDataArray)
     ;_ArrayDisplay($InDataArray, @ScriptLineNumber)
     Local $ModeArray1[1]
@@ -1041,5 +1009,67 @@ Func _ComputeStats($InDataArray, ByRef $ResultsDataArray)
     $sumofall = $sumofall / UBound($STDArray) - 1
     $ResultsDataArray[$StandardDeviationValue] = Sqrt(Abs($sumofall))
     ;_ArrayDisplay($ResultsDataArray, @ScriptLineNumber)
-EndFunc   ;==>ComputeStats
+EndFunc   ;==>_ComputeStats
+;-----------------------------------------------
+Func _stringPad($string, $padChar = ' ', $Count = 10, $left = True)
+    If $left = False Then
+        Return $string & _StringRepeat($padChar, $Count - StringLen($string))
+    Else
+        Return _StringRepeat($padChar, $Count - StringLen($string)) & $string
+    EndIf
+EndFunc   ;==>_stringPad
+;-----------------------------------------------
+Func _GUIEnable()
+    ConsoleWrite(@ScriptLineNumber & " _GUI_Enable detected" & @CRLF)
+    _GuiDisable($GUI_ENABLE)
+    BlockInput($BI_ENABLE)
+EndFunc   ;==>_GUIEnable
+;-----------------------------------------------
+Func _GuiDisable($choice, $DoNotDisable = '', $MaxGUIItems = 100)
+    Static $LastState
+    Local $Setting
+
+    Switch $choice
+        Case "Enable"
+            $Setting = $GUI_ENABLE
+            BlockInput($BI_ENABLE)
+        Case $GUI_ENABLE
+            $Setting = $GUI_ENABLE
+
+        Case "Disable"
+            $Setting = $GUI_DISABLE
+        Case $GUI_DISABLE
+            $Setting = $GUI_DISABLE
+
+        Case "Toggle"
+            If $LastState = $GUI_DISABLE Then
+                $Setting = $GUI_ENABLE
+                BlockInput($BI_ENABLE)
+            Else
+                $Setting = $GUI_DISABLE
+            EndIf
+        Case Else
+            _Debug(@ScriptLineNumber & " Invalid choice at GuiDisable " & $choice, '', True)
+    EndSwitch
+
+    For $x = 0 To $MaxGUIItems
+        GUICtrlSetState($x, $Setting)
+    Next
+
+    If IsNumber($DoNotDisable) Then
+        ConsoleWrite(@ScriptLineNumber & ": " & $DoNotDisable & @LF)
+        GUICtrlSetState($DoNotDisable, $GUI_ENABLE)
+    EndIf
+
+EndFunc   ;==>_GuiDisable
+;-----------------------------------------------
+;Returns an array of screen metrics
+Func _DesktopDimensions()
+    Local $aReturn = [_WinAPI_GetSystemMetrics($SM_CMONITORS), _ ; Number of monitors.
+            _WinAPI_GetSystemMetrics($SM_CXSCREEN), _ ; Width of Primary monitor.
+            _WinAPI_GetSystemMetrics($SM_CYSCREEN), _ ; Height of Primary monitor.
+            _WinAPI_GetSystemMetrics($SM_CXVIRTUALSCREEN), _ ; Width of the Virtual screen.
+            _WinAPI_GetSystemMetrics($SM_CYVIRTUALSCREEN)] ; Height of the Virtual screen.
+    Return $aReturn
+EndFunc   ;==>_DesktopDimensions
 ;-----------------------------------------------
