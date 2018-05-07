@@ -1,10 +1,10 @@
-#region ;**** Directives created by AutoIt3Wrapper_GUI ****
+#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=../icons/head_question.ico
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_UseX64=n
 #AutoIt3Wrapper_Res_Comment=Searchs the system path
 #AutoIt3Wrapper_Res_Description=PathSearch
-#AutoIt3Wrapper_Res_Fileversion=0.0.0.25
+#AutoIt3Wrapper_Res_Fileversion=0.0.0.35
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=Y
 #AutoIt3Wrapper_Res_LegalCopyright=Copyright 2011 Douglas B Kaynor
 #AutoIt3Wrapper_Res_Language=1033
@@ -14,8 +14,8 @@
 #AutoIt3Wrapper_AU3Check_Stop_OnWarning=y
 #AutoIt3Wrapper_AU3Check_Parameters=-d -w 1 -w 2 -w 3 -w 4 -w 5 -w 6
 #AutoIt3Wrapper_Run_Tidy=y
-#Obfuscator_Parameters=/Convert_Strings=0 /Convert_Numerics=0 /showconsoleinfo=9
-#endregion ;**** Directives created by AutoIt3Wrapper_GUI ****
+#AutoIt3Wrapper_Run_Au3Stripper=y
+#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 
 #cs
 	This area is used to store things todo, bugs, and other notes
@@ -24,7 +24,7 @@
 	Search crashes with no data
 	Added debug
 	Tool tips
-	
+
 	Todo:
 	Add a path refresh button
 	Implement an edit path button
@@ -63,13 +63,18 @@ Global $FileListArray[1]
 Global $EXETypes
 Global $Debug = False
 
+_Debug("DBGVIEWCLEAR")
+
 If _Singleton(@ScriptName, 1) = 0 Then
 	MsgBox(48, @ScriptName, @ScriptName & " is already running!")
 	Exit
 EndIf
 
+;#RequireAdmin
+GUIRegisterMsg($WM_SIZE, 'onresize')
+
 For $x = 1 To $CmdLine[0]
-	ConsoleWrite($x & " >> " & $CmdLine[$x] & @CRLF)
+	_Debug($x & " >> " & $CmdLine[$x] & @CRLF)
 	Select
 		Case StringInStr($CmdLine[$x], "help") > 0 Or StringInStr($CmdLine[$x], "?") > 0
 			Help()
@@ -82,9 +87,12 @@ For $x = 1 To $CmdLine[0]
 			Exit
 	EndSelect
 Next
-#region ### START Koda GUI section ### Form=
+
+
+
+#Region ### START Koda GUI section ### Form=
 Global $MainFormOptions = BitOR($WS_MINIMIZEBOX, $WS_SIZEBOX, $WS_THICKFRAME, $WS_SYSMENU, $WS_CAPTION, $WS_POPUP, $WS_POPUPWINDOW, $WS_GROUP, $WS_BORDER, $WS_CLIPSIBLINGS)
-Global $MainForm = GUICreate(@ScriptName & " " & $FileVersion, 625, 625, 10, 10);, $MainFormOptions)
+Global $MainForm = GUICreate(@ScriptName & " " & $FileVersion, 625, 625, 10, 10, $MainFormOptions)
 GUISetFont(10, 400, 0, "Courier New")
 GUISetHelp("notepad .\PathSearch.au3", $MainForm) ; Need a help file to call here
 
@@ -119,10 +127,12 @@ Else
 	GUICtrlSetState(-1, $GUI_UNCHECKED)
 EndIf
 
-Global $ButtonFileInfo = GUICtrlCreateButton("File info", 460, 5, 85, 20, $WS_GROUP)
+Global $ButtonFileInfo = GUICtrlCreateButton("File info", 450, 5, 95, 20, $WS_GROUP)
 GUICtrlSetResizing(-1, 802)
 GUICtrlSetTip(-1, "Display detailed information about selected file")
-Global $ButtonEditPath = GUICtrlCreateButton("Edit path", 460, 25, 85, 20, $WS_GROUP)
+Global $ButtonEditPath = GUICtrlCreateButton("Edit path", 450, 25, 95, 20, $WS_GROUP)
+GUICtrlSetResizing(-1, 802)
+Global $ButtonReloadPath = GUICtrlCreateButton("Reload path", 450, 45, 95, 20, $WS_GROUP)
 GUICtrlSetResizing(-1, 802)
 GUICtrlSetTip(-1, "Edit the current path (not implemented yet)")
 Global $ButtonHelp = GUICtrlCreateButton("Help", 550, 5, 65, 20, $WS_GROUP)
@@ -148,7 +158,8 @@ GUICtrlSetTip(-1, "Number of matching files in path")
 Global $InputEXETypes = GUICtrlCreateInput("", 10, 75, 600, 20, BitOR($ES_AUTOHSCROLL, $ES_READONLY))
 GUICtrlSetResizing(-1, 802)
 GUICtrlSetTip(-1, "Defined EXE types")
-Global $InputPath = GUICtrlCreateEdit("", 10, 100, 600, 20, 0x0800);+ 0x00200000);, BitOR($ES_AUTOHSCROLL, $ES_READONLY))
+;Global $InputPath = GUICtrlCreateEdit("", 10, 100, 600, 20, 0x0800);+ 0x00200000);, BitOR($ES_AUTOHSCROLL, $ES_READONLY))
+Global $InputPath = GUICtrlCreateEdit("", 10, 100, 600, 20, BitOR($ES_AUTOHSCROLL, $ES_READONLY))
 GUICtrlSetResizing(-1, 546)
 GUICtrlSetTip(-1, "The raw path")
 _GUICtrlEdit_Scroll(-1, $SB_BOTH)
@@ -156,19 +167,19 @@ Global $InputStatus = GUICtrlCreateInput("", 10, 125, 600, 20, BitOR($ES_AUTOHSC
 GUICtrlSetResizing(-1, 546)
 GUICtrlSetTip(-1, "Status bar")
 
-
 Global $TreeViewFolders = GUICtrlCreateTreeView(10, 150, 600, 150, BitOR($TVS_HASBUTTONS, $TVS_HASLINES, $TVS_LINESATROOT, $TVS_DISABLEDRAGDROP, $TVS_SHOWSELALWAYS, $TVS_INFOTIP, $WS_GROUP, $WS_TABSTOP), $WS_EX_CLIENTEDGE)
-GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP)
+GUICtrlSetResizing(-1, $GUI_DOCKtop)
 GUICtrlSetTip(-1, "List of all folders in the path")
+
 Global $TreeViewMatches = GUICtrlCreateTreeView(10, 305, 600, 150, BitOR($TVS_HASBUTTONS, $TVS_HASLINES, $TVS_LINESATROOT, $TVS_DISABLEDRAGDROP, $TVS_SHOWSELALWAYS, $TVS_INFOTIP, $WS_GROUP, $WS_TABSTOP), $WS_EX_CLIENTEDGE)
-GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM)
-GUICtrlSetTip(-1, "Results of search results.")
+GUICtrlSetResizing(-1, $GUI_DOCKAUTO)
+GUICtrlSetTip(-1, "Results of search results")
 Global $TreeViewProblems = GUICtrlCreateTreeView(10, 460, 600, 150, BitOR($TVS_HASBUTTONS, $TVS_HASLINES, $TVS_LINESATROOT, $TVS_DISABLEDRAGDROP, $TVS_SHOWSELALWAYS, $TVS_INFOTIP, $WS_GROUP, $WS_TABSTOP), $WS_EX_CLIENTEDGE)
-GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM)
-GUICtrlSetTip(-1, "List of all problems.")
+GUICtrlSetResizing(-1, $GUI_DOCKAUTO)
+GUICtrlSetTip(-1, "List of all problems")
 
 GUISetState(@SW_SHOW)
-#endregion ### END Koda GUI section ###
+#EndRegion ### END Koda GUI section ###
 
 GetPath()
 
@@ -200,70 +211,51 @@ While 1
 		Case $CheckExecutableOnly
 		Case $CheckSkipFiles
 		Case $ButtonEditPath
-			EditPath()
+			ShellExecuteWait("SystemPropertiesAdvanced.exe")
+		Case $ButtonReloadPath
+			MsgBox($MB_ICONINFORMATION, "Reload path information", _
+					"The program may need to be restarted to ensure " & @CRLF & _
+					" that the path is reloaded after editing")
+			GetPath()
 		Case Else
 			;ConsoleWrite($t & '  ')
 	EndSwitch
 WEnd
-;-----------------------------------------------  Test for valid and duplicate folders in the path _arr
-Func EditPath()
+;-----------------------------------------------
+#cs
+	ControlGetPos ( "title", "text", controlID )
+	$aArray[0] = X position
+	$aArray[1] = Y position
+	$aArray[2] = Width
+	$aArray[3] = Height
 
-	Local $var = RegRead("HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\", "Path")
-	MsgBox(4096, "Program files are in:", $var)
+	( "title", "text", controlID, x, y [, width [, height]] )
+#ce
+Func onresize($hwnd, $iMsg, $iwParam, $ilParam)
+	#forceref $hwnd, $iMsg, $iwParam, $ilParam
 
-	Local $TmpFile = $AuxPath & "PathSearch.txt"
+	Local $x1 = ControlGetPos("", "", $TreeViewFolders)
+	If @error == 1 Then Return
+	_Debug(@ScriptLineNumber & " TreeViewFolders  " & $x1[0] & " " & $x1[1] & " " & $x1[2] & " " & $x1[3])
 
-	Local $hItem = _GUICtrlTreeView_GetFirstItem($TreeViewFolders)
-	Local $CurrentPath = _GUICtrlTreeView_GetText($TreeViewFolders, $hItem)
-	FileWriteLine($TmpFile, $CurrentPath)
-	;ConsoleWrite(@ScriptLineNumber & " " & $CurrentPath & @CRLF)
+	ControlMove("", "", $TreeViewMatches, $x1[0], $x1[1] + $x1[3], -1, -1)
 
-	While $hItem <> 0
-		$hItem = _GUICtrlTreeView_GetNext($TreeViewFolders, $hItem)
-		If $hItem <> 0 Then
-			$CurrentPath = _GUICtrlTreeView_GetText($TreeViewFolders, $hItem)
-			FileWriteLine($TmpFile, $CurrentPath)
-			;ConsoleWrite(@ScriptLineNumber & " " & $CurrentPath & @CRLF)
-		EndIf
-	WEnd
+	Local $x2 = ControlGetPos("", "", $TreeViewMatches)
+	If @error == 1 Then Return
+	_Debug(@ScriptLineNumber & " TreeViewMatches  " & $x2[0] & " " & $x2[1] & " " & $x2[2] & " " & $x2[3])
+	Local $x3 = ControlGetPos("", "", $TreeViewProblems)
+	If @error == 1 Then Return
+	_Debug(@ScriptLineNumber & " TreeViewProblems " & $x3[0] & " " & $x3[1] & " " & $x3[2] & " " & $x3[3] & @CRLF)
 
-	Const $edit1 = "c:\program files\notepad++\notepad++.exe"
-	Const $edit2 = "c:\program files (x86)\notepad++\notepad++.exe"
-	Const $edit3 = "notepad.exe"
-	Local $editor = ""
 
-	If FileExists($edit1) = True Then
-		$editor = $edit1
-	ElseIf FileExists($edit2) = True Then
-		$editor = $edit2
-	Else
-		$editor = $edit3
-	EndIf
-	FileGetShortName($editor)
-	ShellExecuteWait($editor, $TmpFile, "", "open")
+	Return
+EndFunc   ;==>onresize
 
-	If MsgBox(4 + 32, "Edit path", "Do you want to save the changes?") = 6 Then
-		Local $TmpArray
-		Local $TS = ''
-		_FileReadToArray($TmpFile, $TmpArray)
-		_ArrayDelete($TmpArray, 0)
-
-		For $x In $TmpArray
-			$TS = $x & ';' & $TS
-
-		Next
-		ConsoleWrite(@ScriptLineNumber & " " & $TS & " " & @CRLF)
-		MsgBox(48, "cool", $TS)
-		; RegWrite("HKEY_CURRENT_USER\Software\Test", "TestKey2", "REG_MULTI_SZ", "line1")
-		RegWrite("HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\", "path""REG_EXPAND_SZ", $TS)
-	EndIf
-	If FileExists($TmpFile) Then FileDelete($TmpFile)
-
-EndFunc   ;==>EditPath
 ;-----------------------------------------------
 Func GetPath()
 	GuiDisable("disable")
 	SplashImageOn("PathSearch is getting data. Please wait.", $AuxPath & "Working.jpg", -1, -1, -1, -1, 18)
+	EnvUpdate()
 	GUICtrlSetData($InputStatus, 'GetThePath starting')
 	_GUICtrlTreeView_DeleteAll($TreeViewFolders)
 	_GUICtrlTreeView_DeleteAll($TreeViewMatches)
@@ -348,7 +340,7 @@ Func CheckForDuplicates(ByRef $A)
 	Local $TmpArray[2] ;Create 2 slots so that a crash with no data is avoided
 	For $x = 0 To UBound($A) - 1
 		Local $t = StringStripWS($A[$x], 3)
-		ConsoleWrite(@ScriptLineNumber & " " & $t & @CRLF)
+		;ConsoleWrite(@ScriptLineNumber & " " & $t & @CRLF)
 		Local $POS = _ArraySearch($TmpArray, $t)
 		If $POS = -1 Then
 			_ArrayAdd($TmpArray, $t)
@@ -528,6 +520,7 @@ Func GuiDisable($choice)
 	GUICtrlSetState($ButtonShowFiles, $setting)
 	GUICtrlSetState($ButtonFileInfo, $setting)
 	GUICtrlSetState($ButtonEditPath, $setting)
+	GUICtrlSetState($ButtonReloadPath, $setting)
 	GUICtrlSetState($ButtonHelp, $setting)
 	GUICtrlSetState($ButtonAbout, $setting)
 	GUICtrlSetState($ButtonExit, $setting)
@@ -538,13 +531,9 @@ Func GuiDisable($choice)
 
 EndFunc   ;==>GuiDisable
 ;-----------------------------------------------
-Func _Debug($msg, $ShowMsgBox = False, $Timeout = 0, $Verbose = True)
+Func _Debug($msg, $ShowMsgBox = False, $Timeout = 0)
 	Local $DebugMSG = ''
-	If $Verbose = True Then
-		$DebugMSG = "DEBUG " & @ScriptName & "  " & $msg & @CRLF
-	Else
-		$DebugMSG = $msg & @CRLF
-	EndIf
+	$DebugMSG = "DEBUG " & @ScriptName & "  " & $msg & @CRLF
 	DllCall("kernel32.dll", "none", "OutputDebugString", "str", $DebugMSG)
 	ConsoleWrite($DebugMSG)
 	If $ShowMsgBox = True Then MsgBox(48, @ScriptName & " Debug", $DebugMSG, $Timeout)

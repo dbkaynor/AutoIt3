@@ -1,4 +1,4 @@
-#region ;**** Directives created by AutoIt3Wrapper_GUI ****
+#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_icon=../icons/eagle.ico
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_UseX64=n
@@ -14,17 +14,16 @@
 #AutoIt3Wrapper_AU3Check_Stop_OnWarning=y
 #AutoIt3Wrapper_AU3Check_Parameters=-d -w 1 -w 2 -w 3 -w 4 -w 5 -w 6
 #AutoIt3Wrapper_Run_Tidy=y
-#endregion ;**** Directives created by AutoIt3Wrapper_GUI ****
-#region
+#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
+#Region
 ;#Tidy_Parameters=/gd /sf
-#endregion
+#EndRegion
 
 #cs
 	Fixed:
 	This area is used to store things todo, bugs, and other notes
 
 	Todo:
-	Hide dead devices in display
 	Make DEL and CLR buttons harder to hit or prompt before doing
 	Handle duplicates in lists
 	Work on 1024x768
@@ -34,7 +33,7 @@
 Opt("MustDeclareVars", 1)
 
 If _Singleton(@ScriptName, 1) = 0 Then
-	_Debug(@ScriptName & " is already running!", 0x40, 5)
+	_Debug(@ScriptName & " is already running!" & @CRLF, 0x40, 5)
 	Exit
 EndIf
 
@@ -43,19 +42,23 @@ EndIf
 #include <iNet.au3>
 #include <Misc.au3>
 #include <String.au3>
+
 #include <GUIConstants.au3>
 #include <GuiListView.au3>
-#include <GuiListBox.au3>
 #include <GUIConstantsEx.au3>
+
 #include <GuiTreeView.au3>
-;#include <GuiImageList.au3>
+#include <GuiImageList.au3>
+
 #include <ButtonConstants.au3>
 #include <EditConstants.au3>
 #include <ListViewConstants.au3>
 #include <StaticConstants.au3>
 #include <TreeViewConstants.au3>
 #include <WindowsConstants.au3>
+
 #include <Process.au3>
+
 #include "_DougFunctions.au3"
 
 DirCreate(@ScriptDir & "\AUXFiles")
@@ -74,86 +77,145 @@ Global $MainFormOptions = BitOR($WS_MINIMIZEBOX, $WS_SIZEBOX, $WS_THICKFRAME, $W
 
 Global $MainForm = GUICreate(@ScriptName & " " & $FileVersion, 1000, 420, 10, 10, $MainFormOptions)
 GUISetFont(10, 400, 0, "Courier New")
+;GUICtrlSetResizing(-1, 256 + 512)
+
 GUISetHelp("notepad", $MainForm) ; Need a help file to call here
+
 Global $ButtonPing = GUICtrlCreateButton("Ping", 10, 10, 50, 20)
 GUICtrlSetTip(-1, "This will do the pings. (What did you expect?)")
+GUICtrlSetResizing(-1, 802)
+
 Global $CheckStop = GUICtrlCreateCheckbox("Stop", 10, 30, 52, 30)
 GUICtrlSetTip(-1, "Stop pinging")
+GUICtrlSetResizing(-1, 802)
+
 Global $ButtonData = GUICtrlCreateButton("Data", 10, 70, 50, 20)
 GUICtrlSetTip(-1, "Clicking this will display the addresses")
+GUICtrlSetResizing(-1, 802)
+
 Global $ButtonSaveProject = GUICtrlCreateButton("Save project", 60, 10, 110, 20)
 GUICtrlSetTip(-1, "Save the current settings")
+GUICtrlSetResizing(-1, 802)
+
 Global $ButtonLoadProject = GUICtrlCreateButton("Load project", 60, 30, 110, 20)
 GUICtrlSetTip(-1, "Load saved settings")
+GUICtrlSetResizing(-1, 802)
+
 Global $ButtonLoadDefaults = GUICtrlCreateButton("Load defaults", 60, 50, 110, 20)
 GUICtrlSetTip(-1, "Load default settings")
+GUICtrlSetResizing(-1, 802)
+
 Global $ButtonSaveLog = GUICtrlCreateButton("Save log", 60, 70, 110, 20)
 GUICtrlSetTip(-1, "Save a log of test results")
+GUICtrlSetResizing(-1, 802)
+
 Global $ButtonAbout = GUICtrlCreateButton("About", 170, 10, 55, 20)
 GUICtrlSetTip(-1, "About button")
+GUICtrlSetResizing(-1, 802)
+
 Global $ButtonHelp = GUICtrlCreateButton("Help", 170, 30, 55, 20)
 GUICtrlSetTip(-1, "Help button")
+GUICtrlSetResizing(-1, 802)
+
 Global $ButtonEdit = GUICtrlCreateButton("Edit", 170, 50, 55, 20)
 GUICtrlSetTip(-1, "Edit or view a file")
+GUICtrlSetResizing(-1, 802)
+
 Global $ButtonExit = GUICtrlCreateButton("Exit", 170, 70, 55, 20)
 GUICtrlSetTip(-1, "Exit button")
+GUICtrlSetResizing(-1, 802)
+
 Global $CheckDNS = GUICtrlCreateCheckbox("DNS", 230, 5, 50, 30)
 GUICtrlSetTip(-1, "Display DNS results of alive hosts")
+GUICtrlSetResizing(-1, 802)
+
 Global $CheckClass = GUICtrlCreateCheckbox("Class", 230, 30, 60, 30)
 GUICtrlSetTip(-1, "Display IP Class")
+GUICtrlSetResizing(-1, 802)
+
 Global $CheckPublicIP = GUICtrlCreateCheckbox("Pub", 230, 55, 50, 22)
 GUICtrlSetTip(-1, "Include Public IP")
+GUICtrlSetResizing(-1, 802)
+
 Global $CheckMAC = GUICtrlCreateCheckbox("MAC", 230, 80, 50, 22)
 GUICtrlSetTip(-1, "Display MAC")
+GUICtrlSetResizing(-1, 802)
+
 Global $LabelTimeout = GUICtrlCreateLabel("Timeout", 300, 10, 60, 20, $SS_SUNKEN)
 GUICtrlSetTip(-1, "Timeout value in milliseconds")
+GUICtrlSetResizing(-1, 802)
+
 Global $InputTimeout = GUICtrlCreateInput("****", 365, 10, 50, 20, BitOR($ES_CENTER, $ES_AUTOHSCROLL))
 GUICtrlSetTip(-1, "Timeout value in milliseconds")
+GUICtrlSetResizing(-1, 802)
+
 Global $LabelLoops = GUICtrlCreateLabel("Loops", 300, 40, 60, 20, $SS_SUNKEN)
 GUICtrlSetTip(-1, "Number of loop to do")
+GUICtrlSetResizing(-1, 802)
+
 Global $InputLoops = GUICtrlCreateInput("****", 365, 40, 50, 20, BitOR($ES_CENTER, $ES_AUTOHSCROLL))
 GUICtrlSetTip(-1, "Number of loop to do")
+GUICtrlSetResizing(-1, 802)
+
 Global $LabelDelay = GUICtrlCreateLabel("Delay", 300, 70, 60, 20, $SS_SUNKEN)
 GUICtrlSetTip(-1, "Delay between loops in milliseconds")
+GUICtrlSetResizing(-1, 802)
+
 Global $InputDelay = GUICtrlCreateInput("100", 365, 70, 50, 20, BitOR($ES_CENTER, $ES_AUTOHSCROLL))
 GUICtrlSetTip(-1, "Delay between loops in milliseconds")
+GUICtrlSetResizing(-1, 802)
+
 Global $InputIPAddress = GUICtrlCreateInput("InputIPAddress", 430, 10, 260, 20, BitOR($ES_CENTER, $ES_AUTOHSCROLL))
 GUICtrlSetTip(-1, "String describing the addresses to test")
+GUICtrlSetResizing(-1, 802)
+
 Global $LabelLocalIP = GUICtrlCreateLabel("Local", 430, 35, 55, 20, $SS_SUNKEN)
 GUICtrlSetTip(-1, "This is the systems local IP address")
+GUICtrlSetResizing(-1, 802)
+
 Global $InputLocalIP = GUICtrlCreateInput("*****", 490, 35, 200, 20, BitOR($ES_AUTOHSCROLL, $ES_READONLY))
 GUICtrlSetTip(-1, "This is the systems local IP address")
+GUICtrlSetResizing(-1, 802)
+
 Global $LabelPublicIP = GUICtrlCreateLabel("Public", 430, 60, 55, 20, $SS_SUNKEN)
 GUICtrlSetTip(-1, "This is the systems public IP")
+GUICtrlSetResizing(-1, 802)
+
 Global $InputPublicIP = GUICtrlCreateInput("****", 490, 60, 200, 20, BitOR($ES_AUTOHSCROLL, $ES_READONLY))
 GUICtrlSetTip(-1, "This is the systems public IP")
+GUICtrlSetResizing(-1, 802)
+
 Global $ButtonAddLocal = GUICtrlCreateButton("Add", 430, 85, 35, 20)
 GUICtrlSetTip(-1, "Add local data to list")
+GUICtrlSetResizing(-1, 802)
+
 Global $ButtonFetch = GUICtrlCreateButton("Fetch", 500, 85, 50, 20)
 GUICtrlSetTip(-1, "Fetch selected value to address input")
-;Global $CheckHideDead = GUICtrlCreateCheckbox("Hide dead", 570, 85, 50, 22)
-;GUICtrlSetTip(-1, "Display MAC")
-Global $ButtonHideDead = GUICtrlCreateButton("Hide dead", 570, 85, 100, 20)
-GUICtrlSetTip(-1, "Hide dead IP's")
+GUICtrlSetResizing(-1, 802)
+
 Global $ButtonAdd = GUICtrlCreateButton("Add", 700, 5, 45, 20)
 GUICtrlSetTip(-1, "Add data to list")
+GUICtrlSetResizing(-1, 802)
+
 Global $ButtonClr = GUICtrlCreateButton("Clr", 700, 25, 45, 20)
 GUICtrlSetTip($ButtonClr, "Clear the list")
+GUICtrlSetResizing(-1, 802)
+
 Global $ButtonDel = GUICtrlCreateButton("Del", 700, 45, 45, 20)
 GUICtrlSetTip(-1, "Delete checked boxes")
+GUICtrlSetResizing(-1, 802)
+
 Global $ButtonTog = GUICtrlCreateButton("TOG", 700, 65, 45, 20)
 GUICtrlSetTip(-1, "Toggle check boxes")
+GUICtrlSetResizing(-1, 802)
+
 Global $ButtonTest = GUICtrlCreateButton("Test", 700, 85, 45, 20)
 GUICtrlSetTip(-1, "Test")
+GUICtrlSetResizing(-1, 802)
+
 Global $hTreeView = GUICtrlCreateTreeView(800, 8, 190, 80, BitOR($TVS_DISABLEDRAGDROP, $TVS_SHOWSELALWAYS, $TVS_CHECKBOXES, $WS_GROUP, $WS_TABSTOP), $WS_EX_CLIENTEDGE)
 GUICtrlSetTip(-1, "Select the addresses to ping")
-
-
-For $x = 0 To 100
-	GUICtrlSetResizing($x, $GUI_DOCKALL)
-Next
-
-GUICtrlSetResizing($hTreeView, $GUI_DOCKRIGHT)
+GUICtrlSetResizing(-1, 4)
 
 Const $Address = 0
 Const $Status = 1
@@ -167,16 +229,16 @@ Const $NameError = 8
 Const $MAC = 9
 
 Global $ListView = GUICtrlCreateListView("Address|Status|Class|MS|W-MS|Loop|Alive|Dead|Name\Error|MAC", 8, 110, 980, 300, -1, BitOR($WS_EX_CLIENTEDGE, $LVS_EX_GRIDLINES))
-GUICtrlSendMsg($ListView, $LVM_SETCOLUMNWIDTH, $Address, 130); Address
+GUICtrlSendMsg($ListView, $LVM_SETCOLUMNWIDTH, $Address, 130) ; Address
 GUICtrlSendMsg($ListView, $LVM_SETCOLUMNWIDTH, $Status, 65) ; Status
 GUICtrlSendMsg($ListView, $LVM_SETCOLUMNWIDTH, $IPClass, 90) ; IP Class
 GUICtrlSendMsg($ListView, $LVM_SETCOLUMNWIDTH, $ResponseTime, 50) ; Ms response time
 GUICtrlSendMsg($ListView, $LVM_SETCOLUMNWIDTH, $Worsttime, 50) ; Worst time
-GUICtrlSendMsg($ListView, $LVM_SETCOLUMNWIDTH, $Loop, 90); Loop
+GUICtrlSendMsg($ListView, $LVM_SETCOLUMNWIDTH, $Loop, 90) ; Loop
 GUICtrlSendMsg($ListView, $LVM_SETCOLUMNWIDTH, $Alive, 60) ; Alive
 GUICtrlSendMsg($ListView, $LVM_SETCOLUMNWIDTH, $Dead, 60) ; Dead
-GUICtrlSendMsg($ListView, $LVM_SETCOLUMNWIDTH, $NameError, 155); Name\Error
-GUICtrlSendMsg($ListView, $LVM_SETCOLUMNWIDTH, $MAC, 160); MAC
+GUICtrlSendMsg($ListView, $LVM_SETCOLUMNWIDTH, $NameError, 155) ; Name\Error
+GUICtrlSendMsg($ListView, $LVM_SETCOLUMNWIDTH, $MAC, 160) ; MAC
 GUICtrlSetTip(-1, "Display the test results")
 GUICtrlSetResizing(-1, 98)
 _GUICtrlListView_SetBkColor($ListView, $CLR_WHITE)
@@ -184,6 +246,7 @@ _GUICtrlListView_SetTextColor($ListView, $CLR_BLACK)
 _GUICtrlListView_SetTextBkColor($ListView, $CLR_Silver)
 
 _Debug("DBGVIEWCLEAR")
+_Debug(@CRLF)
 
 Global $HandleArray[1]
 Global $DataArray[1]
@@ -222,7 +285,7 @@ While 1
 		Case $ButtonFetch
 			Fetch()
 		Case $InputIPAddress
-			_Debug("Case $InputIPAddress")
+			_Debug(@ScriptLineNumber & " Case $InputIPAddress" & @CRLF)
 		Case $ButtonSaveProject
 			SaveProject()
 		Case $ButtonLoadProject
@@ -236,37 +299,26 @@ While 1
 		Case $ButtonAbout
 			About($MainForm)
 		Case $CheckClass
-			_Debug("CheckClass")
+			_Debug(@ScriptLineNumber & " CheckClass" & @CRLF)
 		Case $CheckDNS
-			_Debug("CheckDNS")
+			_Debug(@ScriptLineNumber & " CheckDNS" & @CRLF)
 		Case $CheckPublicIP
-			_Debug("CheckPublicIP")
+			_Debug(@ScriptLineNumber & " CheckPublicIP" & @CRLF)
 			If GUICtrlRead($CheckPublicIP) = $GUI_CHECKED Then GetPublicIp()
 		Case $CheckMAC
-			_Debug("CheckMAC")
+			_Debug(@ScriptLineNumber & " CheckMAC" & @CRLF)
 		Case $CheckStop
-			_Debug("CheckStop")
+			_Debug(@ScriptLineNumber & " CheckStop" & @CRLF)
 		Case $LabelPublicIP
 			GetPublicIp()
 		Case $LabelLocalIP
 			GetLocalIp()
-		Case $ButtonHideDead
-			; $ListView
-
-			;For $x = 0 To _GUICtrlListView_GetItemCount($ListView)
-			;	Global $T = _GUICtrlListView_GetItemText($ListView, $x, $Status) ;retrive the status subitem text
-			;	ConsoleWrite(@ScriptLineNumber & " >>" & $T & '<<>>' & $x & "<< " & @CRLF)
-			;	If StringInStr($T, 'Dead') > 0 Then
-			Global $j = _GUICtrlListView_DeleteAllItems($ListView)
-			;ConsoleWrite(@ScriptLineNumber & " " & $j & @CRLF)
-			;	EndIf
-			;Next
 	EndSwitch
 WEnd
 ;-----------------------------------------------
 ;This function copies checked data to ListView
 Func DataToListView()
-	_Debug("DataToListView")
+	_Debug(@ScriptLineNumber & " DataToListView" & @CRLF)
 	GuiDisable("disable")
 
 	_GUICtrlListView_DeleteAllItems(GUICtrlGetHandle($ListView))
@@ -275,10 +327,11 @@ Func DataToListView()
 
 	_RemoveBlankLines($DataArray)
 	_ArrayUnique($DataArray)
+	;_RemoveDuplicateLines($DataArray)
 	_ArraySort($DataArray)
 
-	For $x = 0 To UBound($DataArray) - 1
-		Local $T = StringReplace($DataArray[$x], '* ', '')
+	For $X = 0 To UBound($DataArray) - 1
+		Local $T = StringReplace($DataArray[$X], '* ', '')
 		If StringInStr(_TestIP($T), "ERROR0", 2) Then _GUICtrlListView_AddItem($ListView, _IPUnPad($T))
 	Next
 
@@ -289,59 +342,64 @@ EndFunc   ;==>DataToListView
 ;-----------------------------------------------
 ;This function puts all of the data from the array into treeview
 Func ArrayToTreeView()
-	_Debug("ArrayToTreeView")
+	_Debug(@ScriptLineNumber & " ArrayToTreeView" & @CRLF)
 	ReDim $HandleArray[1]
 	_GUICtrlTreeView_DeleteAll($hTreeView)
 	_RemoveBlankLines($DataArray)
 	_ArrayUnique($DataArray)
+	;_RemoveDuplicateLines($DataArray)
 	_ArraySort($DataArray)
 
-	For $x In $DataArray
-		If _TestIP($x) = "ERROR0" Then
-			_ArrayAdd($HandleArray, _GUICtrlTreeView_Add($hTreeView, 0, $x))
+	;_ArrayDisplay($DataArray, " ArrayToTreeView")
+
+	For $X In $DataArray
+		If _TestIP($X) = "ERROR0" Then
+			_ArrayAdd($HandleArray, _GUICtrlTreeView_Add($hTreeView, 0, $X))
 		EndIf
 	Next
 EndFunc   ;==>ArrayToTreeView
 ;-----------------------------------------------
 Func Fetch()
-	For $x = 1 To UBound($HandleArray) - 1
-		If _GUICtrlTreeView_GetSelected($hTreeView, $HandleArray[$x]) == True Then
-			GUICtrlSetData($InputIPAddress, _GUICtrlTreeView_GetText($hTreeView, $HandleArray[$x]))
+	For $X = 1 To UBound($HandleArray) - 1
+		If _GUICtrlTreeView_GetSelected($hTreeView, $HandleArray[$X]) == True Then
+			GUICtrlSetData($InputIPAddress, _GUICtrlTreeView_GetText($hTreeView, $HandleArray[$X]))
 		EndIf
 	Next
 EndFunc   ;==>Fetch
 ;-----------------------------------------------
 ;This function gets all of the data from the treeview into an array
 Func TreeViewToArray()
-	_Debug("TreeViewToArray")
+	_Debug(@ScriptLineNumber & " TreeViewToArray" & @CRLF)
 	ReDim $DataArray[1]
-	For $x = 1 To UBound($HandleArray) - 1
-		_ArrayAdd($DataArray, _GUICtrlTreeView_GetText($hTreeView, $HandleArray[$x]))
+	For $X = 1 To UBound($HandleArray) - 1
+		_ArrayAdd($DataArray, _GUICtrlTreeView_GetText($hTreeView, $HandleArray[$X]))
 	Next
+	;_ArrayDisplay($HandleArray)
 EndFunc   ;==>TreeViewToArray
 ;-----------------------------------------------
 ;This function gets the checked data from the treeview into an array
 Func TreeViewCheckedToArray()
-	_Debug("TreeViewCheckedToArray")
+	_Debug(@ScriptLineNumber & " TreeViewCheckedToArray" & @CRLF)
 	ReDim $DataArray[1]
-	For $x = 1 To UBound($HandleArray) - 1
-		Local $AA = _GUICtrlTreeView_GetChecked($hTreeView, $HandleArray[$x])
-		Local $BB = _GUICtrlTreeView_GetText($hTreeView, $HandleArray[$x])
-		_Debug("Checked  " & $AA & "  " & $BB & "  " & $HandleArray[$x])
+	For $X = 1 To UBound($HandleArray) - 1
+		Local $AA = _GUICtrlTreeView_GetChecked($hTreeView, $HandleArray[$X])
+		Local $BB = _GUICtrlTreeView_GetText($hTreeView, $HandleArray[$X])
+		_Debug(@ScriptLineNumber & " Checked  " & $AA & "  " & $BB & "  " & $HandleArray[$X] & @CRLF)
 		If $AA = True Then
 			_ArrayAdd($DataArray, $BB)
 		EndIf
 	Next
+	;_ArrayDisplay($hTreeView)
 EndFunc   ;==>TreeViewCheckedToArray
 ;-----------------------------------------------
 ;This function gets the un-checked data from the treeview into an array
 Func TreeViewUnCheckedToArray()
-	_Debug("TreeViewUnCheckedToArray")
+	_Debug(@ScriptLineNumber & " TreeViewUnCheckedToArray" & @CRLF)
 	ReDim $DataArray[1]
-	For $x = 1 To UBound($HandleArray) - 1
-		Local $AA = _GUICtrlTreeView_GetChecked($hTreeView, $HandleArray[$x])
-		Local $BB = _GUICtrlTreeView_GetText($hTreeView, $HandleArray[$x])
-		_Debug("UNChecked  " & $AA & "  " & $BB & "  " & $HandleArray[$x])
+	For $X = 1 To UBound($HandleArray) - 1
+		Local $AA = _GUICtrlTreeView_GetChecked($hTreeView, $HandleArray[$X])
+		Local $BB = _GUICtrlTreeView_GetText($hTreeView, $HandleArray[$X])
+		_Debug(@ScriptLineNumber & " UNChecked  " & $AA & "  " & $BB & "  " & $HandleArray[$X] & @CRLF)
 		If $AA = False Then
 			_ArrayAdd($DataArray, $BB)
 		EndIf
@@ -350,7 +408,7 @@ Func TreeViewUnCheckedToArray()
 EndFunc   ;==>TreeViewUnCheckedToArray
 ;-----------------------------------------------
 Func AddLocalData() ; doug   $InputLocalIP
-	_Debug("AddLocalData")
+	_Debug(@ScriptLineNumber & " AddLocalData" & @CRLF)
 	GuiDisable("disable")
 	If GUICtrlRead($CheckPublicIP) = $GUI_CHECKED And StringInStr(GUICtrlRead($InputPublicIP), "**") = 0 Then
 		_ArrayAdd($DataArray, '* ' & _IPPad(GUICtrlRead($InputPublicIP)))
@@ -359,7 +417,7 @@ Func AddLocalData() ; doug   $InputLocalIP
 	; Parse the addresses
 	Local $HostList = StringSplit(GUICtrlRead($InputLocalIP), ';,:')
 
-	ConsoleWrite('@@ _Debug(' & @ScriptLineNumber & ') : GUICtrlRead($InputLocalIP) = ' & GUICtrlRead($InputLocalIP) & @CRLF & '>Error code: ' & @error & @CRLF) ;### Debug Console
+	;ConsoleWrite('@@ _Debug(@ScriptLineNumber & ' & @ScriptLineNumber & ') : GUICtrlRead($InputLocalIP) = ' & GUICtrlRead($InputLocalIP) & @CRLF & '>Error code: ' & @error & @CRLF) ;### Debug Console
 
 	_ArrayDelete($HostList, 0) ;get rid of the count value
 	;Add all of the addresses to the $hTreeView
@@ -380,7 +438,7 @@ EndFunc   ;==>AddLocalData
 ;-----------------------------------------------
 ;This function parses the InputBox String and creates the addresses
 Func AddData()
-	_Debug("AddData")
+	_Debug(@ScriptLineNumber & " AddData" & @CRLF)
 	GuiDisable("disable")
 	$ToggleState = False
 	_GUICtrlListView_DeleteAllItems($ListView)
@@ -410,7 +468,7 @@ EndFunc   ;==>AddData
 ;Global $DataArray[1]
 
 Func DelData()
-	_Debug("DelData")
+	_Debug(@ScriptLineNumber & " DelData" & @CRLF)
 	GuiDisable("disable")
 	$ToggleState = False
 
@@ -423,7 +481,7 @@ Func DelData()
 EndFunc   ;==>DelData
 ;-----------------------------------------------
 Func ClrData()
-	_Debug("ClrData")
+	_Debug(@ScriptLineNumber & " ClrData" & @CRLF)
 	$ToggleState = False
 
 	ReDim $DataArray[1]
@@ -435,9 +493,8 @@ Func ClrData()
 EndFunc   ;==>ClrData
 ;-----------------------------------------------
 Func DefaultSettings()
-	_Debug("DefaultSettings")
+	_Debug(@ScriptLineNumber & " DefaultSettings" & @CRLF)
 	$ToggleState = False
-
 	GUICtrlSetData($InputIPAddress, "127.0.0.1;")
 	GUICtrlSetData($InputTimeout, 1000)
 	GUICtrlSetData($InputLoops, 4)
@@ -452,8 +509,8 @@ Func DefaultSettings()
 EndFunc   ;==>DefaultSettings
 ;-----------------------------------------------
 Func GuiDisable($choice) ;@SW_ENABLE @SW_disble
-	_Debug("GuiDisable  " & $choice)
-	Global $LastState
+	_Debug(@ScriptLineNumber & " GuiDisable  " & $choice & "   " & @CRLF)
+	Static Local $LastState
 	Local $setting
 
 	If $choice = "Enable" Then
@@ -467,7 +524,7 @@ Func GuiDisable($choice) ;@SW_ENABLE @SW_disble
 			$setting = $GUI_DISABLE
 		EndIf
 	Else
-		_Debug("Invalid choice at GuiDisable" & $choice, 0x40)
+		_Debug(@ScriptLineNumber & " Invalid choice at GuiDisable" & $choice & @CRLF, 0x40)
 	EndIf
 
 	GUICtrlSetState($ButtonPing, $setting)
@@ -493,7 +550,7 @@ Func GuiDisable($choice) ;@SW_ENABLE @SW_disble
 EndFunc   ;==>GuiDisable
 ;-----------------------------------------------
 Func GetPublicIp()
-	_Debug("GetPublicIp")
+	_Debug(@ScriptLineNumber & " GetPublicIp" & @CRLF)
 	GUICtrlSetData($InputPublicIP, "Getting Public IP") ; Getting public IP-1
 	GUICtrlSetColor($InputPublicIP, 0xff0000)
 	Local $T = _GetIP()
@@ -508,7 +565,7 @@ EndFunc   ;==>GetPublicIp
 
 ;-----------------------------------------------
 Func GetLocalIp()
-	_Debug("Getting the local IP address")
+	_Debug(@ScriptLineNumber & " Getting the local IP address" & @CRLF)
 	Local $T = ''
 	GUICtrlSetColor($InputPublicIP, 0xff0000)
 	GUICtrlSetData($InputLocalIP, "GetLocalIp")
@@ -521,7 +578,7 @@ Func GetLocalIp()
 EndFunc   ;==>GetLocalIp
 ;-----------------------------------------------
 Func PingTheHosts()
-	_Debug("PingTheHosts")
+	_Debug(@ScriptLineNumber & " PingTheHosts" & @CRLF)
 	DataToListView()
 	GuiDisable("disable")
 	GUICtrlSetState($CheckStop, $GUI_UNCHECKED)
@@ -536,24 +593,39 @@ Func PingTheHosts()
 			ExitLoop
 		EndIf
 
+		#cs
+			Const $Address = 0
+			Const $Status = 1
+			Const $IPClass = 2
+			Const $ResponseTime = 3
+			Const $Worsttime = 4
+			Const $Loop = 5
+			Const $Alive = 6
+			Const $Dead = 7
+			Const $NameError = 8
+			Const $MAC = 9
+		#ce
+
 		;now do the testing
-		For $x = 0 To _GUICtrlListView_GetItemCount($ListView)
+		For $X = 0 To _GUICtrlListView_GetItemCount($ListView)
 			If GUICtrlRead($CheckStop) = $GUI_CHECKED Then
 				ExitLoop
 			EndIf
 
-			Local $T = _GUICtrlListView_GetItemText($ListView, $x)
-			_Debug("PingTheHosts  " & $T)
+			Local $T = _GUICtrlListView_GetItemText($ListView, $X)
+			_Debug(@ScriptLineNumber & " PingTheHosts  " & $T & @CRLF)
 			Local $result = Ping($T, GUICtrlRead($InputTimeout))
 			Local $error = @error
-			_Debug("PingTheHosts  " & $T & "   " & $result & "   " & $error)
+			_Debug(@ScriptLineNumber & " PingTheHosts " & $T & "  " & $result & "  " & $error & @CRLF)
 
-			If GUICtrlRead($CheckMAC) = $GUI_CHECKED Then _GUICtrlListView_AddSubItem($ListView, $x, GetMAC($T), $MAC)
 
-			_GUICtrlListView_AddSubItem($ListView, $x, StringFormat("%d", $result), 3)
-			Local $tmp = _GUICtrlListView_GetItemText($ListView, $x, 4)
-			If $tmp <= $result Then _GUICtrlListView_AddSubItem($ListView, $x, StringFormat("%d", $result), 4)
+			If GUICtrlRead($CheckMAC) = $GUI_CHECKED Then _GUICtrlListView_AddSubItem($ListView, $X, GetMAC($T), $MAC)
 
+			_GUICtrlListView_AddSubItem($ListView, $X, StringFormat("%d", $result), 3)
+			Local $tmp = _GUICtrlListView_GetItemText($ListView, $X, 4)
+			If $tmp <= $result Then _GUICtrlListView_AddSubItem($ListView, $X, StringFormat("%d", $result), 4)
+
+			;If $result = 9999 Then ;Dead
 			If $result = 0 Then ;Dead
 				Local $ErrorCause
 				Switch $error
@@ -568,18 +640,17 @@ Func PingTheHosts()
 					Case Else
 						$ErrorCause = @error
 				EndSwitch
-				_GUICtrlListView_AddSubItem($ListView, $x, $ErrorCause, $NameError)
-				$tmp = _GUICtrlListView_GetItemText($ListView, $x, 7)
+				_GUICtrlListView_AddSubItem($ListView, $X, $ErrorCause, $NameError)
+				$tmp = _GUICtrlListView_GetItemText($ListView, $X, 7)
 				$tmp = $tmp + 1
-				_GUICtrlListView_AddSubItem($ListView, $x, $tmp, 7)
-				_GUICtrlListView_AddSubItem($ListView, $x, "Dead", 1)
-
+				_GUICtrlListView_AddSubItem($ListView, $X, $tmp, 7)
+				_GUICtrlListView_AddSubItem($ListView, $X, "Dead", 1)
 			Else ;Alive
-				_GUICtrlListView_AddSubItem($ListView, $x, "Alive", 1)
+				_GUICtrlListView_AddSubItem($ListView, $X, "Alive", 1)
 
-				$tmp = _GUICtrlListView_GetItemText($ListView, $x, 6)
+				$tmp = _GUICtrlListView_GetItemText($ListView, $X, 6)
 				$tmp = $tmp + 1
-				_GUICtrlListView_AddSubItem($ListView, $x, $tmp, 6)
+				_GUICtrlListView_AddSubItem($ListView, $X, $tmp, 6)
 				Local $DNSResult = ""
 				If GUICtrlRead($CheckDNS) = $GUI_CHECKED Then
 					TCPStartup()
@@ -588,7 +659,7 @@ Func PingTheHosts()
 				Else
 					$DNSResult = "*** Alive ***"
 				EndIf
-				_GUICtrlListView_AddSubItem($ListView, $x, $DNSResult, 8)
+				_GUICtrlListView_AddSubItem($ListView, $X, $DNSResult, 8)
 			EndIf
 
 			Local $ClassResult = ""
@@ -597,9 +668,9 @@ Func PingTheHosts()
 			Else
 				$ClassResult = ""
 			EndIf
-			_GUICtrlListView_AddSubItem($ListView, $x, $ClassResult, 2)
+			_GUICtrlListView_AddSubItem($ListView, $X, $ClassResult, 2)
 
-			_GUICtrlListView_AddSubItem($ListView, $x, StringFormat("%d of %d", $Loop, $MaxLoops), 5)
+			_GUICtrlListView_AddSubItem($ListView, $X, StringFormat("%d of %d", $Loop, $MaxLoops), 5)
 		Next
 		Sleep(GUICtrlRead($InputDelay))
 	WEnd
@@ -611,9 +682,11 @@ EndFunc   ;==>PingTheHosts
 Func GetMAC($IPAddress)
 	Local $out = ".\auxfiles\arpout.txt"
 	Local $TA[1]
-	;ConsoleWrite(@ScriptLineNumber & " " & _RunDOS("arp.exe -a > " & $out) & @CRLF)
-	_FileReadToArray($out, $TA)
+	Local $X = _RunDos("arp.exe -a > " & $out)
+	ConsoleWrite(@ScriptLineNumber & " " & $X & " " & @error & @CRLF)
 
+	_FileReadToArray($out, $TA)
+	ConsoleWrite(@ScriptLineNumber & " " & $TA & @CRLF)
 	For $A In $TA
 		If StringInStr($A, $IPAddress) = 3 Then
 			;ConsoleWrite(@ScriptLineNumber & " " & $IPAddress & " " & @CRLF)
@@ -626,18 +699,18 @@ Func GetMAC($IPAddress)
 EndFunc   ;==>GetMAC
 ;-----------------------------------------------
 Func SaveLog()
-	_Debug("SaveLog")
+	_Debug(@ScriptLineNumber & " SaveLog" & @CRLF)
 	$LOG_filename = FileSaveDialog("Save log file", @ScriptDir & "\AUXFiles\", _
 			"PingTool logs (P*.log)|All logs (*.log)|All files (*.*)", 18, @ScriptDir & "\AUXFiles\PingTool.log")
 
 	Local $file = FileOpen($LOG_filename, 2)
 	; Check if file opened for writing OK
 	If $file = -1 Then
-		_Debug("SaveLog: Unable to open file for writing: " & $LOG_filename, 0x10, 5)
+		_Debug(@ScriptLineNumber & " SaveLog: Unable to open file for writing: " & $LOG_filename & @CRLF, 0x10, 5)
 		Return
 	EndIf
 
-	_Debug("SaveLog  " & $LOG_filename)
+	_Debug(@ScriptLineNumber & " SaveLog  " & $LOG_filename & @CRLF)
 	FileWriteLine($file, "Log file for " & @ScriptName & "  " & _DateTimeFormat(_NowCalc(), 0))
 
 	FileWriteLine($file, "IPAddress: " & GUICtrlRead($InputIPAddress))
@@ -654,11 +727,11 @@ Func SaveLog()
 
 	FileWriteLine($file, "Cnt          Address Status      Class    MS  W-MS       Loop Alive Dead      Name\Error")
 
-	For $x = 0 To _GUICtrlListView_GetItemCount($ListView) - 1
-		Local $T = _GUICtrlListView_GetItemTextString($ListView, $x);, 0)
+	For $X = 0 To _GUICtrlListView_GetItemCount($ListView) - 1
+		Local $T = _GUICtrlListView_GetItemTextString($ListView, $X) ;, 0)
 		Local $array = StringSplit($T, "|")
-		Local $NewString = StringFormat("%3d %16s %6s %10s %5d %5d %10s  %4d %4d      %-14s ", $x + 1, $array[1], $array[2], $array[3], $array[4], $array[5], $array[6], $array[7], $array[8], $array[9])
-		_Debug("SaveLog:  " & $NewString)
+		Local $NewString = StringFormat("%3d %16s %6s %10s %5d %5d %10s  %4d %4d      %-14s ", $X + 1, $array[1], $array[2], $array[3], $array[4], $array[5], $array[6], $array[7], $array[8], $array[9])
+		_Debug(@ScriptLineNumber & " SaveLog:  " & $NewString & @CRLF)
 		FileWriteLine($file, $NewString)
 	Next
 
@@ -666,17 +739,17 @@ Func SaveLog()
 EndFunc   ;==>SaveLog
 ;-----------------------------------------------
 Func SaveProject()
-	_Debug("SaveProject")
+	_Debug(@ScriptLineNumber & " SaveProject" & @CRLF)
 	$Project_filename = FileSaveDialog("Save project file", @ScriptDir & "\AUXFiles\", _
 			"PingTool projects (P*.prj)|All projects (*.prj)|All files (*.*)", 18, @ScriptDir & "\AUXFiles\PingTool.prj")
 
 	Local $file = FileOpen($Project_filename, 2)
 	; Check if file opened for writing OK
 	If $file = -1 Then
-		_Debug("SaveProject: Unable to open file for writing: " & $Project_filename, 0x10, 5)
+		_Debug(@ScriptLineNumber & " SaveProject: Unable to open file for writing: " & $Project_filename & @CRLF, 0x10, 5)
 		Return
 	EndIf
-	_Debug("SaveProject  " & $Project_filename)
+	_Debug(@ScriptLineNumber & " SaveProject  " & $Project_filename & @CRLF)
 	FileWriteLine($file, "Valid for PingTool project")
 	FileWriteLine($file, "Project file for " & @ScriptName & "  " & _DateTimeFormat(_NowCalc(), 0))
 	FileWriteLine($file, "Help 1 is enabled, 4 is disabled for checkboxes")
@@ -692,8 +765,8 @@ Func SaveProject()
 	Local $F = WinGetPos("PingTool", "")
 	FileWriteLine($file, "MainWinpos:" & $F[0] & " " & $F[1] & " " & $F[2] & " " & $F[3])
 
-	For $x = 1 To UBound($HandleArray) - 1
-		Local $Y = _GUICtrlTreeView_GetText($hTreeView, $HandleArray[$x])
+	For $X = 1 To UBound($HandleArray) - 1
+		Local $Y = _GUICtrlTreeView_GetText($hTreeView, $HandleArray[$X])
 		Local $Z = StringInStr($Y, "*")
 
 		If $Z = 0 Then
@@ -706,7 +779,7 @@ EndFunc   ;==>SaveProject
 ;-----------------------------------------------
 ;This loads the project file but into the tree control but not into the list
 Func LoadProject($type)
-	_Debug("LoadProject  " & $type)
+	_Debug(@ScriptLineNumber & " LoadProject " & $type & @CRLF)
 
 	If StringCompare($type, "menu") = 0 Then
 		$Project_filename = FileOpenDialog("Load project file", @ScriptDir & "\AUXFiles\", _
@@ -716,14 +789,14 @@ Func LoadProject($type)
 	Local $file = FileOpen($Project_filename, 0)
 	; Check if file opened for reading OK
 	If $file = -1 Then
-		_Debug("LoadProject: Unable to open file for reading: " & $Project_filename, 0x10, 5)
+		_Debug(@ScriptLineNumber & " LoadProject: Unable to open file for reading: " & $Project_filename & @CRLF, 0x10, 5)
 		Return
 	EndIf
 
-	_Debug("LoadProject   " & $Project_filename)
+	_Debug(@ScriptLineNumber & " LoadProject " & $Project_filename & @CRLF)
 	; Read in the first line to verify the file is of the correct type
 	If StringCompare(FileReadLine($file, 1), "Valid for PingTool project") <> 0 Then
-		_Debug("Not a valid project file for PingTool", 0x20, 5)
+		_Debug(@ScriptLineNumber & " Not a valid project file for PingTool" & @CRLF, 0x20, 5)
 		FileClose($file)
 		Return
 	EndIf
@@ -736,21 +809,15 @@ Func LoadProject($type)
 		Local $LineIn = FileReadLine($file)
 		If @error = -1 Then ExitLoop
 
-		_Debug("LoadProject   " & $LineIn)
+		_Debug(@ScriptLineNumber & " " & $LineIn & " " & @CRLF)
 		If StringInStr($LineIn, ";") = 1 Then ContinueLoop
+
 		Local $F
 		If StringInStr($LineIn, "MainWinpos:") Then
 			$F = StringMid($LineIn, StringInStr($LineIn, ":") + 1)
 			$F = StringSplit($F, " ", 2)
 			WinMove("PingTool", "", $F[0], $F[1], $F[2], $F[3])
 		EndIf
-
-		; If the main window is not visible, make it visible
-		$F = WinGetPos("PingTool", "")
-		ConsoleWrite(@ScriptLineNumber & " " & $F[0] & " " & @DesktopWidth & @CRLF)
-		ConsoleWrite(@ScriptLineNumber & " " & $F[1] & " " & @DesktopHeight & @CRLF)
-		If $F[0] > @DesktopWidth Or $F[1] > @DesktopHeight Then WinMove("PingTool", "", 10, 10, 1000, 420)
-		If $F[0] < 0 Or $F[1] < 0 Then WinMove("PingTool", "", 10, 10, 1000, 420)
 
 		If StringInStr($LineIn, "CheckDNS:") Then GUICtrlSetState($CheckDNS, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
 		If StringInStr($LineIn, "CheckClass:") Then GUICtrlSetState($CheckClass, StringMid($LineIn, StringInStr($LineIn, ":") + 1))
@@ -774,18 +841,25 @@ Func LoadProject($type)
 
 	AddData()
 
+	; If the main window is not visible, make it visible
+	$F = WinGetPos("PingTool", "")
+	_debug(@ScriptLineNumber & " DesktopWidth: " & $F[0] & " " & @DesktopWidth & @CRLF)
+	_debug(@ScriptLineNumber & " DesktopHeight: " & $F[1] & " " & @DesktopHeight & @CRLF)
+	If $F[0] > @DesktopWidth Or $F[1] > @DesktopHeight Then WinMove("PingTool", "", 10, 10, 1000, 420)
+	If $F[0] < 0 Or $F[1] < 0 Then WinMove("PingTool", "", 10, 10, 1000, 420)
+
 EndFunc   ;==>LoadProject
 ;-----------------------------------------------
 Func ToggleData()
-	_Debug("ToggleData")
+	_Debug(@ScriptLineNumber & " ToggleData" & @CRLF)
 	GuiDisable("disable")
 
 	;_ArrayDisplay($HandleArray)
 	$ToggleState = Not $ToggleState
 
-	For $x = 1 To UBound($HandleArray) - 1
-		_GUICtrlTreeView_SetChecked($hTreeView, $HandleArray[$x], $ToggleState)
-		_Debug(StringFormat("%2u   %6x   %d", $x, $HandleArray[$x], $ToggleState))
+	For $X = 1 To UBound($HandleArray) - 1
+		_GUICtrlTreeView_SetChecked($hTreeView, $HandleArray[$X], $ToggleState)
+		_Debug(@ScriptLineNumber & StringFormat(" %2u   %6x   %d", $X, $HandleArray[$X], $ToggleState) & @CRLF)
 	Next
 
 	GuiDisable("enable")
@@ -793,7 +867,7 @@ EndFunc   ;==>ToggleData
 ;-----------------------------------------------
 
 Func Edit()
-	_Debug("Edit")
+	_Debug(@ScriptLineNumber & " Edit" & @CRLF)
 	Local $Filename = FileOpenDialog("View a file", @ScriptDir & "\AUXFiles\", _
 			"All (*.*)", 1, @ScriptDir & "\AUXFiles\PingTool.prj")
 
@@ -810,7 +884,7 @@ Func Edit()
 		$editor = $edit3
 	EndIf
 
-	_Debug("Edit  " & $Filename)
+	_Debug(@ScriptLineNumber & " Edit  " & $Filename & @CRLF)
 	ShellExecuteWait($editor, $Filename)
 
 EndFunc   ;==>Edit
@@ -824,6 +898,5 @@ Func About($FormID)
 	Else
 		$WinPos = ">>>About ERROR, Check the window name<<<"
 	EndIf
-	_Debug(@CRLF & $SystemS & @CRLF & $WinPos & @CRLF & "Written by Doug Kaynor because I wanted to!", 0x40, 0)
+	_Debug(@CRLF & $SystemS & @CRLF & $WinPos & @CRLF & "Written by Doug Kaynor because I wanted to!" & @CRLF, 0x40, 0)
 EndFunc   ;==>About
-
